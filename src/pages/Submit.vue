@@ -144,12 +144,12 @@
               </thead>
               <tbody>
                 <tr v-for="item in fastaContent" :key="item.id">
-                  <td>{{ item.id }}</td>
-                  <td>{{ item.length }}</td>
-                  <td><input type="text" v-model="item.new" /></td>
+                  <td><input class="form-control" type="text" readonly :value="item.id"/></td>
+                  <td><input class="form-control" type="nu  mber" readonly :value="item.length"/></td>
+                  <td><input type="text" v-model="item.new" class="form-control"/></td>
                   <td><select-sequence-type v-model="item.type" /></td>
                   <td><select-topology v-model="item.topology" /></td>
-                  <td><input type="text" v-model="item.name" /></td>
+                  <td><input type="text" v-model="item.name" class="form-control" /></td>
                 </tr>
               </tbody>
             </table>
