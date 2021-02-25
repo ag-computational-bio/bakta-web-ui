@@ -66,3 +66,8 @@ export default {
   components: { PageHeader, Shield },
 };
 </script>
+<style scoped>
+.shield {
+  font-size: 1.3em;
+}
+</style>
