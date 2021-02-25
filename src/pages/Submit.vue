@@ -1,8 +1,8 @@
 <template>
   <page-header page="Submit" />
   <div class="container page-body">
-    <div v-if="message !==null" class="alert alert-danger">
-      {{message}}
+    <div v-if="message !== null" class="alert alert-danger">
+      {{ message }}
     </div>
     <div class="mb-3">
       <textarea
@@ -147,9 +147,9 @@
                   <td>{{ item.id }}</td>
                   <td>{{ item.length }}</td>
                   <td><input type="text" v-model="item.new" /></td>
-                  <td>{{ item.type }}</td>
-                  <td>{{ item.topology }}</td>
-                  <td>{{ item.name }}</td>
+                  <td><select-sequence-type v-model="item.type" /></td>
+                  <td><select-topology v-model="item.topology" /></td>
+                  <td><input type="text" v-model="item.name" /></td>
                 </tr>
               </tbody>
             </table>
@@ -173,11 +173,19 @@
 import PageHeader from "@/components/PageHeader";
 import SelectTranslationTable from "@/components/SelectTranslationTable";
 import SelectDermType from "@/components/SelectDermType.vue";
+import SelectTopology from "@/components/SelectTopology";
+import SelectSequenceType from "../components/SelectSequenceType.vue";
 import fasta from "biojs-io-fasta";
 
 export default {
   name: "Submit",
-  components: { PageHeader, SelectTranslationTable, SelectDermType },
+  components: {
+    PageHeader,
+    SelectTranslationTable,
+    SelectDermType,
+    SelectTopology,
+    SelectSequenceType,
+  },
 
   methods: {
     fastaFileChanged: function (name, file) {
@@ -198,38 +206,42 @@ export default {
   },
   watch: {
     sequenceInput(newValue) {
-      this.sequence = newValue
+      if (!this.validSequenceFile) {
+        this.sequence = newValue;
+      }
     },
     sequence() {
       if (this.sequence !== null) {
         try {
           let seq = fasta.parse(this.sequence);
-          this.fastaContent =  seq.map(function (x) {
+          this.fastaContent = seq.map(function (x) {
             return {
               id: x.name,
               length: x.seq.length,
               newid: "",
-              type: "",
-              topology: "",
+              type: "UNKNOWN",
+              topology: "UNKNOWN",
               name: "",
             };
           });
-          this.message = null
+          this.validSequenceFile = true;
+          this.message = null;
         } catch (e) {
-          this.message = "Can't read fasta data"
-          this.fastaContent = []
+          this.message = "Can't read fasta data";
+          this.fastaContent = [];
+          this.validSequenceFile = false;
         }
       } else {
-        this.message = null
-        this.fastaContent =  [];
+        this.validSequenceFile = false;
+        this.message = null;
+        this.fastaContent = [];
       }
-    }
+    },
   },
   computed: {
-    
     showDetails() {
-      return this.fastaContent.length > 0
-    }
+      return this.fastaContent.length > 0;
+    },
   },
   data() {
     return {
@@ -237,6 +249,7 @@ export default {
       sequence: "",
       sequenceInput: "",
       sequenceFile: null,
+      validSequenceFile: false,
       translationTable: 11,
       completeGenome: false,
       keepContigHeaders: false,
@@ -246,7 +259,7 @@ export default {
       genus: "",
       species: "",
       strain: "",
-      fastaContent : []
+      fastaContent: [],
     };
   },
 };
