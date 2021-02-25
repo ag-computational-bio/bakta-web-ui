@@ -19,8 +19,21 @@
         <ul class="navbar-nav">
           <template v-for="item in nav" :key="item.label">
             <li class="nav-item">
-                <a v-if="item.active" class="nav-link active" :href="item.href">{{ item.label }}</a>
-                <a v-else class="nav-link" :href="item.href">{{ item.label }}</a>
+              <template v-if="item.local">
+                <router-link
+                  v-if="item.active"
+                  :to="item.href"
+                  class="nav-link active"
+                >
+                  {{ item.label }}
+                </router-link>
+                <router-link v-else :to="item.href" class="nav-link">
+                  {{ item.label }}
+                </router-link>
+              </template>
+              <template v-else>
+                <a class="nav-link" :href="item.href">{{ item.label }}</a>
+              </template>
             </li>
           </template>
         </ul>
@@ -34,28 +47,34 @@ export default {
   props: {
     active: String,
   },
-  data: function() {
-      return {
-          'navElements': [
-              {"label": "Jobs", "href": "#"},
-              {"label": "Info", "href": "#"},
-              {"label": "Download", "href": "#"},
-              {"label": "GitHub", "href": "https://github.com/oschwengers/bakta"},
-          ]
-      }
+  data: function () {
+    return {
+      navElements: [
+        { label: "Submit", href: "/submit", local: true },
+        { label: "Jobs", href: "/jobs", local: true },
+        { label: "Info", href: "/info", local: true },
+        { label: "Download", href: "/download", local: true },
+        {
+          label: "GitHub",
+          href: "https://github.com/oschwengers/bakta",
+          local: false,
+        },
+      ],
+    };
   },
   computed: {
-      "nav": function() {
-          let nav = []
-          for (let i of this.navElements) {
-              nav.push(
-                  {"label": i.label, "href": i.href, "active": i.label === this.active}
-              )
-          }
-          return nav;
+    nav: function () {
+      let nav = [];
+      for (let i of this.navElements) {
+        nav.push({
+          label: i.label,
+          href: i.href,
+          active: i.label === this.active,
+          local: i.local,
+        });
       }
-  }
-
-
+      return nav;
+    },
+  },
 };
 </script>
