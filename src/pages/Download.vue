@@ -17,9 +17,9 @@
                 </li>
                 <li>
                   <a href="https://anaconda.org/bioconda/bakta">
-                    <shield icon="bi-globe" rightclass="bg-light text-dark">
-                      Conda
-                    </shield>
+                    <img
+                      src="https://img.shields.io/conda/v/bioconda/bakta.svg"
+                    />
                   </a>
                 </li>
                 <li>
@@ -31,9 +31,9 @@
                 </li>
                 <li>
                   <a href="https://github.com/oschwengers/bakta">
-                    <shield icon="bi-globe" rightclass="bg-light text-dark">
-                      GitHub
-                    </shield>
+                    <img
+                      src="https://img.shields.io/github/release/oschwengers/bakta.svg"
+                    />
                   </a>
                 </li>
               </ul>
@@ -46,9 +46,9 @@
               <h4 class="card-title">Database</h4>
               <p class="card-text">
                 <a href="https://doi.org/10.5281/zenodo.4247252">
-                  <shield icon="bi-globe" rightclass="bg-light text-dark">
-                    Zenodo
-                  </shield>
+                  <img
+                    src="https://zenodo.org/badge/DOI/10.5281/zenodo.4247252.svg"
+                  />
                 </a>
               </p>
             </div>
