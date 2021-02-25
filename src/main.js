@@ -7,4 +7,4 @@ import App from '@/App'
 import router from '@/router'
 
 const app = createApp(App).use(router)
-app.mount('#app')
+window.vm  = app.mount('#app')
