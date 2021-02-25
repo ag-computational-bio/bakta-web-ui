@@ -1,10 +1,10 @@
 <template>
   <page-header page="Info" />
-  <div class="body">
+  <div class="page-body">
     <div class="container">
       <div class="row">
         <div class="col-sm-6">
-          <div class="card h-100">
+          <div class="card no-border h-100">
             <div class="card-body">
               <h4 class="card-title">Annotated feature types</h4>
               <ul class="card-text">
@@ -22,7 +22,7 @@
           </div>
         </div>
         <div class="col-sm-6">
-          <div class="card h-100">
+          <div class="card no-border h-100">
             <div class="card-body">
               <h4 class="card-title">Included DBs</h4>
               <ul class="card-text">
@@ -52,10 +52,6 @@ export default {
 };
 </script>
 <style scoped>
-.body {
-    padding-top: 3em;
-}
-.card {
-    border-color: #00000000;
-}
+
+
 </style>

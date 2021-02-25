@@ -1,12 +1,68 @@
 <template>
   <page-header page="Download" />
-
-    
+  <div class="page-body">
+    <div class="container">
+      <div class="row">
+        <div class="col-sm-6">
+          <div class="card no-border h-100">
+            <div class="card-body">
+              <h4 class="card-title">Local version</h4>
+              <ul class="card-text list-unstyled">
+                <li>
+                  <a href="https://github.com/oschwengers/bakta#installation">
+                    <shield icon="bi-globe" rightclass="bg-light text-dark">
+                      Installation instructions
+                    </shield>
+                  </a>
+                </li>
+                <li>
+                  <a href="https://anaconda.org/bioconda/bakta">
+                    <shield icon="bi-globe" rightclass="bg-light text-dark">
+                      Conda
+                    </shield>
+                  </a>
+                </li>
+                <li>
+                  <a href="https://hub.docker.com/r/oschwengers/bakta">
+                    <shield icon="bi-globe" rightclass="bg-light text-dark">
+                      Docker
+                    </shield>
+                  </a>
+                </li>
+                <li>
+                  <a href="https://github.com/oschwengers/bakta">
+                    <shield icon="bi-globe" rightclass="bg-light text-dark">
+                      GitHub
+                    </shield>
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="col-sm-6">
+          <div class="card no-border h-100">
+            <div class="card-body">
+              <h4 class="card-title">Database</h4>
+              <p class="card-text">
+                <a href="https://doi.org/10.5281/zenodo.4247252">
+                  <shield icon="bi-globe" rightclass="bg-light text-dark">
+                    Zenodo
+                  </shield>
+                </a>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 <script>
 import PageHeader from "@/components/PageHeader";
+import Shield from "@/components/Shield";
 export default {
   name: "Download",
-  components: { PageHeader },
+  components: { PageHeader, Shield },
 };
 </script>
