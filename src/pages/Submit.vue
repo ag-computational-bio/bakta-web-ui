@@ -144,12 +144,38 @@
               </thead>
               <tbody>
                 <tr v-for="item in fastaContent" :key="item.id">
-                  <td><input class="form-control" type="text" readonly :value="item.id"/></td>
-                  <td><input class="form-control" type="nu  mber" readonly :value="item.length"/></td>
-                  <td><input type="text" v-model="item.new" class="form-control"/></td>
+                  <td>
+                    <input
+                      class="form-control"
+                      type="text"
+                      readonly
+                      :value="item.id"
+                    />
+                  </td>
+                  <td>
+                    <input
+                      class="form-control"
+                      type="nu  mber"
+                      readonly
+                      :value="item.length"
+                    />
+                  </td>
+                  <td>
+                    <input
+                      type="text"
+                      v-model="item.new"
+                      class="form-control"
+                    />
+                  </td>
                   <td><select-sequence-type v-model="item.type" /></td>
                   <td><select-topology v-model="item.topology" /></td>
-                  <td><input type="text" v-model="item.name" class="form-control" /></td>
+                  <td>
+                    <input
+                      type="text"
+                      v-model="item.name"
+                      class="form-control"
+                    />
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -206,7 +232,10 @@ export default {
   },
   watch: {
     sequenceInput(newValue) {
-      if (!this.validSequenceFile) {
+      if (
+        this.sequenceFile === null ||
+        (this.sequenceFile !== null && !this.validSequenceFile)
+      ) {
         this.sequence = newValue;
       }
     },
