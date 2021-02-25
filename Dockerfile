@@ -13,4 +13,5 @@ LABEL org.opencontainers.image.documentation='https://github.com/ag-computationa
 LABEL org.opencontainers.image.title='Bakta Web Frontend'
 LABEL org.opencontainers.image.description='Web frontend for bakta: Rapid & comprehensive annotation of bacterial genomes & plasmids'
 
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=builder /src/dist /usr/share/nginx/html
