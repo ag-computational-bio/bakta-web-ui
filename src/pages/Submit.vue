@@ -155,7 +155,7 @@
                   <td>
                     <input
                       class="form-control"
-                      type="nu  mber"
+                      type="number"
                       readonly
                       :value="item.length"
                     />
@@ -165,6 +165,7 @@
                       type="text"
                       v-model="item.new"
                       class="form-control"
+                      placeholder="Optional..."
                     />
                   </td>
                   <td><select-sequence-type v-model="item.type" /></td>
@@ -174,6 +175,7 @@
                       type="text"
                       v-model="item.name"
                       class="form-control"
+                      placeholder="Optional..."
                     />
                   </td>
                 </tr>
@@ -248,8 +250,8 @@ export default {
               id: x.name,
               length: x.seq.length,
               newid: "",
-              type: "UNKNOWN",
-              topology: "UNKNOWN",
+              type: "chromosome",
+              topology: "l",
               name: "",
             };
           });
