@@ -1,6 +1,6 @@
 <template>
   <page-header page="Download" />
-  <div class="page-body">
+  <div class="page-body flex-grow-1 ">
     <div class="container">
       <div class="row">
         <div class="col-sm-6">

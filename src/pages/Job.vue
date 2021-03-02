@@ -1,6 +1,6 @@
 <template>
   <page-header page="" />
-  <div class="container">
+  <div class="container flex-grow-1 ">
     <div v-if="job === null">Loading data...</div>
     <div v-else>
       <ul>

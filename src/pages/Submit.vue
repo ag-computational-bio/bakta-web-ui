@@ -1,6 +1,6 @@
 <template>
   <page-header page="Submit" />
-  <div class="container page-body">
+  <div class="container flex-grow-1 page-body">
     <notification :message="error" />
     <div class="mb-3">
       <textarea

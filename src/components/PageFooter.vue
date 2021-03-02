@@ -1,13 +1,12 @@
 <template>
-  <div class="container">
-    <hr />
-    <a href="http://www.computational.bio/">
-      <img
-        src="@/assets/logo-cb.svg"
-        alt="Computational biolgogy logo"
-      />
-    </a>
-  </div>
+  <footer>
+    <div class="container">
+      <hr />
+      <a href="http://www.computational.bio/">
+        <img src="@/assets/logo-cb.svg" alt="Computational biolgogy logo" />
+      </a>
+    </div>
+  </footer>
 </template>
 <script>
 export default {
@@ -16,7 +15,6 @@ export default {
 </script>
 <style scoped>
 hr {
-  margin-top: 10em;
   margin-bottom: 0em;
 }
 img {

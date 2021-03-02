@@ -1,6 +1,6 @@
 <template>
   <page-header page="Jobs" />
-  <div class="container">
+  <div class="container flex-grow-1 ">
     <table class="table table-striped">
       <thead>
         <tr>
