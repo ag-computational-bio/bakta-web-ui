@@ -18,7 +18,7 @@
         type="file"
         id="fastaFile"
         @change="fastaFileChanged($event.target.name, $event.target.files)"
-        accept=".fas,.fna,.fasta"
+        accept=".fas,.fna,.fasta,.fna.gz,.fas.gz,.fasta.gz"
       />
     </div>
     <div v-if="showDetails">
@@ -215,6 +215,7 @@ import SelectSequenceType from "../components/SelectSequenceType.vue";
 import Notification from "@/components/Notification";
 import PageFooter from "@/components/PageFooter";
 import fasta from "biojs-io-fasta";
+import zlib from "zlib"
 
 export default {
   name: "Submit",
@@ -233,10 +234,20 @@ export default {
       let vm = this;
       this.sequenceFile = file.item(0);
       let reader = new FileReader();
-      reader.onload = function (text) {
-        vm.sequence = text.target.result;
+      reader.onload = function (result) {
+        const buffer = result.target.result
+        const array = new Uint8Array(buffer.slice(0,2))
+        let text
+        // check for gzip magic bytes and unzip
+        if (array[0] == 0x1f && array[1] == 0x8b) {
+          text = zlib.gunzipSync(Buffer.from(buffer))
+        } else {
+          text = buffer
+        }
+        let decoder = new TextDecoder("utf-8")
+        vm.sequence = decoder.decode(text);
       };
-      reader.readAsText(this.sequenceFile);
+      reader.readAsArrayBuffer(this.sequenceFile);
     },
     prodigalFileChanged: function (name, file) {
       this.prodigalTrainingFile = file[0];
