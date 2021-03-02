@@ -57,13 +57,15 @@
       </div>
     </div>
   </div>
+  <page-footer />
 </template>
 <script>
 import PageHeader from "@/components/PageHeader";
+import PageFooter from "@/components/PageFooter";
 import Shield from "@/components/Shield";
 export default {
   name: "Download",
-  components: { PageHeader, Shield },
+  components: { PageHeader, PageFooter, Shield },
 };
 </script>
 <style scoped>

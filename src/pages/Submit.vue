@@ -204,6 +204,7 @@
       </div>
     </div>
   </div>
+  <page-footer />
 </template>
 <script>
 import PageHeader from "@/components/PageHeader";
@@ -211,18 +212,20 @@ import SelectTranslationTable from "@/components/SelectTranslationTable";
 import SelectDermType from "@/components/SelectDermType.vue";
 import SelectTopology from "@/components/SelectTopology";
 import SelectSequenceType from "../components/SelectSequenceType.vue";
-import Notification from '@/components/Notification'
+import Notification from "@/components/Notification";
+import PageFooter from "@/components/PageFooter";
 import fasta from "biojs-io-fasta";
 
 export default {
   name: "Submit",
   components: {
     PageHeader,
+    PageFooter,
     SelectTranslationTable,
     SelectDermType,
     SelectTopology,
     SelectSequenceType,
-    Notification
+    Notification,
   },
 
   methods: {
@@ -239,7 +242,7 @@ export default {
       this.prodigalTrainingFile = file[0];
     },
     submit: function () {
-      let vm = this
+      let vm = this;
       this.submitting = true;
       this.error = null;
       this.$bakta
@@ -247,7 +250,7 @@ export default {
         .then((x) => {
           console.debug("Job submitted", x);
           vm.submitting = false;
-          vm.$router.push({name: 'Job', params: { id: x.job.key }})
+          vm.$router.push({ name: "Job", params: { id: x.job.key } });
         })
         .catch((ex) => {
           console.log("Submission failed", ex);

@@ -43,15 +43,15 @@
       </div>
     </div>
   </div>
+  <page-footer />
 </template>
 <script>
 import PageHeader from "@/components/PageHeader";
+import PageFooter from "@/components/PageFooter.vue";
 export default {
   name: "Info",
-  components: { PageHeader },
+  components: { PageHeader, PageFooter },
 };
 </script>
 <style scoped>
-
-
 </style>

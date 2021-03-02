@@ -24,12 +24,15 @@
       </tbody>
     </table>
   </div>
+  <page-footer />
 </template>
 <script>
 import PageHeader from "@/components/PageHeader";
+import PageFooter from "@/components/PageFooter.vue";
+
 export default {
   name: "Jobs",
-  components: { PageHeader },
+  components: { PageHeader, PageFooter },
   data: function () {
     return { jobs: [], pollInterval: 2000 };
   },
@@ -48,9 +51,12 @@ export default {
         )
       ) {
         // all jobs are in finished state. No polling needed anymore
-        console.debug("All jobs finished or failed, no need to refresh", this.jobs)
+        console.debug(
+          "All jobs finished or failed, no need to refresh",
+          this.jobs
+        );
       } else {
-        console.debug("Jobs still running, need to refresh", this.jobs)
+        console.debug("Jobs still running, need to refresh", this.jobs);
         // trigger reload
         window.setTimeout(() => {
           this.udpateJobs();

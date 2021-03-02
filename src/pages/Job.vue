@@ -9,12 +9,14 @@
       </ul>
     </div>
   </div>
+  <page-footer />
 </template>
 <script>
 import PageHeader from "@/components/PageHeader";
+import PageFooter from '@/components/PageFooter.vue';
 export default {
   name: "Job",
-  components: { PageHeader },
+  components: { PageHeader, PageFooter },
   data: function () {
     return { job: null, pollInterval: 2000};
   },
