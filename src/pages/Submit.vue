@@ -1,9 +1,7 @@
 <template>
   <page-header page="Submit" />
   <div class="container page-body">
-    <div v-if="message !== null" class="alert alert-danger">
-      {{ message }}
-    </div>
+    <notification :message="error" />
     <div class="mb-3">
       <textarea
         class="form-control"
@@ -34,7 +32,7 @@
               type="text"
               id="genus"
               placeholder="Genus"
-              v-model="genus"
+              v-model="options.genus"
             />
           </div>
           <div class="col">
@@ -43,7 +41,7 @@
               type="text"
               id="species"
               placeholder="Species"
-              v-model="species"
+              v-model="options.species"
             />
           </div>
           <div class="col">
@@ -52,7 +50,7 @@
               type="text"
               id="strain"
               placeholder="Strain"
-              v-model="strain"
+              v-model="options.strain"
             />
           </div>
         </div>
@@ -66,7 +64,7 @@
               <input
                 class="form-check-input"
                 type="checkbox"
-                v-model="completeGenome"
+                v-model="options.completeGenome"
                 id="complete-genome"
               />
               <label class="form-check-label" for="complete-genome">
@@ -77,7 +75,7 @@
               <input
                 class="form-check-input"
                 type="checkbox"
-                v-model="keepContigHeaders"
+                v-model="options.keepContigHeaders"
                 id="keep-headers"
               />
               <label class="form-check-label" for="keep-headers">
@@ -92,7 +90,7 @@
             <input
               class="form-control"
               type="number"
-              v-model="minContigLength"
+              v-model="options.minContigLength"
               id="min-contig-length"
             />
           </div>
@@ -102,14 +100,14 @@
             </label>
             <select-translation-table
               id="translation-table"
-              v-model="translationTable"
+              v-model="options.translationTable"
             ></select-translation-table>
           </div>
           <div class="col">
             <label class="form-label" for="mono-diderm">Mono-/Diderm</label>
             <select-derm-type
               id="mono-diderm"
-              v-model="dermType"
+              v-model="options.dermType"
             ></select-derm-type>
           </div>
           <div class="col">
@@ -143,7 +141,7 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="item in fastaContent" :key="item.id">
+                <tr v-for="item in replicons" :key="item.id">
                   <td>
                     <input
                       class="form-control"
@@ -185,12 +183,22 @@
         </div>
         <div class="d-flex justify-content-end mb-5">
           <button
+            v-if="!submitting"
             class="btn btn-secondary"
             type="button"
             id="submit-button"
-            @click="handle()"
+            :disabled="!valid"
+            @click="submit()"
           >
             Submit
+          </button>
+          <button
+            v-if="submitting"
+            class="btn btn-secondary"
+            type="button"
+            disabled
+          >
+            Submitting...
           </button>
         </div>
       </div>
@@ -203,6 +211,7 @@ import SelectTranslationTable from "@/components/SelectTranslationTable";
 import SelectDermType from "@/components/SelectDermType.vue";
 import SelectTopology from "@/components/SelectTopology";
 import SelectSequenceType from "../components/SelectSequenceType.vue";
+import Notification from '@/components/Notification'
 import fasta from "biojs-io-fasta";
 
 export default {
@@ -213,6 +222,7 @@ export default {
     SelectDermType,
     SelectTopology,
     SelectSequenceType,
+    Notification
   },
 
   methods: {
@@ -228,8 +238,22 @@ export default {
     prodigalFileChanged: function (name, file) {
       this.prodigalTrainingFile = file[0];
     },
-    handle: function () {
-      console.log(this);
+    submit: function () {
+      let vm = this
+      this.submitting = true;
+      this.error = null;
+      this.$bakta
+        .submit(this.request)
+        .then((x) => {
+          console.debug("Job submitted", x);
+          vm.submitting = false;
+          vm.$router.push({name: 'Job', params: { id: x.job.key }})
+        })
+        .catch((ex) => {
+          console.log("Submission failed", ex);
+          vm.submitting = false;
+          vm.error = ex;
+        });
     },
   },
   watch: {
@@ -245,12 +269,12 @@ export default {
       if (this.sequence !== null) {
         try {
           let seq = fasta.parse(this.sequence);
-          this.fastaContent = seq.map(function (x) {
+          this.replicons = seq.map(function (x) {
             return {
               id: x.name,
               length: x.seq.length,
               newid: "",
-              type: "chromosome",
+              type: "contig",
               topology: "l",
               name: "",
             };
@@ -259,38 +283,52 @@ export default {
           this.message = null;
         } catch (e) {
           this.message = "Can't read fasta data";
-          this.fastaContent = [];
+          this.replicons = [];
           this.validSequenceFile = false;
         }
       } else {
         this.validSequenceFile = false;
         this.message = null;
-        this.fastaContent = [];
+        this.replicons = [];
       }
     },
   },
   computed: {
     showDetails() {
-      return this.fastaContent.length > 0;
+      return this.replicons.length > 0;
+    },
+    valid() {
+      return this.showDetails;
+    },
+    request() {
+      return {
+        sequence: this.sequence,
+        prodigal: this.prodigalTrainingFile,
+        replicons: this.replicons,
+        options: this.options,
+      };
     },
   },
   data() {
     return {
-      message: null,
       sequence: "",
       sequenceInput: "",
       sequenceFile: null,
       validSequenceFile: false,
-      translationTable: 11,
-      completeGenome: false,
-      keepContigHeaders: false,
-      minContigLength: 1,
-      dermType: "UNKNOWN",
-      prodigalTrainingFile: null,
-      genus: "",
-      species: "",
-      strain: "",
-      fastaContent: [],
+      options: {
+        translationTable: 11,
+        completeGenome: false,
+        keepContigHeaders: false,
+        minContigLength: 1,
+        dermType: "UNKNOWN",
+        prodigalTrainingFile: null,
+        genus: "",
+        species: "",
+        strain: "",
+      },
+      replicons: [],
+      submitting: false,
+      error: null,
     };
   },
 };

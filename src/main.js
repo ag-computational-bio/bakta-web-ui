@@ -5,6 +5,9 @@ import 'bootstrap-icons/font/bootstrap-icons.css'
 import { createApp } from 'vue'
 import App from '@/App'
 import router from '@/router'
+import bakta from '@/bakta'
 
-const app = createApp(App).use(router)
-window.vm  = app.mount('#app')
+const app = createApp(App)
+    .use(router)
+    .use(bakta)
+window.vm = app.mount('#app')

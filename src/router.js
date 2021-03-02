@@ -2,6 +2,7 @@ import { createWebHistory, createRouter } from "vue-router";
 import Download from '@/pages/Download'
 import Submit from '@/pages/Submit'
 import Jobs from '@/pages/Jobs'
+import Job from '@/pages/Job'
 import Info from '@/pages/Info'
 
 import NotFound from '@/pages/NotFound'
@@ -26,6 +27,11 @@ const routes = [
     path: "/jobs",
     name: "Jobs",
     component: Jobs,
+  },
+  {
+    path: "/job/:id",
+    name: "Job",
+    component: Job,
   },
   {
     path: "/submit",
