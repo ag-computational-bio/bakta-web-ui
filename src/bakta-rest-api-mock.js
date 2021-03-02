@@ -36,7 +36,7 @@ const api = function () {
         },
         version: function () {
             return new Promise(resolve =>
-                resolve({ 'version': 'v0.5', 'db': 'v1.1.0' })
+                resolve({ 'toolVersion': 'v0.5', 'dbVersion': 'v1.1.0' })
             )
         },
         init: function () {
