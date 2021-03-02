@@ -1,45 +1,46 @@
 <template>
-  <nav class="navbar navbar-expand-lg navbar-light bg-white">
-    <div class="container-fluid">
-      <button
-        class="navbar-toggler"
-        type="button"
-        data-bs-toggle="collapse"
-        data-bs-target="#navbarNav"
-        aria-controls="navbarNav"
-        aria-expanded="false"
-        aria-label="Toggle navigation"
-      >
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div
-        class="collapse navbar-collapse d-flex justify-content-end"
-        id="navbarNav"
-      >
-        <ul class="navbar-nav">
-          <template v-for="item in nav" :key="item.label">
-            <li class="nav-item">
-              <template v-if="item.local">
-                <router-link
-                  v-if="item.active"
-                  :to="item.href"
-                  class="nav-link active"
-                >
-                  {{ item.label }}
-                </router-link>
-                <router-link v-else :to="item.href" class="nav-link">
-                  {{ item.label }}
-                </router-link>
+  <div class="d-flex justify-content-end">
+    <nav class="navbar navbar-expand-lg navbar-light bg-white">
+      <div class="container-fluid">
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav"
+          aria-controls="navbarNav"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <div class="d-flex justify-content-end">
+            <ul class="navbar-nav">
+              <template v-for="item in nav" :key="item.label">
+                <li class="nav-item">
+                  <template v-if="item.local">
+                    <router-link
+                      v-if="item.active"
+                      :to="item.href"
+                      class="nav-link active"
+                    >
+                      {{ item.label }}
+                    </router-link>
+                    <router-link v-else :to="item.href" class="nav-link">
+                      {{ item.label }}
+                    </router-link>
+                  </template>
+                  <template v-else>
+                    <a class="nav-link" :href="item.href">{{ item.label }}</a>
+                  </template>
+                </li>
               </template>
-              <template v-else>
-                <a class="nav-link" :href="item.href">{{ item.label }}</a>
-              </template>
-            </li>
-          </template>
-        </ul>
+            </ul>
+          </div>
+        </div>
       </div>
-    </div>
-  </nav>
+    </nav>
+  </div>
 </template>
 <script>
 export default {
