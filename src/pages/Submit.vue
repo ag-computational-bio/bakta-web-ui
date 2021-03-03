@@ -267,26 +267,26 @@ export default {
           });
         });
     },
-  },
-  prodigalFileChanged: function (name, file) {
-    this.prodigalTrainingFile = file[0];
-  },
-  submit: function () {
-    let vm = this;
-    this.submitting = true;
-    this.error = null;
-    this.$bakta
-      .submit(this.request)
-      .then((x) => {
-        console.debug("Job submitted", x);
-        vm.submitting = false;
-        vm.$router.push({ name: "Job", params: { id: x.job.key } });
-      })
-      .catch((ex) => {
-        console.log("Submission failed", ex);
-        vm.submitting = false;
-        vm.error = ex;
-      });
+    prodigalFileChanged: function (name, file) {
+      this.prodigalTrainingFile = file[0];
+    },
+    submit: function () {
+      let vm = this;
+      this.submitting = true;
+      this.error = null;
+      this.$bakta
+        .submit(this.request)
+        .then((x) => {
+          console.debug("Job submitted", x);
+          vm.submitting = false;
+          vm.$router.push({ name: "Job", params: { id: x.job.key } });
+        })
+        .catch((ex) => {
+          console.log("Submission failed", ex);
+          vm.submitting = false;
+          vm.error = ex;
+        });
+    },
   },
   watch: {
     sequenceInput(newValue) {
@@ -312,15 +312,15 @@ export default {
             };
           });
           this.validSequenceFile = true;
-          this.message = null;
+          this.error = null;
         } catch (e) {
-          this.message = "Can't read fasta data";
+          this.error = "Can't read fasta data";
           this.replicons = [];
           this.validSequenceFile = false;
         }
       } else {
         this.validSequenceFile = false;
-        this.message = null;
+        this.error = null;
         this.replicons = [];
       }
     },
@@ -376,5 +376,4 @@ form-label {
   overflow: auto;
   max-height: 20em;
 }
-
 </style>
