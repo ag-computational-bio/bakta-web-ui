@@ -127,7 +127,7 @@
         </div>
         <div class="mt-4">
           <h4 class="mb-2">Replicons</h4>
-          <div class="row">
+          <div class="row scroll">
             <table class="table table-striped">
               <thead>
                 <tr>
@@ -372,4 +372,9 @@ h4 {
 form-label {
   color: gray;
 }
+.scroll {
+  overflow: auto;
+  max-height: 20em;
+}
+
 </style>
