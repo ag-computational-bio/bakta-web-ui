@@ -6,8 +6,7 @@
       <textarea
         class="form-control"
         name="paste-fasta"
-        cols="120"
-        rows="15"
+        rows="8"
         placeholder="Paste your fasta sequences here or select a fasta file from your computer below..."
         v-model="sequenceInput"
       ></textarea>
