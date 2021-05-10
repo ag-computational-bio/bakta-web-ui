@@ -23,10 +23,19 @@ function generateRepliconTable(replicons) {
 }
 
 // eslint-disable-next-line no-unused-vars
-function upload(job, type, data) {
-    return new Promise(r => r(job))
+function upload(_api, job, type, data) {
+    return new Promise(r => {
+        const url = job["uploadLink" + type]
+        return _api.upload(url, data)
+            .then(() => r(job))
+    })
 }
 
+/**
+ * Methods of the bakta service return a promise with either 
+ * the response json object or an error object if the return
+ * code is not okay.
+ */
 const BaktaService = {
     /** Vue plugin registration */
     install: (app) => {
@@ -46,17 +55,17 @@ const BaktaService = {
                     // upload files
                     .then(job => {
                         console.debug("Uploading fasta")
-                        return upload(job, "uploadLinkFasta", request.sequence)
+                        return upload(_api, job, "uploadLinkFasta", request.sequence)
                     })
                     .then(job => {
                         const replicons = generateRepliconTable(request.replicons)
                         console.debug("Uploading replicon table", replicons)
-                        return upload(job, "uploadLinkReplicons", replicons)
+                        return upload(_api, job, "uploadLinkReplicons", replicons)
                     })
                     .then(job => {
                         if (request.prodigal !== null) {
                             console.debug("Uploading prodigal file")
-                            return upload(job, "uploadLinkProdigal", request.prodigal)
+                            return upload(_api, job, "uploadLinkProdigal", request.prodigal)
                         } else {
                             return new Promise(r => r(job))
                         }

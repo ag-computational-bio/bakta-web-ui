@@ -29,7 +29,7 @@ const api = function () {
     }
 
     load()
-    console.log(data)
+    console.log("Loaded persisted mock data: ", data)
     return {
         data: function () {
             return data
@@ -44,7 +44,7 @@ const api = function () {
                 let job = { 'jobID': 'id' + data.jobs.length, 'secret': 'secret' + data.jobs.length, 'jobStatus': "INIT" }
                 data.jobs.push(job)
                 persist()
-                r({ jobID: job.jobID, secret: job.secret})
+                r({ jobID: job.jobID, secret: job.secret })
             })
         },
         list: function (jobs) {
@@ -73,9 +73,12 @@ const api = function () {
                             persist()
                         }, 2000);
                     // mimick slow connection by waiting for a second
-                    setTimeout(() => resolve({}), 1000)    
+                    setTimeout(() => resolve({}), 1000)
                 }
             })
+        },
+        upload: function () {
+            return Promise.resolve()
         }
     }
 }

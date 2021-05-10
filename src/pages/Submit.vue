@@ -20,6 +20,13 @@
         accept=".fas,.fna,.fasta,.fna.gz,.fas.gz,.fasta.gz"
       />
     </div>
+
+    <progress-bar
+      v-if="loading"
+      :progress="loadingProgress"
+      :title="loadingProgress.title"
+    />
+
     <div v-if="showDetails">
       <hr />
       <div class="mt-4">
@@ -214,7 +221,8 @@ import SelectSequenceType from "../components/SelectSequenceType.vue";
 import Notification from "@/components/Notification";
 import PageFooter from "@/components/PageFooter";
 import fasta from "biojs-io-fasta";
-import zlib from "zlib";
+import ProgressBar from "../components/ProgressBar.vue";
+import readFileWithProgress from "@/read-file-with-progress";
 
 export default {
   name: "Submit",
@@ -226,46 +234,34 @@ export default {
     SelectTopology,
     SelectSequenceType,
     Notification,
+    ProgressBar,
   },
 
   methods: {
+    setSequence(seq) {
+      this.sequence = seq;
+      this.loading = false;
+    },
     fastaFileChanged: function (name, file) {
       let vm = this;
       this.sequenceFile = file.item(0);
       this.readTextFile(this.sequenceFile)
-        .then((r) => (vm.sequence = r))
+        .then((r) => vm.setSequence(r))
         .catch((e) => (vm.error = e));
     },
     readTextFile: function (file) {
-      return new Promise((r) => {
-        let reader = new FileReader();
-        reader.onload = r;
-        reader.readAsArrayBuffer(file);
-      })
-        .then((result) => {
-          return new Promise((r, e) => {
-            const buffer = result.target.result;
-            const array = new Uint8Array(buffer.slice(0, 2));
-            // check for gzip magic bytes and unzip
-            if (array[0] == 0x1f && array[1] == 0x8b) {
-              zlib.gunzip(Buffer.from(buffer), (err, res) => {
-                if (err) {
-                  e(err);
-                } else {
-                  r(res);
-                }
-              });
-            } else {
-              r(buffer);
-            }
-          });
-        })
-        .then((buffer) => {
-          return new Promise((r) => {
-            let decoder = new TextDecoder("utf-8");
-            r(decoder.decode(buffer));
-          });
+      this.loading = true;
+      this.sequence = null;
+      const vm = this;
+      return readFileWithProgress(
+        file,
+        (x) => (vm.loadingProgress.value = Math.floor(x * 100))
+      ).then((buffer) => {
+        return new Promise((r) => {
+          let decoder = new TextDecoder("utf-8");
+          r(decoder.decode(buffer));
         });
+      });
     },
     prodigalFileChanged: function (name, file) {
       this.prodigalTrainingFile = file[0];
@@ -361,6 +357,13 @@ export default {
       replicons: [],
       submitting: false,
       error: null,
+      loading: false,
+      loadingProgress: {
+        title: "Loading fasta file",
+        min: 0,
+        max: 100,
+        value: 0,
+      },
     };
   },
 };
