@@ -13,7 +13,7 @@ function read_gzip_file(file, progressHandler) {
         const inflate = new pako.Inflate();
         const chunks = [];
 
-        const chunkSize = 1024 * 100;
+        const chunkSize = 1024 * 1000;
         let offset = 0;
         let reader = new FileReader();
 

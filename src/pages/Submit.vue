@@ -249,6 +249,22 @@ export default {
         .then((r) => vm.setSequence(r))
         .catch((e) => (vm.error = e));
     },
+    parseAndSetSeqquence: function() {
+          let seq = fasta.parse(this.sequence);
+          this.replicons = seq.map(function (x) {
+            return {
+              id: x.name,
+              length: x.seq.length,
+              newid: "",
+              type: "contig",
+              topology: "l",
+              name: "",
+            };
+          });
+          this.loading = false;
+          this.validSequenceFile = true;
+          this.error = null;
+    },
     readTextFile: function (file) {
       this.loading = true;
       this.sequence = null;
@@ -296,19 +312,10 @@ export default {
     sequence() {
       if (this.sequence !== null) {
         try {
-          let seq = fasta.parse(this.sequence);
-          this.replicons = seq.map(function (x) {
-            return {
-              id: x.name,
-              length: x.seq.length,
-              newid: "",
-              type: "contig",
-              topology: "l",
-              name: "",
-            };
-          });
-          this.validSequenceFile = true;
-          this.error = null;
+          console.log("Parsing file")
+          this.loading = true;
+          this.loadingProgress.title = "Parsing file"
+          setTimeout(this.parseAndSetSeqquence, 0);          
         } catch (e) {
           this.error = "Can't read fasta data";
           this.replicons = [];
