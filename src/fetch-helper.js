@@ -9,6 +9,7 @@
  * @returns Promise: String
  */
 function getResponseErrorMessage(response) {
+  console.log("Response", response)
   return response.text().then((message) => {
     if (!message) message = response.statusText;
     return Promise.resolve(response.status + " - " + message);
@@ -22,7 +23,8 @@ function getResponseErrorMessage(response) {
  * @returns Promise: String
  */
 function throwResponseErrorMessage(response) {
-  return getResponseErrorMessage(response).then((x) => Promise.reject(x));
+  return getResponseErrorMessage(response)
+    .then((x) => Promise.reject(x));
 }
 
 /**

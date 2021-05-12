@@ -15,7 +15,7 @@
         </h4>
         <div class="collapse.show" id="stats">
           <div class="card card-body">
-            <bakta-stats :data="data" />
+            <bakta-stats :data="data" :job="result" />
           </div>
         </div>
       </div>
@@ -79,6 +79,7 @@ export default {
   data: function () {
     return {
       job: null,
+      result: null,
       pollInterval: 2000,
       loadingProgress: {
         enabled: true,
@@ -94,17 +95,18 @@ export default {
   methods: {
     udpateJob: function () {
       let token = this.$router.currentRoute.value.params.id;
-      console.log(token);
       if (token) {
         let job = JSON.parse(atob(token));
         let vm = this;
         this.$bakta.job(job).then((x) => {
-          // quick hack for rest api mock
-          // vue does not update when the objects have the same reference
-          vm.job = JSON.parse(JSON.stringify(x[0]));
+          vm.job = x[0];
+          vm.loadResult({ jobID: vm.job.jobID, secret: vm.job.secret });
           this.planRefresh();
         });
       }
+    },
+    loadResult: function (job) {
+      this.$bakta.result(job).then((x) => (this.result = x));
     },
     loadDemoData: function () {
       const vm = this;
@@ -139,6 +141,7 @@ export default {
     planRefresh: function () {
       if (
         this.job.jobStatus === "SUCCESSFULL" ||
+        this.job.jobStatus === "SUCCESFULL" ||
         this.job.jobStatus === "ERROR"
       ) {
         //  jobs is in finished state. No polling needed anymore

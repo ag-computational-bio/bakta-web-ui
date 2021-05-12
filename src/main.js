@@ -9,5 +9,8 @@ import bakta from '@/bakta'
 
 const app = createApp(App)
     .use(router)
-    .use(bakta)
+    .use(bakta, {
+        api: "https://restapi.bakta.ingress.rancher2.computational.bio",
+        token: "d89vgaegfv0aew8cagfwecg"
+    })
 window.vm = app.mount('#app')

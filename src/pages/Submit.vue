@@ -312,7 +312,7 @@ export default {
         .then((x) => {
           console.debug("Job submitted", x);
           vm.submitting = false;
-          vm.$router.push({ name: "Job", params: { id: x.job.key } });
+          vm.$router.push({ name: "Jobs"});
         })
         .catch((ex) => {
           console.log("Submission failed", ex);

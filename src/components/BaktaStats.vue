@@ -1,5 +1,5 @@
 <template>
-  <div class="row">
+  <div class="row mb-5">
     <div class="col-md-6">
       <h5>Input</h5>
       <display-tuple label="Organism:" :value="name" />
@@ -9,9 +9,9 @@
 
     <div class="col-md-6">
       <h5>Runtime</h5>
-      <display-tuple label="Start:" value="2020-12-10 9:35:00" />
-      <display-tuple label="Stop:" value="2020-12-10 9:35:00" />
-      <display-tuple label="Duration:" value="11:00" />
+      <display-tuple label="Start:" :value="started" />
+      <display-tuple label="Stop:" :value="ended" />
+      <display-tuple label="Duration:" :value="duration" />
     </div>
   </div>
 
@@ -82,25 +82,29 @@
     </div>
     <div class="col-md-2 text-end">
       <h5>Download</h5>
-      <div class="row"><a href="#">tsv</a></div>
-      <div class="row"><a href="#">gff3</a></div>
-      <div class="row"><a href="#">gbff</a></div>
-      <div class="row"><a href="#">faa</a></div>
-      <div class="row"><a href="#">fna</a></div>
+      <div class="row"><a :href="job.ResultFiles.TSV">tsv</a></div>
+      <div class="row"><a :href="job.ResultFiles.GFF3">gff3</a></div>
+      <div class="row"><a :href="job.ResultFiles.GBFF">gbff</a></div>
+      <div class="row"><a :href="job.ResultFiles.FAA">faa</a></div>
+      <div class="row"><a :href="job.ResultFiles.FNA">fna</a></div>
       <div class="row"><a href="#">json</a></div>
     </div>
   </div>
 </template>
 
 <script>
+import humanizeDuration from "humanize-duration";
 import DisplayTuple from "@/components/DisplayTuple";
 import bakta from "@/bakta-helper";
-
 export default {
   name: "BaktaResultView",
   components: { DisplayTuple },
   props: {
     data: {
+      type: Object,
+      default: () => {},
+    },
+    job: {
       type: Object,
       default: () => {},
     },
@@ -118,11 +122,32 @@ export default {
     sequencesCount: function () {
       return bakta.sequencesCountString(this.data);
     },
+    started: function () {
+      return this.formatDate(this.job.started);
+    },
+    ended: function () {
+      return this.formatDate(this.job.updated);
+    },
+    duration: function () {
+      return this.formatDuration(this.job.started, this.job.updated);
+    },
   },
   data: function () {
     return {};
   },
-  methods: {},
+  methods: {
+    formatDate(date) {
+      return new Intl.DateTimeFormat("en-GB", {
+        dateStyle: "short",
+        timeStyle: "short",
+      }).format(new Date(date));
+    },
+    formatDuration(from, to) {
+      return humanizeDuration(
+        new Date(to).getTime() - new Date(from).getTime()
+      );
+    },
+  },
   mounted: function () {},
 };
 </script>

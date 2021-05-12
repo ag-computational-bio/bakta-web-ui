@@ -1,11 +1,12 @@
 <template>
   <page-header page="Jobs" />
-  <div class="container flex-grow-1 ">
+  <div class="container flex-grow-1">
     <table class="table table-striped">
       <thead>
         <tr>
           <th>Id</th>
           <th>Submission</th>
+          <th>Started</th>
           <th>Status</th>
           <th>Link</th>
         </tr>
@@ -13,12 +14,13 @@
       <tbody>
         <tr v-for="item in jobs" :key="item.key">
           <td>{{ item.jobID }}</td>
-          <td>{{ item.secret }}</td>
+          <td>{{ item.started }}</td>
+          <td>{{ item.updated }}</td>
           <td>{{ item.jobStatus }}</td>
           <td>
-            <router-link :to="{ name: 'Job', params: { id: item.key } }"
-              >Link</router-link
-            >
+            <router-link :to="{ name: 'Job', params: { id: item.key } }">
+              Link
+            </router-link>
           </td>
         </tr>
       </tbody>
@@ -47,7 +49,10 @@ export default {
     planRefresh: function () {
       if (
         this.jobs.every(
-          (j) => j.jobStatus === "SUCCESSFULL" || j.jobStatus === "ERROR"
+          (j) =>
+            j.jobStatus === "SUCCESSFULL" ||
+            j.jobStatus === "SUCCESFULL" ||
+            j.jobStatus === "ERROR"
         )
       ) {
         // all jobs are in finished state. No polling needed anymore
