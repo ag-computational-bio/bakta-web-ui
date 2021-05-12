@@ -60,6 +60,27 @@
             />
           </div>
         </div>
+        <div class="row mt-2">
+          <div class="col">
+            <input
+              class="form-control"
+              type="text"
+              id="locus"
+              placeholder="Locus prefix (optional)"
+              v-model="options.locus"
+            />
+          </div>
+          <div class="col">
+            <input
+              class="form-control"
+              type="text"
+              id="locustag"
+              placeholder="Locus tag prefix (optional)"
+              v-model="options.locus_tag"
+            />
+          </div>
+          <div class="col"></div>
+        </div>
       </div>
 
       <div class="mt-4">
@@ -360,6 +381,8 @@ export default {
         genus: "",
         species: "",
         strain: "",
+        locus: "",
+        locus_tag: ""
       },
       replicons: [],
       submitting: false,
