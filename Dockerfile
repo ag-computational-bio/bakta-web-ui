@@ -2,6 +2,7 @@ FROM node:lts-alpine as builder
 
 COPY . /src
 WORKDIR /src
+RUN apk update && apk add git
 RUN npm i
 RUN npm run build
 
