@@ -4,6 +4,9 @@
   </div>
 </template>
 <script>
+/**
+ * The notification is only visible when the message is non-null.
+ */
 export default {
   name: "Notification",
   props: {
