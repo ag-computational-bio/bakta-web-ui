@@ -11,7 +11,7 @@ import Datatable from "@/components/Datatable.vue";
 
 export default {
   name: "BaktaResultView",
-  components: { Datatable,  },
+  components: { Datatable },
   props: {
     data: {
       type: Object,
@@ -28,10 +28,14 @@ export default {
         strand: x.strand || "",
         locus: x.locus || "",
         product: x.product || "",
-        dbxrefs: x.db_xrefs ? x.db_xrefs.join("<br> ") : "",
+        dbxrefs: x.db_xrefs
+          ? x.db_xrefs
+          // url is hard coded for the moment. Should be moved to rest-api module
+              .map((x) => "<a href=https://psos-staging.computational.bio/api/v1/dbxref/redirect/" + x + ">" + x + "</a>")
+              .join("<br> ")
+          : "",
       }));
     },
-
   },
   data: function () {
     return {
@@ -62,5 +66,4 @@ export default {
 };
 </script>
 <style scoped>
-
 </style>
