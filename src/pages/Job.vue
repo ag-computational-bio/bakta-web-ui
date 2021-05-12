@@ -1,14 +1,54 @@
 <template>
   <page-header page="" />
   <div class="container flex-grow-1">
+    <notification :message="error" />
     <progress-bar
       v-if="loadingProgress.enabled"
       :progress="loadingProgress"
       :title="loadingProgress.title"
     />
 
-    <div v-if="!loadingProgress.enabled">
-      <bakta-result-table :data="data" />
+    <div v-if="!loadingProgress.enabled && !error">
+      <div class="mt-5">
+        <h4 data-bs-toggle="collapse" data-bs-target="#stats" role="button">
+          Job statistics
+        </h4>
+        <div class="collapse.show" id="stats">
+          <div class="card card-body">
+            <bakta-stats :data="data" />
+          </div>
+        </div>
+      </div>
+      <hr />
+      <div class="row">
+        <h4
+          data-bs-toggle="collapse"
+          data-bs-target="#genomeBrowser"
+          role="button"
+          @click="$refs.genomeview.refresh()"
+        >
+          Genomeviewer
+        </h4>
+        <div class="collapse" id="genomeBrowser">
+          <div class="card card-body">
+            <bakta-genome-viewer ref="genomeview" :data="data" />
+          </div>
+        </div>
+      </div>
+      <hr />
+      <h4
+        data-bs-toggle="collapse"
+        data-bs-target="#annotationTable"
+        role="button"
+      >
+        Annotations
+      </h4>
+      <div class="collapse" id="annotationTable">
+        <div class="card card-body">
+          <bakta-annotation-table :data="data" />
+        </div>
+      </div>
+      <hr />
     </div>
   </div>
   <page-footer />
@@ -16,13 +56,25 @@
 <script>
 import PageHeader from "@/components/PageHeader";
 import PageFooter from "@/components/PageFooter.vue";
-import BaktaResultTable from "@/components/BaktaResultTable";
+import Notification from "@/components/Notification";
 import notifyFetchProgress from "@/notify-fetch-progress";
 import ProgressBar from "@/components/ProgressBar";
+import BaktaGenomeViewer from "@/components/BaktaGenomeViewer";
+import BaktaStats from "@/components/BaktaStats";
+import BaktaAnnotationTable from "@/components/BaktaAnnotationTable";
+import { expectOk } from "@/fetch-helper";
 
 export default {
   name: "Job",
-  components: { PageHeader, PageFooter, BaktaResultTable, ProgressBar },
+  components: {
+    PageHeader,
+    PageFooter,
+    ProgressBar,
+    BaktaGenomeViewer,
+    BaktaStats,
+    BaktaAnnotationTable,
+    Notification,
+  },
   computed: {},
   data: function () {
     return {
@@ -35,7 +87,7 @@ export default {
         value: 0,
         title: "Loading results...",
       },
-
+      error: null,
       data: {},
     };
   },
@@ -58,8 +110,9 @@ export default {
       const vm = this;
       window
         .fetch(
-          "https://lj-bakta-test-data.s3.computational.bio.uni-giessen.de/test.json"
+          "https://lj-bakta-test-data.s3.computational.bio.uni-giessen.de/test2.json"
         )
+        .then(expectOk)
         .then((response) =>
           notifyFetchProgress(
             response,
@@ -77,7 +130,11 @@ export default {
         .then((response) => response.json())
         .then((text) => (vm.data = text))
         .then(() => (this.loadingProgress.enabled = false))
-        .catch((err) => console.log(err));
+        .catch(vm.setError);
+    },
+    setError(err) {
+      this.error = err;
+      this.loadingProgress.enabled = false;
     },
     planRefresh: function () {
       if (

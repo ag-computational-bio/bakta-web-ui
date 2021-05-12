@@ -26,4 +26,17 @@ html {
 #app {
   height: 100%;
 }
+h4 {
+  color: gray;
+}
+h5 {
+  color: gray;
+}
+h6 {
+  color: gray;
+}
+.value {
+  font-weight: bold;
+  color: gray;
+}
 </style>
