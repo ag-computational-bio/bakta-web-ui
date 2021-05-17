@@ -1,6 +1,6 @@
 {
   "name": "bakta-web-ui",
-  "version": "0.5.0",
+  "version": "0.5.2",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
