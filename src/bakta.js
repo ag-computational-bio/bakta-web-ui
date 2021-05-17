@@ -50,6 +50,29 @@ function loadKeys(localJobs, retrievedJobs) {
         })
 }
 
+function toJobConfig(options) {
+    let s = ""
+    s += "--translation-table " + options.translationTable + " "
+    if (options.dermType) {
+        switch (options.dermType) {
+            case "UNKNOWN": s += "--gram ? "; break;
+            case "monoderm": s += "--gram + "; break;
+            case "diderm": s += "--gram - "; break;
+        }
+    }
+    if (options.minContigLength) s += "--min-contig-length " + options.minContigLength + " "
+    if (options.complete) s += "--complete "
+    if (options.keepContigHeaders) s += "--keep-contig-headers "
+
+    if (options.genus) s += "--genus \"" + options.genus + "\" "
+    if (options.species) s += "--species \"" + options.species + "\" "
+    if (options.species) s += "--strain \"" + options.strain + "\" "
+    
+    if (options.locus) s += "--locus \"" + options.locus + "\" "
+    if (options.locus_tag) s += "--locus-tag \"" + options.locus_tag + "\" "
+    return s;
+}
+
 /**
  * Methods of the bakta service return a promise with either 
  * the response json object or an error object if the return
@@ -73,7 +96,7 @@ const BaktaService = {
                         saveJob(job.job)
 
                         const replicons = generateRepliconTable(request.replicons)
-                        const jobRequest = { job: job.job, config: request.options }
+                        const jobRequest = { job: job.job, config: request.options, jobConfigString: toJobConfig(request.options) }
                         // upload files
                         return upload(_api, job, "uploadLinkFasta", request.sequence)
                             .then(() => upload(_api, job, "uploadLinkReplicons", replicons))
