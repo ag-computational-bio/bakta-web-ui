@@ -82,12 +82,9 @@
     </div>
     <div class="col-md-2 text-end">
       <h5>Download</h5>
-      <div class="row"><a :href="job.ResultFiles.TSV">tsv</a></div>
-      <div class="row"><a :href="job.ResultFiles.GFF3">gff3</a></div>
-      <div class="row"><a :href="job.ResultFiles.GBFF">gbff</a></div>
-      <div class="row"><a :href="job.ResultFiles.FAA">faa</a></div>
-      <div class="row"><a :href="job.ResultFiles.FNA">fna</a></div>
-      <div class="row"><a href="#">json</a></div>
+      <div v-for="d in downloads" :key="d.key" class="row">
+        <a :href="job.ResultFiles[d.key]">{{ d.label }}</a>
+      </div>
     </div>
   </div>
 </template>
@@ -130,6 +127,30 @@ export default {
     },
     duration: function () {
       return this.formatDuration(this.job.started, this.job.updated);
+    },
+    downloads: function () {
+      const order = {
+        TSV: { label: "tsv", position: 0 },
+        TSVHypothetical: { label: "tsv (hypthetical)", position: 5 },
+        GFF3: { label: "gff3", position: 10 },
+        GBFF: { label: "gbff", position: 20 },
+        FAA: { label: "faa", position: 30 },
+        FAAHypothetical: { label: "faa (hypthetical)", position: 35 },
+        FNA: { label: "fna", position: 40 },
+        JSON: { label: "json", position: 50 },
+      };
+      let resultFiles = this.job && this.job.ResultFiles ? this.job.ResultFiles : {};
+
+      let l = [];
+      for (let k of Object.keys(resultFiles)) {
+        console.log(k)
+        if (k in order) {
+          l.push({ key: k, ...order[k] });
+        } else {
+          l.push({ key: k, label: k, position: 1000 });
+        }
+      }
+      return l.sort((a, b) => a.position - b.position);
     },
   },
   data: function () {
