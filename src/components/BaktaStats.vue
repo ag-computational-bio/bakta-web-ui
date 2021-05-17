@@ -131,11 +131,11 @@ export default {
     downloads: function () {
       const order = {
         TSV: { label: "tsv", position: 0 },
-        TSVHypothetical: { label: "tsv (hypthetical)", position: 5 },
+        TSVHypothetical: { label: "tsv (hypothetical)", position: 5 },
         GFF3: { label: "gff3", position: 10 },
         GBFF: { label: "gbff", position: 20 },
         FAA: { label: "faa", position: 30 },
-        FAAHypothetical: { label: "faa (hypthetical)", position: 35 },
+        FAAHypothetical: { label: "faa (hypothetical)", position: 35 },
         FNA: { label: "fna", position: 40 },
         JSON: { label: "json", position: 50 },
       };
