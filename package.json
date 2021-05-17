@@ -16,7 +16,7 @@
     "core-js": "^3.6.5",
     "datatables.net-dt": "^1.10.24",
     "humanize-duration": "^3.26.0",
-    "igv": "^2.8.2",
+    "igv": "^2.8.3",
     "pako": "^2.0.3",
     "vue": "^3.0.0",
     "vue-router": "^4.0.4"
