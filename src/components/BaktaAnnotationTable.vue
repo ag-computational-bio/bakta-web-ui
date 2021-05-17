@@ -30,8 +30,15 @@ export default {
         product: x.product || "",
         dbxrefs: x.db_xrefs
           ? x.db_xrefs
-          // url is hard coded for the moment. Should be moved to rest-api module
-              .map((x) => "<a href=https://psos-staging.computational.bio/api/v1/dbxref/redirect/" + x + ">" + x + "</a>")
+              // url is hard coded for the moment. Should be moved to rest-api module
+              .map(
+                (x) =>
+                  '<a target="_" href=https://psos-staging.computational.bio/api/v1/dbxref/redirect/' +
+                  x +
+                  ">" +
+                  x +
+                  "</a>"
+              )
               .join("<br> ")
           : "",
       }));
