@@ -95,9 +95,8 @@ const BaktaService = {
                     .then(jobs => Promise.resolve(loadKeys(_jobs, jobs.jobs)))
             },
             job: function (job) {
-                let _jobs = loadJobs()
                 return _api.list({ jobs: [job] })
-                    .then(jobs => Promise.resolve(loadKeys(_jobs, jobs.jobs)))
+                    .then(jobs => Promise.resolve(loadKeys([job], jobs.jobs)))
             },
             result: function (job) {
                 return _api.result(job)
