@@ -8,7 +8,7 @@
       :title="loadingProgress.title"
     />
 
-    <div v-if="!loadingProgress.enabled && !error">
+    <div v-if="!loadingProgress.enabled && !error && data">
       <div class="mt-5">
         <h4 data-bs-toggle="collapse" data-bs-target="#stats" role="button">
           Job statistics
@@ -93,6 +93,9 @@ export default {
     };
   },
   methods: {
+    handleError: function (err) {
+      this.error = err
+    },
     udpateJob: function () {
       let token = this.$router.currentRoute.value.params.id;
       if (token) {
@@ -102,18 +105,29 @@ export default {
           vm.job = x[0];
           vm.loadResult({ jobID: vm.job.jobID, secret: vm.job.secret });
           this.planRefresh();
-        });
+        })
+        .catch(this.handleError);
       }
     },
     loadResult: function (job) {
-      this.$bakta.result(job).then((x) => (this.result = x));
+      this.$bakta
+        .result(job)
+        .then((x) => (this.result = x))
+        .then(() => {
+          if (this.result && this.result.ResultFiles && this.result.ResultFiles.JSON) {
+
+            this.loadData(this.result.ResultFiles.JSON);
+          } else {
+            this.error = "No result found for job."
+          }
+        });
     },
-    loadDemoData: function () {
+    loadData: function (url) {
+      this.loadingProgress.enabled = true;
+      this.loadingProgress.value = 0;
       const vm = this;
       window
-        .fetch(
-          "https://lj-bakta-test-data.s3.computational.bio.uni-giessen.de/test2.json"
-        )
+        .fetch(url)
         .then(expectOk)
         .then((response) =>
           notifyFetchProgress(
@@ -160,7 +174,6 @@ export default {
   },
   mounted: function () {
     this.udpateJob();
-    this.loadDemoData();
   },
 };
 </script>
