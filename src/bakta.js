@@ -43,7 +43,7 @@ function upload(_api, job, type, data) {
 function loadKeys(localJobs, retrievedJobs) {
     return retrievedJobs.map(
         job => {
-            const localJob = localJobs.filter(j => j.jobID = job.jobID)[0]
+            const localJob = localJobs.filter(j => j.jobID == job.jobID)[0]
             job.key = jobKey(localJob);
             job.secret = localJob.secret
             return job
