@@ -1,6 +1,6 @@
 {
   "name": "bakta-web-ui",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
@@ -8,6 +8,7 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
+    "@ljelonek-public/vue-bootstrap5-components": "^0.1.4",
     "@popperjs/core": "^2.8.4",
     "biojs-io-fasta": "^0.1.17",
     "bootstrap": "^5.0.0",

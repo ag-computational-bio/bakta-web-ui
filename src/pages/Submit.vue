@@ -33,29 +33,19 @@
         <h4 class="mb-2">Organism</h4>
         <div class="row">
           <div class="col">
-            <input
-              class="form-control"
-              type="text"
-              id="genus"
-              placeholder="Genus"
-              v-model="options.genus"
+            <remote-typeahead
+              :suggestionLookup="lookupTaxonomy"
+              v-model="genus_species"
+              placeholder="Genus and species (optional)"
             />
           </div>
-          <div class="col">
-            <input
-              class="form-control"
-              type="text"
-              id="species"
-              placeholder="Species"
-              v-model="options.species"
-            />
-          </div>
+
           <div class="col">
             <input
               class="form-control"
               type="text"
               id="strain"
-              placeholder="Strain"
+              placeholder="Strain (optional)"
               v-model="options.strain"
             />
           </div>
@@ -79,7 +69,6 @@
               v-model="options.locus_tag"
             />
           </div>
-          <div class="col"></div>
         </div>
       </div>
 
@@ -244,6 +233,7 @@ import PageFooter from "@/components/PageFooter";
 import fasta from "biojs-io-fasta";
 import ProgressBar from "../components/ProgressBar.vue";
 import readFileWithProgress from "@/read-file-with-progress";
+import { RemoteTypeahead } from "@ljelonek-public/vue-bootstrap5-components";
 
 export default {
   name: "Submit",
@@ -256,14 +246,27 @@ export default {
     SelectSequenceType,
     Notification,
     ProgressBar,
+    RemoteTypeahead,
   },
 
   methods: {
+    lookupTaxonomy: function(input, result) {
+      window
+        .fetch(
+          "https://www.ebi.ac.uk/ena/taxonomy/rest/suggest-for-search/" + input
+        )
+        .then((r) => r.json())
+        .then((j) => {
+          result(
+            j.map((x) => ({ value: x.scientificName, label: x.scientificName }))
+          );
+        });
+    },
     setSequence(seq) {
       this.sequence = seq;
       this.loading = false;
     },
-    fastaFileChanged: function (name, file) {
+    fastaFileChanged: function(name, file) {
       let vm = this;
       this.sequenceFile = file.item(0);
       this.readTextFile(this.sequenceFile)
@@ -271,22 +274,22 @@ export default {
         .catch((e) => (vm.error = e));
     },
     parseAndSetSeqquence: function() {
-          let seq = fasta.parse(this.sequence);
-          this.replicons = seq.map(function (x) {
-            return {
-              id: x.name,
-              length: x.seq.length,
-              newid: "",
-              type: "contig",
-              topology: "l",
-              name: "",
-            };
-          });
-          this.loading = false;
-          this.validSequenceFile = true;
-          this.error = null;
+      let seq = fasta.parse(this.sequence);
+      this.replicons = seq.map(function(x) {
+        return {
+          id: x.name,
+          length: x.seq.length,
+          newid: "",
+          type: "contig",
+          topology: "l",
+          name: "",
+        };
+      });
+      this.loading = false;
+      this.validSequenceFile = true;
+      this.error = null;
     },
-    readTextFile: function (file) {
+    readTextFile: function(file) {
       this.loading = true;
       this.sequence = null;
       const vm = this;
@@ -300,10 +303,10 @@ export default {
         });
       });
     },
-    prodigalFileChanged: function (name, file) {
+    prodigalFileChanged: function(name, file) {
       this.prodigalTrainingFile = file[0];
     },
-    submit: function () {
+    submit: function() {
       let vm = this;
       this.submitting = true;
       this.error = null;
@@ -312,7 +315,7 @@ export default {
         .then((x) => {
           console.debug("Job submitted", x);
           vm.submitting = false;
-          vm.$router.push({ name: "Jobs"});
+          vm.$router.push({ name: "Jobs" });
         })
         .catch((ex) => {
           console.log("Submission failed", ex);
@@ -333,10 +336,10 @@ export default {
     sequence() {
       if (this.sequence !== null) {
         try {
-          console.log("Parsing file")
+          console.log("Parsing file");
           this.loading = true;
-          this.loadingProgress.title = "Parsing file"
-          setTimeout(this.parseAndSetSeqquence, 0);          
+          this.loadingProgress.title = "Parsing file";
+          setTimeout(this.parseAndSetSeqquence, 0);
         } catch (e) {
           this.error = "Can't read fasta data";
           this.replicons = [];
@@ -346,6 +349,18 @@ export default {
         this.validSequenceFile = false;
         this.error = null;
         this.replicons = [];
+      }
+    },
+    genus_species() {
+      if (this.genus_species) {
+        const split = this.genus_species.indexOf(" ");
+        if (split >= 0) {
+          this.options.genus = this.genus_species.substring(0, split);
+          this.options.species = this.genus_species.substring(split + 1);
+        } else {
+          this.options.genus = this.genus_species;
+          this.options.species = "";
+        }
       }
     },
   },
@@ -371,6 +386,7 @@ export default {
       sequenceInput: "",
       sequenceFile: null,
       validSequenceFile: false,
+      genus_species: "",
       options: {
         translationTable: 11,
         completeGenome: false,
@@ -382,7 +398,7 @@ export default {
         species: "",
         strain: "",
         locus: "",
-        locus_tag: ""
+        locus_tag: "",
       },
       replicons: [],
       submitting: false,
