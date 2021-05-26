@@ -146,10 +146,14 @@ const BaktaService = {
       /** Retrieves a list of all known jobs */
       jobs: function() {
         let _jobs = loadJobs();
-        return _api.list({ jobs: _jobs }).then((jobs) => {
-          removeUnknownJobs(jobs);
-          return Promise.resolve(loadKeys(_jobs, jobs.jobs));
-        });
+        if (_jobs.length > 0) {
+          return _api.list({ jobs: _jobs }).then((jobs) => {
+            removeUnknownJobs(jobs);
+            return Promise.resolve(loadKeys(_jobs, jobs.jobs));
+          });
+        } else {
+          return Promise.resolve([]);
+        }
       },
       job: function(job) {
         return _api
