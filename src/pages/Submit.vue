@@ -395,6 +395,7 @@ export default {
     },
     request() {
       return {
+        jobname: this.sequenceFile.name,
         sequence: this.sequence,
         prodigal: this.prodigalTrainingFile,
         replicons: this.replicons,
