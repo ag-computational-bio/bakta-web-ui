@@ -67,6 +67,20 @@ function loadKeys(localJobs, retrievedJobs) {
   });
 }
 
+function mergeJobs(localJobs, retrievedJobs) {
+  const jobs = new Map();
+  retrievedJobs.forEach((j) => jobs.set(j.jobID, j));
+  localJobs.forEach((j) => {
+    if (!jobs.has(j.jobID)) {
+      jobs.set(j.jobID, {
+        jobID: j.jobID,
+        jobStatus: "Server did not provide information for this job",
+      });
+    }
+  });
+  return Array.from(jobs.values());
+}
+
 function toJobConfig(options) {
   let s = "";
   s += "--translation-table " + options.translationTable + " ";
@@ -144,12 +158,20 @@ const BaktaService = {
           });
       },
       /** Retrieves a list of all known jobs */
-      jobs: function() {
+      jobs: function(includeLocalJobs = false, removeUnknownLocalJobs = false) {
         let _jobs = loadJobs();
         if (_jobs.length > 0) {
           return _api.list({ jobs: _jobs }).then((jobs) => {
-            removeUnknownJobs(jobs);
-            return Promise.resolve(loadKeys(_jobs, jobs.jobs));
+            if (removeUnknownLocalJobs) {
+              removeUnknownJobs(jobs);
+            }
+            if (includeLocalJobs) {
+              return Promise.resolve(
+                mergeJobs(_jobs, loadKeys(_jobs, jobs.jobs))
+              );
+            } else {
+              return Promise.resolve(loadKeys(_jobs, jobs.jobs));
+            }
           });
         } else {
           return Promise.resolve([]);

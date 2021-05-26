@@ -1,6 +1,20 @@
 <template>
   <page-header page="Jobs" />
   <div class="container flex-grow-1">
+    <div class="d-flex flex-row-reverse row-cols-lg-auto g-3 align-items-end">
+      <div class="col-12">
+        <div class="form-check">
+          <input
+            class="form-check-input"
+            type="checkbox"
+            v-model="hideLocalJobs"
+          />
+          <label class="form-check-label" for="flexCheckDefault">
+            Hide jobs not found on server
+          </label>
+        </div>
+      </div>
+    </div>
     <table class="table table-striped">
       <thead>
         <tr>
@@ -30,6 +44,7 @@
         </tr>
       </tbody>
     </table>
+    <div v-if="!hasJobs">No jobs found</div>
     <div class="row d-flex justify-content-center" v-if="loading">
       <div class="spinner-border text-secondary" role="status">
         <span class="visually-hidden">Loading...</span>
@@ -46,13 +61,28 @@ export default {
   name: "Jobs",
   components: { PageHeader, PageFooter },
   data: function() {
-    return { jobs: [], pollInterval: 5000, loading: true };
+    return {
+      jobs: [],
+      pollInterval: 5000,
+      loading: true,
+      hideLocalJobs: true,
+    };
+  },
+  computed: {
+    hasJobs: function() {
+      return this.jobs != null && this.jobs.length > 0;
+    },
+  },
+  watch: {
+    hideLocalJobs: function() {
+      this.udpateJobs();
+    },
   },
   methods: {
     udpateJobs: function() {
       let vm = this;
       vm.loading = true;
-      this.$bakta.jobs().then((x) => {
+      this.$bakta.jobs(!this.hideLocalJobs).then((x) => {
         vm.jobs = x.sort(
           (a, b) =>
             new Date(b.started).valueOf() - new Date(a.started).valueOf()
