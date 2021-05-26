@@ -6,16 +6,25 @@ function jobKey(job) {
 }
 
 function saveJob(job) {
-  let jobs = JSON.parse(window.localStorage.getItem("bakta-jobs"));
-  if (jobs === null) {
-    jobs = new Set();
-  } else {
-    jobs = new Set(jobs);
-  }
-  const job_token = jobKey(job);
-  jobs.add(job_token);
-  window.localStorage.setItem("bakta-jobs", JSON.stringify(Array.from(jobs)));
+  const jobs = loadJobs();
+  jobs.push(job);
+  saveJobs(jobs);
   return Promise.resolve(job);
+}
+
+function saveJobs(jobs) {
+  const toPersist = jobs.map((j) => jobKey(j));
+  window.localStorage.setItem(
+    "bakta-jobs",
+    JSON.stringify(Array.from(new Set(toPersist)))
+  );
+}
+
+function removeJobs(jobids) {
+  const jobsToKeep = loadJobs().filter(
+    (job) => !jobids.some((id) => id === job.jobID)
+  );
+  saveJobs(jobsToKeep);
 }
 
 function loadJobs() {
@@ -40,6 +49,13 @@ function upload(_api, job, type, data) {
     .upload(url, data)
     .then(expectOk)
     .then(() => Promise.resolve(job));
+}
+
+function removeUnknownJobs(listResult) {
+  const toRemove = listResult.failedJobs
+    .filter((j) => j.jobStatus === "NOT_FOUND")
+    .map((j) => j.jobID);
+  removeJobs(toRemove);
 }
 
 function loadKeys(localJobs, retrievedJobs) {
@@ -130,9 +146,10 @@ const BaktaService = {
       /** Retrieves a list of all known jobs */
       jobs: function() {
         let _jobs = loadJobs();
-        return _api
-          .list({ jobs: _jobs })
-          .then((jobs) => Promise.resolve(loadKeys(_jobs, jobs.jobs)));
+        return _api.list({ jobs: _jobs }).then((jobs) => {
+          removeUnknownJobs(jobs);
+          return Promise.resolve(loadKeys(_jobs, jobs.jobs));
+        });
       },
       job: function(job) {
         return _api
