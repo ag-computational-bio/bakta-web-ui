@@ -21,7 +21,7 @@ export default {
     return {
       options: [
         { value: "UNKNOWN", label: "?" },
-        { value: "c", label: "cicular" },
+        { value: "c", label: "circular" },
         { value: "l", label: "linear" },
       ],
     };
