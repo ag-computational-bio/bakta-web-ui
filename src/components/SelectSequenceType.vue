@@ -1,13 +1,14 @@
 <template>
   <select
     class="form-select"
+    ref="select"
     :id="id"
-    @change="$emit('update:modelValue', $event.srcElement.value)"
+    @change="emitChange($event.srcElement.value)"
     :value="modelValue"
   >
     <option
-      v-for="item in options"
-      :selected="item.value === def ? true : false"
+      v-for="item in visibleOptions"
+      :selected="item.value === selectedOption ? true : false"
       :key="item.value"
       :value="item.value"
     >
@@ -28,15 +29,40 @@ export default {
     };
   },
   props: {
+    complete: { type: Boolean, default: false },
     def: {
       type: String,
-      default: "UNKNOWN",
+      default: "contig",
     },
     id: {
       type: String,
       default: "",
     },
     modelValue: { type: String },
+  },
+  computed: {
+    visibleOptions() {
+      if (this.complete) {
+        return this.options.slice(1, 3);
+      }
+      return this.options;
+    },
+    selectedOption() {
+      if (this.options.some((x) => x.value === this.modelValue)) {
+        return this.modelValue;
+      } else {
+        if (this.complete) {
+          return "chromosome";
+        } else {
+          return this.def;
+        }
+      }
+    },
+  },
+  methods: {
+    emitChange(newValue) {
+      this.$emit("update:modelValue", newValue);
+    },
   },
   emits: ["update:modelValue"],
 };

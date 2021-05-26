@@ -6,8 +6,8 @@
     :value="modelValue"
   >
     <option
-      v-for="item in options"
-      :selected="item.value === def ? true : false"
+      v-for="item in visibleOptions"
+      :selected="item.value === selectedOption ? true : false"
       :key="item.value"
       :value="item.value"
     >
@@ -27,6 +27,7 @@ export default {
     };
   },
   props: {
+    complete: { type: Boolean, default: false },
     def: {
       type: String,
       default: "UNKNOWN",
@@ -36,6 +37,25 @@ export default {
       default: "",
     },
     modelValue: { type: String },
+  },
+  computed: {
+    visibleOptions() {
+      if (this.complete) {
+        return this.options.slice(1, 3);
+      }
+      return this.options;
+    },
+    selectedOption() {
+      if (this.options.some((x) => x.value === this.modelValue)) {
+        return this.modelValue;
+      } else {
+        if (this.complete) {
+          return "c";
+        } else {
+          return this.def;
+        }
+      }
+    },
   },
   emits: ["update:modelValue"],
 };

@@ -182,8 +182,18 @@
                       placeholder="Optional..."
                     />
                   </td>
-                  <td><select-sequence-type v-model="item.type" /></td>
-                  <td><select-topology v-model="item.topology" /></td>
+                  <td>
+                    <select-sequence-type
+                      v-model="item.type"
+                      :complete="options.completeGenome"
+                    />
+                  </td>
+                  <td>
+                    <select-topology
+                      v-model="item.topology"
+                      :complete="options.completeGenome"
+                    />
+                  </td>
                   <td>
                     <input
                       type="text"
@@ -361,6 +371,18 @@ export default {
           this.options.genus = this.genus_species;
           this.options.species = "";
         }
+      }
+    },
+    "options.completeGenome": function() {
+      if (this.options.completeGenome) {
+        const possibleTypes = ["chromosome", "plasmid"];
+        this.replicons
+          .filter((x) => !possibleTypes.some((y) => x.type === y))
+          .forEach((x) => (x.type = "chromosome"));
+        const possibleTopologies = ["c"];
+        this.replicons
+          .filter((x) => !possibleTopologies.some((y) => x.topology === y))
+          .forEach((x) => (x.topology = "c"));
       }
     },
   },
