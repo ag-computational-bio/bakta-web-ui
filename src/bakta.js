@@ -167,7 +167,10 @@ const BaktaService = {
             }
             if (includeLocalJobs) {
               return Promise.resolve(
-                mergeJobs(_jobs, loadKeys(_jobs, jobs.jobs))
+                mergeJobs(
+                  _jobs,
+                  loadKeys(_jobs, [...jobs.jobs, ...jobs.failedJobs])
+                )
               );
             } else {
               return Promise.resolve(loadKeys(_jobs, jobs.jobs));

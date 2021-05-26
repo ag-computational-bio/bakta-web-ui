@@ -2,7 +2,7 @@
   <page-header page="Jobs" />
   <div class="container flex-grow-1">
     <div class="d-flex flex-row-reverse row-cols-lg-auto g-3 align-items-end">
-      <div class="col-12">
+      <div class="col-12 ms-4 me-4">
         <div class="form-check">
           <input
             class="form-check-input"
@@ -12,6 +12,18 @@
           <label class="form-check-label" for="flexCheckDefault">
             Hide jobs not found on server
           </label>
+        </div>
+      </div>
+    </div>
+    <div
+      v-if="hasNotFound"
+      class="d-flex flex-row-reverse row-cols-lg-auto g-3 align-items-end"
+    >
+      <div class="col-12 ms-4 me-4">
+        <div class="col-12">
+          <button class="btn btn-light btn-sm" @click="udpateJobs(true)">
+            Delete jobs not found on server
+          </button>
         </div>
       </div>
     </div>
@@ -72,6 +84,9 @@ export default {
     hasJobs: function() {
       return this.jobs != null && this.jobs.length > 0;
     },
+    hasNotFound: function() {
+      return this.jobs.some((j) => j.jobStatus === "NOT_FOUND");
+    },
   },
   watch: {
     hideLocalJobs: function() {
@@ -79,10 +94,10 @@ export default {
     },
   },
   methods: {
-    udpateJobs: function() {
+    udpateJobs: function(deleteUnknown = false) {
       let vm = this;
       vm.loading = true;
-      this.$bakta.jobs(!this.hideLocalJobs).then((x) => {
+      this.$bakta.jobs(!this.hideLocalJobs, deleteUnknown).then((x) => {
         vm.jobs = x.sort(
           (a, b) =>
             new Date(b.started).valueOf() - new Date(a.started).valueOf()
@@ -93,7 +108,13 @@ export default {
     },
     planRefresh: function() {
       if (
-        this.jobs.every((j) => this.isSuccessful(j) || j.jobStatus === "ERROR")
+        this.jobs.every(
+          (j) =>
+            this.isSuccessful(j) ||
+            j.jobStatus === "ERROR" ||
+            j.jobStatus === "UNAUTHORIZED" ||
+            j.jobStatus === "NOT_FOUND"
+        )
       ) {
         // all jobs are in finished state. No polling needed anymore
         console.debug(
