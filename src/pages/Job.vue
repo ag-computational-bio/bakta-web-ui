@@ -76,7 +76,7 @@ export default {
     Notification,
   },
   computed: {},
-  data: function () {
+  data: function() {
     return {
       job: null,
       result: null,
@@ -93,36 +93,41 @@ export default {
     };
   },
   methods: {
-    handleError: function (err) {
-      this.error = err
+    handleError: function(err) {
+      this.error = err;
     },
-    udpateJob: function () {
+    udpateJob: function() {
       let token = this.$router.currentRoute.value.params.id;
       if (token) {
         let job = JSON.parse(atob(token));
         let vm = this;
-        this.$bakta.job(job).then((x) => {
-          vm.job = x[0];
-          vm.loadResult({ jobID: vm.job.jobID, secret: vm.job.secret });
-          this.planRefresh();
-        })
-        .catch(this.handleError);
+        this.$bakta
+          .job(job)
+          .then((x) => {
+            vm.job = x[0];
+            vm.loadResult({ jobID: vm.job.jobID, secret: vm.job.secret });
+            this.planRefresh();
+          })
+          .catch(this.handleError);
       }
     },
-    loadResult: function (job) {
+    loadResult: function(job) {
       this.$bakta
         .result(job)
         .then((x) => (this.result = x))
         .then(() => {
-          if (this.result && this.result.ResultFiles && this.result.ResultFiles.JSON) {
-
+          if (
+            this.result &&
+            this.result.ResultFiles &&
+            this.result.ResultFiles.JSON
+          ) {
             this.loadData(this.result.ResultFiles.JSON);
           } else {
-            this.error = "No result found for job."
+            this.error = "No result found for job.";
           }
         });
     },
-    loadData: function (url) {
+    loadData: function(url) {
       this.loadingProgress.enabled = true;
       this.loadingProgress.value = 0;
       const vm = this;
@@ -143,8 +148,20 @@ export default {
           )
         )
         .then((stream) => new Response(stream))
-        .then((response) => response.json())
-        .then((text) => (vm.data = text))
+        .then((response) => response.text())
+        .then((text) => {
+          try {
+            vm.data = JSON.parse(text);
+            return Promise.resolve(vm.data);
+          } catch (ex) {
+            try {
+              vm.data = JSON.parse(text.replace(/:\s?NaN/g, ": null"));
+              return Promise.resolve(vm.data);
+            } catch (ex2) {
+              return Promise.reject(ex2);
+            }
+          }
+        })
         .then(() => (this.loadingProgress.enabled = false))
         .catch(vm.setError);
     },
@@ -152,7 +169,7 @@ export default {
       this.error = err;
       this.loadingProgress.enabled = false;
     },
-    planRefresh: function () {
+    planRefresh: function() {
       if (
         this.job.jobStatus === "SUCCESSFULL" ||
         this.job.jobStatus === "SUCCESFULL" ||
@@ -172,10 +189,9 @@ export default {
       }
     },
   },
-  mounted: function () {
+  mounted: function() {
     this.udpateJob();
   },
 };
 </script>
-<style scoped>
-</style>
+<style scoped></style>
