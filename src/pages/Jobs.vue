@@ -5,6 +5,7 @@
       <thead>
         <tr>
           <th>Id</th>
+          <th>Jobname</th>
           <th>Submission</th>
           <th>Started</th>
           <th>Status</th>
@@ -14,6 +15,7 @@
       <tbody v-if="!loading">
         <tr v-for="item in jobs" :key="item.key">
           <td>{{ item.jobID }}</td>
+          <td>{{ item.name }}</td>
           <td>{{ item.started }}</td>
           <td>{{ item.updated }}</td>
           <td>{{ item.jobStatus }}</td>
@@ -43,11 +45,11 @@ import PageFooter from "@/components/PageFooter.vue";
 export default {
   name: "Jobs",
   components: { PageHeader, PageFooter },
-  data: function () {
+  data: function() {
     return { jobs: [], pollInterval: 5000, loading: true };
   },
   methods: {
-    udpateJobs: function () {
+    udpateJobs: function() {
       let vm = this;
       vm.loading = true;
       this.$bakta.jobs().then((x) => {
@@ -59,7 +61,7 @@ export default {
         vm.loading = false;
       });
     },
-    planRefresh: function () {
+    planRefresh: function() {
       if (
         this.jobs.every((j) => this.isSuccessful(j) || j.jobStatus === "ERROR")
       ) {
@@ -76,11 +78,11 @@ export default {
         }, this.pollInterval);
       }
     },
-    isSuccessful: function (job) {
+    isSuccessful: function(job) {
       return job.jobStatus === "SUCCESSFULL" || job.jobStatus === "SUCCESFULL";
     },
   },
-  mounted: function () {
+  mounted: function() {
     this.udpateJobs();
   },
 };
