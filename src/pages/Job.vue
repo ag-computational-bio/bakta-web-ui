@@ -10,10 +10,10 @@
 
     <div v-if="!loadingProgress.enabled && !error && data">
       <div class="mt-5">
-        <h4 data-bs-toggle="collapse" data-bs-target="#stats" role="button">
+        <h4>
           Job statistics
         </h4>
-        <div class="collapse.show" id="stats">
+        <div class="" id="stats">
           <div class="card card-body">
             <bakta-stats :data="data" :job="result" />
           </div>
@@ -21,29 +21,20 @@
       </div>
       <hr />
       <div class="row">
-        <h4
-          data-bs-toggle="collapse"
-          data-bs-target="#genomeBrowser"
-          role="button"
-          @click="$refs.genomeview.refresh()"
-        >
+        <h4>
           Genomeviewer
         </h4>
-        <div class="collapse" id="genomeBrowser">
+        <div class="" id="genomeBrowser">
           <div class="card card-body">
             <bakta-genome-viewer ref="genomeview" :data="data" />
           </div>
         </div>
       </div>
       <hr />
-      <h4
-        data-bs-toggle="collapse"
-        data-bs-target="#annotationTable"
-        role="button"
-      >
+      <h4>
         Annotations
       </h4>
-      <div class="collapse" id="annotationTable">
+      <div class="" id="annotationTable">
         <div class="card card-body">
           <bakta-annotation-table :data="data" />
         </div>
