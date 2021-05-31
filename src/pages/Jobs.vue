@@ -33,7 +33,7 @@
           <th>Id</th>
           <th>Jobname</th>
           <th>Submission</th>
-          <th>Started</th>
+          <th>Last updated</th>
           <th>Status</th>
           <th>Link</th>
         </tr>
@@ -42,8 +42,8 @@
         <tr v-for="item in jobs" :key="item.key">
           <td>{{ item.jobID }}</td>
           <td>{{ item.name }}</td>
-          <td>{{ item.started }}</td>
-          <td>{{ item.updated }}</td>
+          <td>{{ formatDateTime(item.started) }}</td>
+          <td>{{ formatDateTime(item.updated) }}</td>
           <td>{{ item.jobStatus }}</td>
           <td>
             <router-link
@@ -94,6 +94,21 @@ export default {
     },
   },
   methods: {
+    formatDateTime: function(datestring) {
+      if (datestring) {
+        try {
+          const date = Date.parse(datestring);
+          return new Intl.DateTimeFormat([], {
+            dateStyle: "short",
+            timeStyle: "short",
+          }).format(date);
+        } catch (err) {
+          return `Unable to format: '${datestring}'. Error: ${err}`;
+        }
+      } else {
+        return "";
+      }
+    },
     udpateJobs: function(deleteUnknown = false) {
       let vm = this;
       vm.loading = true;
