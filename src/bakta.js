@@ -56,6 +56,7 @@ function removeUnknownJobs(listResult) {
     .filter((j) => j.jobStatus === "NOT_FOUND")
     .map((j) => j.jobID);
   removeJobs(toRemove);
+  return toRemove;
 }
 
 function loadKeys(localJobs, retrievedJobs) {
@@ -162,15 +163,16 @@ const BaktaService = {
         let _jobs = loadJobs();
         if (_jobs.length > 0) {
           return _api.list({ jobs: _jobs }).then((jobs) => {
+            let removedJobs = [];
             if (removeUnknownLocalJobs) {
-              removeUnknownJobs(jobs);
+              removedJobs = removeUnknownJobs(jobs);
             }
             if (includeLocalJobs) {
               return Promise.resolve(
                 mergeJobs(
                   _jobs,
                   loadKeys(_jobs, [...jobs.jobs, ...jobs.failedJobs])
-                )
+                ).filter((j) => !removedJobs.some((i) => i === j.jobID))
               );
             } else {
               return Promise.resolve(loadKeys(_jobs, jobs.jobs));

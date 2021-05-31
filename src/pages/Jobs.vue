@@ -1,32 +1,6 @@
 <template>
   <page-header page="Jobs" />
   <div class="container flex-grow-1">
-    <div class="d-flex flex-row-reverse row-cols-lg-auto g-3 align-items-end">
-      <div class="col-12 ms-4 me-4">
-        <div class="form-check">
-          <input
-            class="form-check-input"
-            type="checkbox"
-            v-model="hideLocalJobs"
-          />
-          <label class="form-check-label" for="flexCheckDefault">
-            Hide jobs not found on server
-          </label>
-        </div>
-      </div>
-    </div>
-    <div
-      v-if="hasNotFound"
-      class="d-flex flex-row-reverse row-cols-lg-auto g-3 align-items-end"
-    >
-      <div class="col-12 ms-4 me-4">
-        <div class="col-12">
-          <button class="btn btn-light btn-sm" @click="udpateJobs(true)">
-            Delete jobs not found on server
-          </button>
-        </div>
-      </div>
-    </div>
     <table class="table table-striped">
       <thead>
         <tr>
@@ -56,7 +30,22 @@
         </tr>
       </tbody>
     </table>
+
     <div v-if="!hasJobs">No jobs found</div>
+
+    <div
+      v-if="hasNotFound"
+      class="d-flex flex-row-reverse row-cols-lg-auto align-items-end"
+    >
+      <div class="col-12 ">
+        <div class="col-12">
+          <button class="btn btn-secondary " @click="udpateJobs(true)">
+            Remove outdated jobs from list
+          </button>
+        </div>
+      </div>
+    </div>
+
     <div class="row d-flex justify-content-center" v-if="loading">
       <div class="spinner-border text-secondary" role="status">
         <span class="visually-hidden">Loading...</span>
@@ -76,8 +65,7 @@ export default {
     return {
       jobs: [],
       pollInterval: 5000,
-      loading: true,
-      hideLocalJobs: true,
+      hideLocalJobs: false,
       timeout: null,
     };
   },
@@ -98,7 +86,7 @@ export default {
     formatState: function(state) {
       switch (state) {
         case "NOT_FOUND":
-          return "outdated";
+          return "OUTDATED";
       }
       return state;
     },
