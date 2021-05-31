@@ -100,7 +100,7 @@ export default {
         try {
           const date = Date.parse(datestring);
           return new Intl.DateTimeFormat([], {
-            dateStyle: "short",
+            dateStyle: "medium",
             timeStyle: "short",
           }).format(date);
         } catch (err) {
