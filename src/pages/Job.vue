@@ -90,16 +90,27 @@ export default {
     udpateJob: function() {
       let token = this.$router.currentRoute.value.params.id;
       if (token) {
-        let job = JSON.parse(atob(token));
-        let vm = this;
-        this.$bakta
-          .job(job)
-          .then((x) => {
-            vm.job = x[0];
-            vm.loadResult({ jobID: vm.job.jobID, secret: vm.job.secret });
-            this.planRefresh();
-          })
-          .catch(this.handleError);
+        try {
+          let job = JSON.parse(atob(token));
+          let vm = this;
+          this.$bakta
+            .job(job)
+            .then((x) => {
+              if (x.length > 0) {
+                vm.job = x[0];
+                vm.loadResult({ jobID: vm.job.jobID, secret: vm.job.secret });
+                this.planRefresh();
+              } else {
+                this.loadingProgress.enabled = false;
+                vm.handleError("Job not found.");
+              }
+            })
+            .catch(this.handleError);
+        } catch (err) {
+          this.loadingProgress.enabled = false;
+          console.error("Job token is not valid json.", atob(token));
+          this.handleError("Can't process job token. Invalid format.");
+        }
       }
     },
     loadResult: function(job) {
