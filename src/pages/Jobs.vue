@@ -44,7 +44,7 @@
           <td>{{ item.name }}</td>
           <td>{{ formatDateTime(item.started) }}</td>
           <td>{{ formatDateTime(item.updated) }}</td>
-          <td>{{ item.jobStatus }}</td>
+          <td>{{ formatState(item.jobStatus) }}</td>
           <td>
             <router-link
               v-if="isSuccessful(item)"
@@ -95,6 +95,13 @@ export default {
     },
   },
   methods: {
+    formatState: function(state) {
+      switch (state) {
+        case "NOT_FOUND":
+          return "outdated";
+      }
+      return state;
+    },
     formatDateTime: function(datestring) {
       if (datestring) {
         try {
