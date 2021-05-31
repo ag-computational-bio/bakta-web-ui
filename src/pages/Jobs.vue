@@ -78,6 +78,7 @@ export default {
       pollInterval: 5000,
       loading: true,
       hideLocalJobs: true,
+      timeout: null,
     };
   },
   computed: {
@@ -136,10 +137,19 @@ export default {
           "All jobs finished or failed, no need to refresh",
           this.jobs
         );
+        this.timeout = null;
       } else {
+        if (this.timeout) {
+          console.debug(
+            "Job lookup already scheduled. Canceling",
+            this.timeout
+          );
+          window.clearTimeout(this.timeout);
+        }
         console.debug("Jobs still running, need to refresh", this.jobs);
         // trigger reload
-        window.setTimeout(() => {
+        this.timeout = window.setTimeout(() => {
+          this.timeout = null;
           this.udpateJobs();
         }, this.pollInterval);
       }
