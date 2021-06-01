@@ -48,11 +48,12 @@ export default {
   props: {
     active: String,
   },
-  data: function () {
+  data: function() {
     return {
       navElements: [
         { label: "Submit", href: "/submit", local: true },
         { label: "Jobs", href: "/jobs", local: true },
+        { label: "Viewer", href: "/viewer", local: true },
         { label: "Info", href: "/info", local: true },
         { label: "Download", href: "/download", local: true },
         {
@@ -64,7 +65,7 @@ export default {
     };
   },
   computed: {
-    nav: function () {
+    nav: function() {
       let nav = [];
       for (let i of this.navElements) {
         nav.push({

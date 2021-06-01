@@ -7,7 +7,7 @@
       <display-tuple label="Genome size:" :value="size" />
     </div>
 
-    <div class="col-md-6">
+    <div v-if="job" class="col-md-6">
       <h5>Runtime</h5>
       <display-tuple label="Start:" :value="started" />
       <display-tuple label="Stop:" :value="ended" />
@@ -80,7 +80,7 @@
         <div class="col-md-3"></div>
       </div>
     </div>
-    <div class="col-md-2 text-end">
+    <div v-if="job" class="col-md-2 text-end">
       <h5>Download</h5>
       <div v-for="d in downloads" :key="d.key" class="row">
         <a :href="job.ResultFiles[d.key]">{{ d.label }}</a>
@@ -107,28 +107,28 @@ export default {
     },
   },
   computed: {
-    name: function () {
+    name: function() {
       return bakta.genomeName(this.data);
     },
-    size: function () {
+    size: function() {
       return bakta.formattedSize(this.data);
     },
-    featureCount: function () {
+    featureCount: function() {
       return bakta.featureCount(this.data);
     },
-    sequencesCount: function () {
+    sequencesCount: function() {
       return bakta.sequencesCountString(this.data);
     },
-    started: function () {
+    started: function() {
       return this.formatDate(this.job.started);
     },
-    ended: function () {
+    ended: function() {
       return this.formatDate(this.job.updated);
     },
-    duration: function () {
+    duration: function() {
       return this.formatDuration(this.job.started, this.job.updated);
     },
-    downloads: function () {
+    downloads: function() {
       const order = {
         TSV: { label: "tsv", position: 0 },
         TSVHypothetical: { label: "tsv (hypothetical)", position: 5 },
@@ -139,11 +139,12 @@ export default {
         FNA: { label: "fna", position: 40 },
         JSON: { label: "json", position: 50 },
       };
-      let resultFiles = this.job && this.job.ResultFiles ? this.job.ResultFiles : {};
+      let resultFiles =
+        this.job && this.job.ResultFiles ? this.job.ResultFiles : {};
 
       let l = [];
       for (let k of Object.keys(resultFiles)) {
-        console.log(k)
+        console.log(k);
         if (k in order) {
           l.push({ key: k, ...order[k] });
         } else {
@@ -153,7 +154,7 @@ export default {
       return l.sort((a, b) => a.position - b.position);
     },
   },
-  data: function () {
+  data: function() {
     return {};
   },
   methods: {
@@ -169,9 +170,8 @@ export default {
       );
     },
   },
-  mounted: function () {},
+  mounted: function() {},
 };
 </script>
 
-<style>
-</style>
+<style></style>

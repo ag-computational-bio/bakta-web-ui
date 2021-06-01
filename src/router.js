@@ -1,11 +1,12 @@
 import { createWebHistory, createRouter } from "vue-router";
-import Download from '@/pages/Download'
-import Submit from '@/pages/Submit'
-import Jobs from '@/pages/Jobs'
-import Job from '@/pages/Job'
-import Info from '@/pages/Info'
+import Download from "@/pages/Download";
+import Submit from "@/pages/Submit";
+import Jobs from "@/pages/Jobs";
+import Job from "@/pages/Job";
+import Viewer from "@/pages/Viewer";
+import Info from "@/pages/Info";
 
-import NotFound from '@/pages/NotFound'
+import NotFound from "@/pages/NotFound";
 
 const routes = [
   {
@@ -34,14 +35,19 @@ const routes = [
     component: Job,
   },
   {
+    path: "/viewer",
+    name: "Viewer",
+    component: Viewer,
+  },
+  {
     path: "/submit",
     name: "Submit",
     component: Submit,
   },
   {
     path: "/:catchAll(.*)",
-    component: NotFound
-  }
+    component: NotFound,
+  },
 ];
 
 const router = createRouter({
