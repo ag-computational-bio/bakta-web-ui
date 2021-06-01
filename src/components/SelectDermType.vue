@@ -21,8 +21,8 @@ export default {
     return {
       options: [
         { value: "UNKNOWN", label: "?" },
-        { value: "monoderm", label: "Monoderm" },
-        { value: "diderm", label: "Diderm" },
+        { value: "MONODERM", label: "Monoderm" },
+        { value: "DIDERM", label: "Diderm" },
       ],
     };
   },
