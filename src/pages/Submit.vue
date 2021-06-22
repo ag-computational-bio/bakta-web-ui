@@ -279,9 +279,13 @@ export default {
     fastaFileChanged: function(name, file) {
       let vm = this;
       this.sequenceFile = file.item(0);
-      this.readTextFile(this.sequenceFile)
-        .then((r) => vm.setSequence(r))
-        .catch((e) => (vm.error = e));
+      if (this.sequenceFile === null) {
+        vm.setSequence(null);
+      } else {
+        this.readTextFile(this.sequenceFile)
+          .then((r) => vm.setSequence(r))
+          .catch((e) => (vm.error = e));
+      }
     },
     parseAndSetSeqquence: function() {
       let seq = fasta.parse(this.sequence);
