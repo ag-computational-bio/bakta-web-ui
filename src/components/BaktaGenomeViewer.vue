@@ -14,12 +14,12 @@ export default {
     data: { type: Object, default: () => {} },
   },
   watch: {
-    data: function () {
+    data: function() {
       this.setupIgv();
     },
   },
   computed: {
-    features: function () {
+    features: function() {
       return this.data.features.map((x) => {
         const feature = {
           chr: x.contig,
@@ -43,35 +43,35 @@ export default {
         return feature;
       });
     },
-    seqEntries: function () {
+    seqEntries: function() {
       return this.data.sequences.map((x) => {
         return { name: x.id, seq: x.sequence };
       });
     },
-    fasta: function () {
+    fasta: function() {
       return fasta.write(this.seqEntries);
     },
-    fastaUrl: function () {
+    fastaUrl: function() {
       const blob = new Blob([this.fasta], { type: "text/plain" });
       return URL.createObjectURL(blob);
     },
   },
-  data: function () {
+  data: function() {
     return {
       igv: null,
     };
   },
   methods: {
-    setupIgv: function () {
+    setupIgv: function() {
       const track = (name, types) => ({ name: name, types: types });
       const featuretracks = [
-        track("cds/sorf", ["cds", "sorf"]),
+        track("CDS/sORF", ["cds", "sorf"]),
         track("tRNA/tmRNA/rRNA", ["tRNA", "tmRNA", "rRNA"]),
         track("ncRNA", ["ncRNA"]),
         track("ncRNA-region", ["ncRNA-region"]),
-        track("crispr", ["crispr"]),
-        track("gap", ["gap"]),
-        track("ori", ["oriC", "oriV", "oriT"]),
+        track("CRISPR", ["crispr"]),
+        track("Gap", ["gap"]),
+        track("oriC/oriV/oriT", ["oriC", "oriV", "oriT"]),
       ];
       const tracks = [];
       for (let t of featuretracks) {
@@ -98,21 +98,21 @@ export default {
         console.log("IGV browser created");
       });
     },
-    refresh: function () {
+    refresh: function() {
       if (this.igv) this.igv.visibilityChange();
     },
-    lookupName: function (feature) {
+    lookupName: function(feature) {
       if (feature.product) return feature.product;
       else if (feature.gene) return feature.gene;
       else return feature.locus;
     },
-    lookupCogLabels: function (coglist) {
+    lookupCogLabels: function(coglist) {
       return cog.lookupCogLabels(coglist).join("<br>");
     },
     lookupCog(feature) {
       return bakta.lookupCogFunctionalCategories(feature);
     },
-    color: function (feature) {
+    color: function(feature) {
       if (feature.type === "cds")
         return cog.lookupCogColor(this.lookupCog(feature));
       if (feature.type === "tRNA") return "rgb(255,0,0)";
@@ -120,11 +120,10 @@ export default {
       return "rgb(100,0,0)";
     },
   },
-  mounted: function () {
+  mounted: function() {
     this.setupIgv();
   },
 };
 </script>
 
-<style>
-</style>
+<style></style>
