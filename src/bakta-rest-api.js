@@ -2,14 +2,17 @@ import { expectJson } from "@/fetch-helper";
 
 const api = function(options) {
   function post(url, body) {
+    const headers = {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    };
+    if (options.token) {
+      headers.Authorization = options.token;
+    }
     return window
       .fetch(url, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          Authorization: options.token,
-        },
+        headers: headers,
         body: body,
       })
       .then(expectJson);
@@ -37,12 +40,16 @@ const api = function(options) {
       });
     },
     version: function() {
+      const headers = {
+        Accept: "application/json",
+        Authorization: options.token,
+      };
+      if (options.token) {
+        headers.Authorization = options.token;
+      }
       return window
         .fetch(options.api + "/api/v1/version", {
-          headers: {
-            Accept: "application/json",
-            Authorization: options.token,
-          },
+          headers: headers,
         })
         .then(expectJson);
     },
