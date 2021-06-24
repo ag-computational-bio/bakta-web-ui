@@ -3,7 +3,7 @@
     <div class="container">
       <hr />
       <a href="http://www.computational.bio/">
-        <img src="@/assets/logo-cb.svg" alt="Computational biolgogy logo" />
+        <img src="@/assets/logo-cb.svg" alt="Computational biology logo" />
       </a>
     </div>
   </footer>
