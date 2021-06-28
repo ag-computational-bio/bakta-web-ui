@@ -399,7 +399,9 @@ export default {
     },
     request() {
       return {
-        jobname: this.sequenceFile.name,
+        jobname: this.sequenceFile
+          ? this.sequenceFile.name
+          : "Manually entered sequence(s)",
         sequence: this.sequence,
         prodigal: this.prodigalTrainingFile,
         replicons: this.replicons,
