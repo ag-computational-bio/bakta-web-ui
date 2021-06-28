@@ -288,20 +288,26 @@ export default {
       }
     },
     parseAndSetSeqquence: function() {
-      let seq = fasta.parse(this.sequence);
-      this.replicons = seq.map(function(x) {
-        return {
-          id: x.name,
-          length: x.seq.length,
-          newid: "",
-          type: "contig",
-          topology: "l",
-          name: "",
-        };
-      });
-      this.loading = false;
-      this.validSequenceFile = true;
-      this.error = null;
+      try {
+        let seq = fasta.parse(this.sequence);
+        this.replicons = seq.map(function(x) {
+          return {
+            id: x.name,
+            length: x.seq.length,
+            newid: "",
+            type: "contig",
+            topology: "l",
+            name: "",
+          };
+        });
+        this.loading = false;
+        this.validSequenceFile = true;
+        this.error = null;
+      } catch (e) {
+        this.loading = false;
+        this.validSequenceFile = false;
+        this.error = "Invalid fasta file. Please provide a valid fasta.";
+      }
     },
     readTextFile: function(file) {
       this.loading = true;
