@@ -15,7 +15,7 @@ function init(config) {
 }
 
 window
-  .fetch("config/config.json")
+  .fetch("/config/config.json")
   .then(expectJson)
   .then((j) => init(j))
   .catch(
