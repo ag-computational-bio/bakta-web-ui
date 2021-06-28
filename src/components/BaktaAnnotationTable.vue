@@ -8,6 +8,7 @@
 
 <script>
 import Datatable from "@/components/Datatable.vue";
+import $ from "jquery";
 
 export default {
   name: "BaktaResultView",
@@ -19,7 +20,7 @@ export default {
     },
   },
   computed: {
-    table: function () {
+    table: function() {
       return this.data.features.map((x) => ({
         contig: x.contig || "",
         type: x.type || "",
@@ -44,7 +45,7 @@ export default {
       }));
     },
   },
-  data: function () {
+  data: function() {
     return {
       dataTableConfig: {
         scrollY: "70vh",
@@ -57,20 +58,35 @@ export default {
       },
 
       columns: [
-        { data: "contig", title: "Sequence" },
-        { data: "type", title: "Type" },
-        { data: "start", title: "Start" },
-        { data: "stop", title: "Stop" },
-        { data: "strand", title: "Strand" },
-        { data: "locus", title: "Locus tag" },
-        { data: "product", title: "Product" },
+        {
+          data: "contig",
+          title: "Sequence",
+          render: $.fn.dataTable.render.text(),
+        },
+        { data: "type", title: "Type", render: $.fn.dataTable.render.text() },
+        { data: "start", title: "Start", render: $.fn.dataTable.render.text() },
+        { data: "stop", title: "Stop", render: $.fn.dataTable.render.text() },
+        {
+          data: "strand",
+          title: "Strand",
+          render: $.fn.dataTable.render.text(),
+        },
+        {
+          data: "locus",
+          title: "Locus tag",
+          render: $.fn.dataTable.render.text(),
+        },
+        {
+          data: "product",
+          title: "Product",
+          render: $.fn.dataTable.render.text(),
+        },
         { data: "dbxrefs", title: "DbXrefs" },
       ],
     };
   },
   methods: {},
-  mounted: function () {},
+  mounted: function() {},
 };
 </script>
-<style scoped>
-</style>
+<style scoped></style>
