@@ -378,16 +378,29 @@ export default {
       }
     },
     "options.completeGenome": function() {
+      let possibleTopologies = [];
+      let possibleTypes = [];
+      let newTopology = null;
+      let newType = null;
+
       if (this.options.completeGenome) {
-        const possibleTypes = ["chromosome", "plasmid"];
-        this.replicons
-          .filter((x) => !possibleTypes.some((y) => x.type === y))
-          .forEach((x) => (x.type = "chromosome"));
-        const possibleTopologies = ["c"];
-        this.replicons
-          .filter((x) => !possibleTopologies.some((y) => x.topology === y))
-          .forEach((x) => (x.topology = "c"));
+        possibleTypes = ["chromosome", "plasmid"];
+        possibleTopologies = ["c"];
+        newTopology = "chromosome";
+        newType = "c";
+      } else {
+        possibleTypes = ["contig"];
+        possibleTopologies = ["l"];
+        newTopology = "contig";
+        newType = "l";
       }
+
+      this.replicons
+        .filter((x) => !possibleTypes.some((y) => x.type === y))
+        .forEach((x) => (x.type = newType));
+      this.replicons
+        .filter((x) => !possibleTopologies.some((y) => x.topology === y))
+        .forEach((x) => (x.topology = newTopology));
     },
   },
   computed: {
