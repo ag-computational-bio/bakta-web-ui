@@ -291,6 +291,8 @@ export default {
     parseAndSetSeqquence: function() {
       try {
         let seq = fasta.parse(this.sequence);
+        // fix windows newline characters as the fasta parser has problems to handle them
+        seq.forEach((x) => (x.seq = x.seq.replaceAll("\r", "")));
 
         let valid = validateDna(seq);
         if (valid.valid) {
