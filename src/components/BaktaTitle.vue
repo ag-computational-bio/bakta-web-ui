@@ -2,9 +2,7 @@
   <div>
     <h1>
       Bakta Web
-      <span class="float-end version">
-        ({{ versionString }})
-      </span>
+      <span class="float-end version"> ({{ versionString }}) </span>
     </h1>
     <h3>
       Rapid &amp; standardized annotation of bacterial genomes &amp; plasmids
@@ -20,12 +18,10 @@ export default {
   },
   computed: {
     versionString: function() {
-      if (this.version === null) {
-        return "unknown|unknown"
-      } else {
-        return this.version.toolVersion + "|" + this.version.dbVersion
-      }
-    }
+      const toolVersion = this.version ? this.version.toolVersion : "unknown";
+      const dbVersion = this.version ? this.version.dbVersion : "unknown";
+      return `Bakta-Version: ${toolVersion}| BaktaDB-Version: ${dbVersion}`;
+    },
   },
 };
 </script>
