@@ -20,7 +20,7 @@ export default {
     versionString: function() {
       const toolVersion = this.version ? this.version.toolVersion : "unknown";
       const dbVersion = this.version ? this.version.dbVersion : "unknown";
-      return `Bakta-Version: ${toolVersion}| BaktaDB-Version: ${dbVersion}`;
+      return `Software: ${toolVersion}| DB: ${dbVersion}`;
     },
   },
 };
