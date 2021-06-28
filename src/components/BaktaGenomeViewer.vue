@@ -95,7 +95,6 @@ export default {
       };
       igv.createBrowser(this.$refs.igv, config).then((x) => {
         this.igv = x;
-        console.log("IGV browser created");
       });
     },
     refresh: function() {

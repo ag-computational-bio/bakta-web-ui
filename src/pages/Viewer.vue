@@ -97,11 +97,9 @@ export default {
       this.error = err;
     },
     jsonFileChanged: function(name, file) {
-      console.log(name, file);
       this.loadData(file.item(0));
     },
     loadData: function(file) {
-      console.log(file);
       this.loadingProgress.enabled = true;
       this.loadingProgress.value = 0;
       const vm = this;
@@ -112,7 +110,6 @@ export default {
       var reader = new FileReader();
       reader.onload = function(event) {
         vm.data = JSON.parse(event.target.result);
-        console.log(vm.data);
         vm.loadingProgress.enabled = false;
       };
       reader.readAsText(file);

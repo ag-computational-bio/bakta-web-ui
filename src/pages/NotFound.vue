@@ -17,11 +17,5 @@ export default {
   components: {
     PageHeader,
   },
-  computed: {
-    test: function () {
-      console.log(this);
-      return "test"
-    },
-  },
 };
 </script>

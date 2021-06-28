@@ -14,8 +14,6 @@ import $ from "jquery";
 import "@/external/dataTables.bootstrap5.min.js";
 import "@/external/dataTables.bootstrap5.min.css";
 
-console.log("x");
-
 export default {
   props: {
     tableId: { type: String, default: "datatable" },
@@ -26,26 +24,26 @@ export default {
     },
     configuration: {
       type: Object,
-      default: () => ({ }),
+      default: () => ({}),
     },
   },
-  data: function () {
+  data: function() {
     return {
       datatable: null,
     };
   },
-  mounted: function () {
+  mounted: function() {
     this.initTable();
   },
-  unmounted: function () {
+  unmounted: function() {
     this.destroyTable();
   },
   methods: {
-    destroyTable: function () {
+    destroyTable: function() {
       this.datatable.destroy();
       this.datatable = null;
     },
-    initTable: function () {
+    initTable: function() {
       if (this.columns || this.dataSet) {
         const config = { ...this.configuration };
         config.data = this.dataSet;
@@ -54,17 +52,17 @@ export default {
         this.datatable = $("#" + this.tableId).DataTable(config);
       }
     },
-    reloadData: function () {
+    reloadData: function() {
       this.datatable.clear();
       this.datatable.rows.add(this.dataSet);
       this.datatable.draw();
     },
   },
   watch: {
-    dataSet: function () {
+    dataSet: function() {
       this.reloadData();
     },
-    columns: function () {
+    columns: function() {
       this.destroyTable();
       this.initTable();
     },
@@ -72,5 +70,4 @@ export default {
 };
 </script>
 
-<style>
-</style>
+<style></style>

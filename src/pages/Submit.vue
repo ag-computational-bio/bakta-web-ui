@@ -356,7 +356,6 @@ export default {
     sequence() {
       if (this.sequence !== null) {
         try {
-          console.log("Parsing file");
           this.loading = true;
           this.loadingProgress.title = "Parsing file";
           setTimeout(this.parseAndSetSeqquence, 0);

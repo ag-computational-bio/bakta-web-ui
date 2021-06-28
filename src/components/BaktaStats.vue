@@ -144,7 +144,6 @@ export default {
 
       let l = [];
       for (let k of Object.keys(resultFiles)) {
-        console.log(k);
         if (k in order) {
           l.push({ key: k, ...order[k] });
         } else {
