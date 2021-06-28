@@ -241,6 +241,7 @@ import SelectSequenceType from "../components/SelectSequenceType.vue";
 import Notification from "@/components/Notification";
 import PageFooter from "@/components/PageFooter";
 import fasta from "biojs-io-fasta";
+import { validateDna } from "@/fasta-validator";
 import ProgressBar from "../components/ProgressBar.vue";
 import readFileWithProgress from "@/read-file-with-progress";
 import { RemoteTypeahead } from "@ljelonek-public/vue-bootstrap5-components";
@@ -290,19 +291,27 @@ export default {
     parseAndSetSeqquence: function() {
       try {
         let seq = fasta.parse(this.sequence);
-        this.replicons = seq.map(function(x) {
-          return {
-            id: x.name,
-            length: x.seq.length,
-            newid: "",
-            type: "contig",
-            topology: "l",
-            name: "",
-          };
-        });
-        this.loading = false;
-        this.validSequenceFile = true;
-        this.error = null;
+
+        let valid = validateDna(seq);
+        if (valid.valid) {
+          this.replicons = seq.map(function(x) {
+            return {
+              id: x.name,
+              length: x.seq.length,
+              newid: "",
+              type: "contig",
+              topology: "l",
+              name: "",
+            };
+          });
+          this.loading = false;
+          this.validSequenceFile = true;
+          this.error = null;
+        } else {
+          this.loading = false;
+          this.validSequenceFile = false;
+          this.error = ["Invalid fasta:", ...valid.messages];
+        }
       } catch (e) {
         this.loading = false;
         this.validSequenceFile = false;
