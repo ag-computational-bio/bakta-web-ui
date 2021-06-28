@@ -391,13 +391,13 @@ export default {
       if (this.options.completeGenome) {
         possibleTypes = ["chromosome", "plasmid"];
         possibleTopologies = ["c"];
-        newTopology = "chromosome";
-        newType = "c";
+        newTopology = "c";
+        newType = "chromosome";
       } else {
         possibleTypes = ["contig"];
         possibleTopologies = ["l"];
-        newTopology = "contig";
-        newType = "l";
+        newTopology = "l";
+        newType = "contig";
       }
 
       this.replicons
