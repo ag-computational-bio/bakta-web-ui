@@ -1,4 +1,4 @@
 {
-    "api": "https://restapi.bakta.ingress.rancher2.computational.bio",
-    "token": "d89vgaegfv0aew8cagfwecg"
+  "api": "https://api.bakta.computational.bio",
+  "token": null
 }
