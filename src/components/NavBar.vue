@@ -31,7 +31,9 @@
                     </router-link>
                   </template>
                   <template v-else>
-                    <a class="nav-link" :href="item.href">{{ item.label }}</a>
+                    <a class="nav-link" target="_blank" :href="item.href">{{
+                      item.label
+                    }}</a>
                   </template>
                 </li>
               </template>
