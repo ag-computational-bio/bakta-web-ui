@@ -23,7 +23,9 @@ export default {
       return this.data.features.map((x) => {
         const feature = {
           chr: x.contig,
-          start: x.start,
+          // Bakta coordinates are 1-based closed intervals, but igvjs uses zero based open intervals
+          // so we need to transform them here
+          start: x.start - 1,
           end: x.stop,
           strand: x.strand,
           type: x.type,
