@@ -20,30 +20,11 @@ export default {
   },
   computed: {
     features: function() {
-      return this.data.features.map((x) => {
-        const feature = {
-          chr: x.contig,
-          // Bakta coordinates are 1-based closed intervals, but igvjs uses zero based open intervals
-          // so we need to transform them here
-          start: x.start - 1,
-          end: x.stop,
-          strand: x.strand,
-          type: x.type,
-          color: this.color(x),
-        };
-
-        if ("locus" in x) feature.locus = x.locus || "";
-        if ("gene" in x) feature.gene = x.gene || "";
-
-        if ("product" in x) feature.product = x.product || "";
-        if ("product" in x) feature.name = x.product || "";
-        if ("cds" === x.type) {
-          const cogs = this.lookupCog(x);
-          if (cogs.length > 0) feature.cog = cog.lookupCogLabels(cogs);
-        }
-
-        return feature;
-      });
+      return this.data.features
+        .map((x) => {
+          return this.createFeatures(x, this.data.sequences);
+        })
+        .flat();
     },
     seqEntries: function() {
       return this.data.sequences.map((x) => {
@@ -98,6 +79,38 @@ export default {
       igv.createBrowser(this.$refs.igv, config).then((x) => {
         this.igv = x;
       });
+    },
+    createFeatures: function(baktaEntry, sequences) {
+      const feature = {
+        chr: baktaEntry.contig,
+        // Bakta coordinates are 1-based closed intervals, but igvjs uses zero based open intervals
+        // so we need to transform them here
+        start: baktaEntry.start - 1,
+        end: baktaEntry.stop,
+        strand: baktaEntry.strand,
+        type: baktaEntry.type,
+        color: this.color(baktaEntry),
+      };
+
+      if ("locus" in baktaEntry) feature.locus = baktaEntry.locus || "";
+      if ("gene" in baktaEntry) feature.gene = baktaEntry.gene || "";
+
+      if ("product" in baktaEntry) feature.product = baktaEntry.product || "";
+      if ("product" in baktaEntry) feature.name = baktaEntry.product || "";
+      if ("cds" === baktaEntry.type) {
+        const cogs = this.lookupCog(baktaEntry);
+        if (cogs.length > 0) feature.cog = cog.lookupCogLabels(cogs);
+      }
+
+      // split into two feature when end < start
+      if (baktaEntry.stop < baktaEntry.start) {
+        const seq = sequences.filter((s) => baktaEntry.contig === s.id)[0];
+        return [
+          { ...feature, start: feature.start, end: seq.length },
+          { ...feature, start: 0, end: feature.end },
+        ];
+      }
+      return feature;
     },
     refresh: function() {
       if (this.igv) this.igv.visibilityChange();
