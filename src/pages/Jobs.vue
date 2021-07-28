@@ -150,12 +150,20 @@ export default {
         }, this.pollInterval);
       }
     },
+    cancelRefresh: function() {
+      if (this.timeout) {
+        window.clearTimeout(this.timeout);
+      }
+    },
     isSuccessful: function(job) {
       return job.jobStatus === "SUCCESSFULL" || job.jobStatus === "SUCCESFULL";
     },
   },
   mounted: function() {
     this.udpateJobs();
+  },
+  unmounted: function() {
+    this.cancelRefresh();
   },
 };
 </script>
