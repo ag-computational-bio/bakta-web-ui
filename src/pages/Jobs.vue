@@ -67,6 +67,7 @@ export default {
       pollInterval: 5000,
       hideLocalJobs: false,
       timeout: null,
+      loading: false,
     };
   },
   computed: {
