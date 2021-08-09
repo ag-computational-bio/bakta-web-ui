@@ -75,6 +75,7 @@ export default {
           tracks: tracks,
           wholeGenomeView: false,
         },
+        loadDefaultGenomes: false
       };
       igv.createBrowser(this.$refs.igv, config).then((x) => {
         this.igv = x;
