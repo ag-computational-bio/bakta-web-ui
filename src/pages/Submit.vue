@@ -98,6 +98,17 @@
                 Keep contig headers
               </label>
             </div>
+            <div class="form-check">
+              <input
+                class="form-check-input"
+                type="checkbox"
+                v-model="options.compliant"
+                id="keep-headers"
+              />
+              <label class="form-check-label" for="keep-headers">
+                INSDC compliant output
+              </label>
+            </div>
           </div>
           <div class="col">
             <label class="form-label" for="min-contig-length">
@@ -457,6 +468,7 @@ export default {
         strain: "",
         locus: "",
         locus_tag: "",
+        compliant: false,
       },
       replicons: [],
       submitting: false,
