@@ -15,7 +15,7 @@
     </div>
   </div>
 
-  <div class="row">
+  <div class="row mb-5">
     <div class="col-md-10">
       <h5>Output</h5>
       <div class="row">
@@ -80,11 +80,15 @@
         <div class="col-md-3"></div>
       </div>
     </div>
-    <div v-if="job" class="col-md-2 text-end">
-      <h5>Download</h5>
-      <div v-for="d in downloads" :key="d.key" class="row">
-        <a :href="job.ResultFiles[d.key]">{{ d.label }}</a>
-      </div>
+  </div>
+  <div v-if="job" class="row ">
+    <h5>Downloads</h5>
+    <div class="col-12">
+      <template v-for="d in downloads" :key="d.key" class="text-no-wrap">
+        <a :href="job.ResultFiles[d.key]">
+          <span class="me-3">{{ d.label }}</span>
+        </a>
+      </template>
     </div>
   </div>
 </template>
@@ -131,13 +135,15 @@ export default {
     downloads: function() {
       const order = {
         TSV: { label: "tsv", position: 0 },
-        TSVHypothetical: { label: "tsv (hypothetical)", position: 5 },
         GFF3: { label: "gff3", position: 10 },
         GBFF: { label: "gbff", position: 20 },
-        FAA: { label: "faa", position: 30 },
-        FAAHypothetical: { label: "faa (hypothetical)", position: 35 },
+        EMBL: { label: "embl", position: 25 },
+        FFN: { label: "ffn", position: 30 },
+        FAA: { label: "faa", position: 35 },
         FNA: { label: "fna", position: 40 },
         JSON: { label: "json", position: 50 },
+        TSVHypothetical: { label: "tsv (hypothetical)", position: 55 },
+        FAAHypothetical: { label: "faa (hypothetical)", position: 60 },
       };
       let resultFiles =
         this.job && this.job.ResultFiles ? this.job.ResultFiles : {};
