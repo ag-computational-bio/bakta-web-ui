@@ -103,9 +103,9 @@
                 class="form-check-input"
                 type="checkbox"
                 v-model="options.compliant"
-                id="keep-headers"
+                id="compliant"
               />
-              <label class="form-check-label" for="keep-headers">
+              <label class="form-check-label" for="compliant">
                 INSDC compliant output
               </label>
             </div>
