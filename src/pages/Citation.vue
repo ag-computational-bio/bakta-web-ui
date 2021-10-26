@@ -17,38 +17,86 @@
         </div>
       </div>
       <div class="row">
-        Bakta is standing on the shoulder of giants taking advantage of many publicly available databases. If you find any of those used within Bakta useful, please also cite these primary sources.
+        <div class="col">
+          <div class="card no-border h-100">
+            <div class="card-body">
+              <p class="card-text list-unstyled">
+                Bakta stands on the shoulders of giants as it takes advantage of
+                many publicly available databases. If you find any of those used
+                within Bakta useful, please also cite these primary sources.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row">
         <div class="col-sm-6">
           <div class="card no-border h-100">
             <div class="card-body">
               <h4 class="card-title">Tools</h4>
               <ul class="card-text list-unstyled">
                 <li>
-                  tRNAscan-SE 2.0 (<a href="https://doi.org/10.1093/nar/gkab688" target="_blank">10.1093/nar/gkab688</a>)
+                  tRNAscan-SE 2.0 (<a
+                    href="https://doi.org/10.1093/nar/gkab688"
+                    target="_blank"
+                    >10.1093/nar/gkab688</a
+                  >)
                 </li>
                 <li>
-                  Aragorn (<a href="https://doi.org/10.1093/nar/gkh152" target="_blank">10.1093/nar/gkh152</a>)
+                  Aragorn (<a
+                    href="https://doi.org/10.1093/nar/gkh152"
+                    target="_blank"
+                    >10.1093/nar/gkh152</a
+                  >)
                 </li>
                 <li>
-                  Infernal (<a href="https://doi.org/10.1093/bioinformatics/btt509" target="_blank">10.1093/bioinformatics/btt509</a>)
+                  Infernal (<a
+                    href="https://doi.org/10.1093/bioinformatics/btt509"
+                    target="_blank"
+                    >10.1093/bioinformatics/btt509</a
+                  >)
                 </li>
                 <li>
-                  PilerCR (<a href="https://doi.org/10.1186/1471-2105-8-18" target="_blank">10.1186/1471-2105-8-18</a>)
+                  PilerCR (<a
+                    href="https://doi.org/10.1186/1471-2105-8-18"
+                    target="_blank"
+                    >10.1186/1471-2105-8-18</a
+                  >)
                 </li>
                 <li>
-                  Prodigal (<a href="https://doi.org/10.1186/1471-2105-11-119" target="_blank">10.1186/1471-2105-11-119</a>)
+                  Prodigal (<a
+                    href="https://doi.org/10.1186/1471-2105-11-119"
+                    target="_blank"
+                    >10.1186/1471-2105-11-119</a
+                  >)
                 </li>
                 <li>
-                  Diamond (<a href="https://doi.org/10.1038/s41592-021-01101-x" target="_blank">10.1038/s41592-021-01101-x</a>)
+                  Diamond (<a
+                    href="https://doi.org/10.1038/s41592-021-01101-x"
+                    target="_blank"
+                    >10.1038/s41592-021-01101-x</a
+                  >)
                 </li>
                 <li>
-                  BLAST+ (<a href="https://doi.org/10.1186/1471-2105-10-421" target="_blank">10.1186/1471-2105-10-421</a>)
+                  BLAST+ (<a
+                    href="https://doi.org/10.1186/1471-2105-10-421"
+                    target="_blank"
+                    >10.1186/1471-2105-10-421</a
+                  >)
                 </li>
                 <li>
-                  HMMER (<a href="https://doi.org/10.1371/journal.pcbi.1002195" target="_blank">10.1371/journal.pcbi.1002195</a>)
+                  HMMER (<a
+                    href="https://doi.org/10.1371/journal.pcbi.1002195"
+                    target="_blank"
+                    >10.1371/journal.pcbi.1002195</a
+                  >)
                 </li>
                 <li>
-                  AMRFinderPlus (<a href="https://doi.org/10.1038/s41598-021-91456-0" target="_blank">10.1038/s41598-021-91456-0</a>)
+                  AMRFinderPlus (<a
+                    href="https://doi.org/10.1038/s41598-021-91456-0"
+                    target="_blank"
+                    >10.1038/s41598-021-91456-0</a
+                  >)
                 </li>
               </ul>
             </div>
@@ -60,37 +108,81 @@
               <h4 class="card-title">Databases</h4>
               <ul class="card-text list-unstyled">
                 <li>
-                  Rfam (<a href="https://doi.org/10.1002/cpbi.51" target="_blank">10.1002/cpbi.51</a>)
+                  Rfam (<a
+                    href="https://doi.org/10.1002/cpbi.51"
+                    target="_blank"
+                    >10.1002/cpbi.51</a
+                  >)
                 </li>
                 <li>
-                  Mob-suite (<a href="https://doi.org/10.1099/mgen.0.000206" target="_blank">10.1099/mgen.0.000206</a>)
+                  Mob-suite (<a
+                    href="https://doi.org/10.1099/mgen.0.000206"
+                    target="_blank"
+                    >10.1099/mgen.0.000206</a
+                  >)
                 </li>
                 <li>
-                  DoriC (<a href="https://doi.org/10.1093/nar/gky1014" target="_blank">10.1093/nar/gky1014</a>)
+                  DoriC (<a
+                    href="https://doi.org/10.1093/nar/gky1014"
+                    target="_blank"
+                    >10.1093/nar/gky1014</a
+                  >)
                 </li>
                 <li>
-                  AntiFam (<a href="https://doi.org/10.1093/database/bas003" target="_blank">10.1093/database/bas003</a>)
+                  AntiFam (<a
+                    href="https://doi.org/10.1093/database/bas003"
+                    target="_blank"
+                    >10.1093/database/bas003</a
+                  >)
                 </li>
                 <li>
-                  UniProt (<a href="https://doi.org/10.1093/nar/gky1049" target="_blank">10.1093/nar/gky1049</a>)
+                  UniProt (<a
+                    href="https://doi.org/10.1093/nar/gky1049"
+                    target="_blank"
+                    >10.1093/nar/gky1049</a
+                  >)
                 </li>
                 <li>
-                  RefSeq (<a href="https://doi.org/10.1093/nar/gkx1068" target="_blank">10.1093/nar/gkx1068</a>)
+                  RefSeq (<a
+                    href="https://doi.org/10.1093/nar/gkx1068"
+                    target="_blank"
+                    >10.1093/nar/gkx1068</a
+                  >)
                 </li>
                 <li>
-                  COG (<a href="https://doi.org/10.1093/bib/bbx117" target="_blank">10.1093/bib/bbx117</a>)
+                  COG (<a
+                    href="https://doi.org/10.1093/bib/bbx117"
+                    target="_blank"
+                    >10.1093/bib/bbx117</a
+                  >)
                 </li>
                 <li>
-                  AMRFinder (<a href="https://doi.org/10.1128/AAC.00483-19" target="_blank">10.1128/AAC.00483-19</a>)
+                  AMRFinder (<a
+                    href="https://doi.org/10.1128/AAC.00483-19"
+                    target="_blank"
+                    >10.1128/AAC.00483-19</a
+                  >)
                 </li>
                 <li>
-                  ISFinder (<a href="https://doi.org/10.1093/nar/gkj014" target="_blank">10.1093/nar/gkj014</a>)
+                  ISFinder (<a
+                    href="https://doi.org/10.1093/nar/gkj014"
+                    target="_blank"
+                    >10.1093/nar/gkj014</a
+                  >)
                 </li>
                 <li>
-                  Pfam (<a href="https://doi.org/10.1093/nar/gky995" target="_blank">10.1093/nar/gky995</a>)
+                  Pfam (<a
+                    href="https://doi.org/10.1093/nar/gky995"
+                    target="_blank"
+                    >10.1093/nar/gky995</a
+                  >)
                 </li>
                 <li>
-                  VFDB (<a href="https://doi.org/10.1093/nar/gky1080" target="_blank">10.1093/nar/gky1080</a>)
+                  VFDB (<a
+                    href="https://doi.org/10.1093/nar/gky1080"
+                    target="_blank"
+                    >10.1093/nar/gky1080</a
+                  >)
                 </li>
               </ul>
             </div>
