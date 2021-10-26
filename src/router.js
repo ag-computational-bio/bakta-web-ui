@@ -1,4 +1,5 @@
 import { createWebHistory, createRouter } from "vue-router";
+import Citation from "@/pages/Citation";
 import Download from "@/pages/Download";
 import Submit from "@/pages/Submit";
 import Jobs from "@/pages/Jobs";
@@ -13,6 +14,11 @@ const routes = [
     path: "/",
     name: "Home",
     component: Submit,
+  },
+  {
+    path: "/citation",
+    name: "Citation",
+    component: Citation,
   },
   {
     path: "/download",

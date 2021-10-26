@@ -57,6 +57,7 @@ export default {
         { label: "Jobs", href: "/jobs", local: true },
         { label: "Viewer", href: "/viewer", local: true },
         { label: "Docs", href: "https://bakta.readthedocs.io/", local: false },
+        { label: "Citation", href: "/citation", local: true },
         { label: "Download", href: "/download", local: true },
         {
           label: "GitHub",
