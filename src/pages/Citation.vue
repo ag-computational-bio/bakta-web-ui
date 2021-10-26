@@ -7,10 +7,11 @@
           <div class="card-body">
             <h4 class="card-title">Citation</h4>
             <ul class="card-text list-unstyled">
-              If you find Bakta useful for your research please cite it:
+              <pre>
               Schwengers O., Jelonek L., Dieckmann M., Beyvers S., Blom J., Goesmann A. (2021).
               Bakta: Rapid &amp; standardized annotation of bacterial genomes via alignment-free sequence identification.
               bioRxiv 2021.09.02.458689; doi: <a href="https://doi.org/10.1101/2021.09.02.458689">10.1101/2021.09.02.458689</a>
+              </pre>
             </ul>
           </div>
         </div>
@@ -103,10 +104,9 @@
 <script>
 import PageHeader from "@/components/PageHeader";
 import PageFooter from "@/components/PageFooter";
-import Shield from "@/components/Shield";
 export default {
   name: "Citation",
-  components: { PageHeader, PageFooter, Shield },
+  components: { PageHeader, PageFooter },
 };
 </script>
 <style scoped>
