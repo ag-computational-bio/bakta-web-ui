@@ -8,9 +8,9 @@
             <h4 class="card-title">Citation</h4>
             <ul class="card-text list-unstyled">
               <pre>
-              Schwengers O., Jelonek L., Dieckmann M., Beyvers S., Blom J., Goesmann A. (2021).
-              Bakta: Rapid &amp; standardized annotation of bacterial genomes via alignment-free sequence identification.
-              bioRxiv 2021.09.02.458689; doi: <a href="https://doi.org/10.1101/2021.09.02.458689" target="_blank">10.1101/2021.09.02.458689</a>
+              Schwengers O., Jelonek L., Dieckmann M. A., Beyvers S., Blom J., Goesmann A. (2021).
+              Bakta: rapid and standardized annotation of bacterial genomes via alignment-free sequence identification.
+              Microbial Genomics, 7(11). <a href="https://doi.org/10.1099/mgen.0.000685" target="_blank">10.1099/mgen.0.000685</a>
               </pre>
             </ul>
           </div>
