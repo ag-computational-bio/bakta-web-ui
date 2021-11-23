@@ -2,244 +2,252 @@
   <page-header page="Submit" />
   <div class="container flex-grow-1 page-body">
     <notification :message="error" />
-    <div class="mb-3">
-      <textarea
-        class="form-control"
-        name="paste-fasta"
-        rows="8"
-        placeholder="Paste your fasta sequences here or select a fasta file from your computer below..."
-        v-model="sequenceInput"
-      ></textarea>
-    </div>
-    <div class="input-group mb-3">
-      <input
-        class="form-control"
-        type="file"
-        id="fastaFile"
-        @change="fastaFileChanged($event.target.name, $event.target.files)"
-        accept=".fas,.fna,.fasta,.fna.gz,.fas.gz,.fasta.gz"
+    <form ref="submitform">
+      <div class="mb-3">
+        <textarea
+          class="form-control"
+          name="paste-fasta"
+          rows="8"
+          placeholder="Paste your fasta sequences here or select a fasta file from your computer below..."
+          v-model="sequenceInput"
+        ></textarea>
+      </div>
+      <div class="input-group mb-3">
+        <input
+          class="form-control"
+          type="file"
+          id="fastaFile"
+          @change="fastaFileChanged($event.target.name, $event.target.files)"
+          accept=".fas,.fna,.fasta,.fna.gz,.fas.gz,.fasta.gz"
+        />
+      </div>
+
+      <progress-bar
+        v-if="loading"
+        :progress="loadingProgress"
+        :title="loadingProgress.title"
       />
-    </div>
 
-    <progress-bar
-      v-if="loading"
-      :progress="loadingProgress"
-      :title="loadingProgress.title"
-    />
-
-    <div v-if="showDetails">
-      <hr />
-      <div class="mt-4">
-        <h4 class="mb-2">Organism</h4>
-        <div class="row">
-          <div class="col">
-            <remote-typeahead
-              :suggestionLookup="lookupTaxonomy"
-              v-model="genus_species"
-              placeholder="Genus and species (optional)"
-            />
-          </div>
-
-          <div class="col">
-            <input
-              class="form-control"
-              type="text"
-              id="strain"
-              placeholder="Strain (optional)"
-              v-model="options.strain"
-            />
-          </div>
-        </div>
-        <div class="row mt-2">
-          <div class="col">
-            <input
-              class="form-control"
-              type="text"
-              id="locus"
-              placeholder="Locus prefix (optional)"
-              v-model="options.locus"
-            />
-          </div>
-          <div class="col">
-            <input
-              class="form-control"
-              type="text"
-              id="locustag"
-              placeholder="Locus tag prefix (optional)"
-              v-model="options.locus_tag"
-            />
-          </div>
-        </div>
-      </div>
-
-      <div class="mt-4">
-        <h4 class="mb-2">Annotation</h4>
-        <div class="row">
-          <div class="col">
-            <div class="form-check mt-3">
-              <input
-                class="form-check-input"
-                type="checkbox"
-                v-model="options.completeGenome"
-                id="complete-genome"
-              />
-              <label class="form-check-label" for="complete-genome">
-                Complete genome
-              </label>
-            </div>
-            <div class="form-check">
-              <input
-                class="form-check-input"
-                type="checkbox"
-                v-model="options.keepContigHeaders"
-                id="keep-headers"
-              />
-              <label class="form-check-label" for="keep-headers">
-                Keep contig headers
-              </label>
-            </div>
-            <div class="form-check">
-              <input
-                class="form-check-input"
-                type="checkbox"
-                v-model="options.compliant"
-                id="compliant"
-              />
-              <label class="form-check-label" for="compliant">
-                INSDC compliant output
-              </label>
-            </div>
-          </div>
-          <div class="col">
-            <label class="form-label" for="min-contig-length">
-              Min contig length
-            </label>
-            <input
-              class="form-control"
-              type="number"
-              v-model="options.minContigLength"
-              id="min-contig-length"
-            />
-          </div>
-          <div class="col">
-            <label class="form-label" for="translation-table">
-              Translation table
-            </label>
-            <select-translation-table
-              id="translation-table"
-              v-model="options.translationTable"
-            ></select-translation-table>
-          </div>
-          <div class="col">
-            <label class="form-label" for="mono-diderm">Mono-/Diderm</label>
-            <select-derm-type
-              id="mono-diderm"
-              v-model="options.dermType"
-            ></select-derm-type>
-          </div>
-          <div class="col">
-            <label class="form-label" for="prodigal-training-file">
-              Prodigal training file
-            </label>
-
-            <input
-              class="form-control"
-              type="file"
-              id="prodigal-training-file"
-              @change="
-                prodigalFileChanged($event.target.name, $event.target.files)
-              "
-              accept=".tf"
-            />
-          </div>
-        </div>
+      <div v-if="showDetails">
+        <hr />
         <div class="mt-4">
-          <h4 class="mb-2">Replicons</h4>
-          <div class="row scroll">
-            <table class="table table-striped">
-              <thead>
-                <tr>
-                  <th>Original sequence id</th>
-                  <th>Length</th>
-                  <th>New sequence id</th>
-                  <th>Type</th>
-                  <th>Topology</th>
-                  <th>Name</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="item in replicons" :key="item.id">
-                  <td>
-                    <input
-                      class="form-control"
-                      type="text"
-                      readonly
-                      :value="item.id"
-                    />
-                  </td>
-                  <td>
-                    <input
-                      class="form-control"
-                      type="number"
-                      readonly
-                      :value="item.length"
-                    />
-                  </td>
-                  <td>
-                    <input
-                      type="text"
-                      v-model="item.new"
-                      class="form-control"
-                      placeholder="Optional..."
-                    />
-                  </td>
-                  <td>
-                    <select-sequence-type
-                      v-model="item.type"
-                      :complete="options.completeGenome"
-                    />
-                  </td>
-                  <td>
-                    <select-topology
-                      v-model="item.topology"
-                      :complete="options.completeGenome"
-                    />
-                  </td>
-                  <td>
-                    <input
-                      type="text"
-                      v-model="item.name"
-                      class="form-control"
-                      placeholder="Optional..."
-                    />
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+          <h4 class="mb-2">Organism</h4>
+          <div class="row">
+            <div class="col">
+              <remote-typeahead
+                :suggestionLookup="lookupTaxonomy"
+                v-model="genus_species"
+                placeholder="Genus and species (optional)"
+              />
+            </div>
+
+            <div class="col">
+              <input
+                class="form-control"
+                type="text"
+                id="strain"
+                placeholder="Strain (optional)"
+                v-model="options.strain"
+              />
+            </div>
+          </div>
+          <div class="row mt-2">
+            <div class="col">
+              <input
+                class="form-control"
+                type="text"
+                id="locus"
+                placeholder="Locus prefix (optional)"
+                v-model="options.locus"
+                pattern="[^\s]+"
+                oninvalid="this.setCustomValidity('Only characters and numbers allowed, no whitespaces')"
+                oninput="this.setCustomValidity('')"
+              />
+            </div>
+            <div class="col">
+              <input
+                class="form-control"
+                type="text"
+                id="locustag"
+                placeholder="Locus tag prefix (optional)"
+                v-model="options.locus_tag"
+                pattern="[^\s]+"
+                oninvalid="this.setCustomValidity('Only characters and numbers allowed, no whitespaces')"
+                oninput="this.setCustomValidity('')"
+              />
+            </div>
           </div>
         </div>
-        <div class="d-flex justify-content-end mb-5">
-          <button
-            v-if="!submitting"
-            class="btn btn-secondary"
-            type="button"
-            id="submit-button"
-            :disabled="!valid"
-            @click="submit()"
-          >
-            Submit
-          </button>
-          <button
-            v-if="submitting"
-            class="btn btn-secondary"
-            type="button"
-            disabled
-          >
-            Submitting...
-          </button>
+
+        <div class="mt-4">
+          <h4 class="mb-2">Annotation</h4>
+          <div class="row">
+            <div class="col">
+              <div class="form-check mt-3">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  v-model="options.completeGenome"
+                  id="complete-genome"
+                />
+                <label class="form-check-label" for="complete-genome">
+                  Complete genome
+                </label>
+              </div>
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  v-model="options.keepContigHeaders"
+                  id="keep-headers"
+                />
+                <label class="form-check-label" for="keep-headers">
+                  Keep contig headers
+                </label>
+              </div>
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  v-model="options.compliant"
+                  id="compliant"
+                />
+                <label class="form-check-label" for="compliant">
+                  INSDC compliant output
+                </label>
+              </div>
+            </div>
+            <div class="col">
+              <label class="form-label" for="min-contig-length">
+                Min contig length
+              </label>
+              <input
+                class="form-control"
+                type="number"
+                v-model="options.minContigLength"
+                id="min-contig-length"
+              />
+            </div>
+            <div class="col">
+              <label class="form-label" for="translation-table">
+                Translation table
+              </label>
+              <select-translation-table
+                id="translation-table"
+                v-model="options.translationTable"
+              ></select-translation-table>
+            </div>
+            <div class="col">
+              <label class="form-label" for="mono-diderm">Mono-/Diderm</label>
+              <select-derm-type
+                id="mono-diderm"
+                v-model="options.dermType"
+              ></select-derm-type>
+            </div>
+            <div class="col">
+              <label class="form-label" for="prodigal-training-file">
+                Prodigal training file
+              </label>
+
+              <input
+                class="form-control"
+                type="file"
+                id="prodigal-training-file"
+                @change="
+                  prodigalFileChanged($event.target.name, $event.target.files)
+                "
+                accept=".tf"
+              />
+            </div>
+          </div>
+          <div class="mt-4">
+            <h4 class="mb-2">Replicons</h4>
+            <div class="row scroll">
+              <table class="table table-striped">
+                <thead>
+                  <tr>
+                    <th>Original sequence id</th>
+                    <th>Length</th>
+                    <th>New sequence id</th>
+                    <th>Type</th>
+                    <th>Topology</th>
+                    <th>Name</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="item in replicons" :key="item.id">
+                    <td>
+                      <input
+                        class="form-control"
+                        type="text"
+                        readonly
+                        :value="item.id"
+                      />
+                    </td>
+                    <td>
+                      <input
+                        class="form-control"
+                        type="number"
+                        readonly
+                        :value="item.length"
+                      />
+                    </td>
+                    <td>
+                      <input
+                        type="text"
+                        v-model="item.new"
+                        class="form-control"
+                        placeholder="Optional..."
+                      />
+                    </td>
+                    <td>
+                      <select-sequence-type
+                        v-model="item.type"
+                        :complete="options.completeGenome"
+                      />
+                    </td>
+                    <td>
+                      <select-topology
+                        v-model="item.topology"
+                        :complete="options.completeGenome"
+                      />
+                    </td>
+                    <td>
+                      <input
+                        type="text"
+                        v-model="item.name"
+                        class="form-control"
+                        placeholder="Optional..."
+                      />
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="d-flex justify-content-end mb-5">
+            <button
+              v-if="!submitting"
+              class="btn btn-secondary"
+              type="button"
+              id="submit-button"
+              :disabled="!valid"
+              @click="submit()"
+            >
+              Submit
+            </button>
+            <button
+              v-if="submitting"
+              class="btn btn-secondary"
+              type="button"
+              disabled
+            >
+              Submitting...
+            </button>
+          </div>
         </div>
       </div>
-    </div>
+    </form>
   </div>
   <page-footer />
 </template>
@@ -350,20 +358,23 @@ export default {
     },
     submit: function() {
       let vm = this;
-      this.submitting = true;
-      this.error = null;
-      this.$bakta
-        .submit(this.request)
-        .then((x) => {
-          console.debug("Job submitted", x);
-          vm.submitting = false;
-          vm.$router.push({ name: "Jobs" });
-        })
-        .catch((ex) => {
-          console.log("Submission failed", ex);
-          vm.submitting = false;
-          vm.error = ex;
-        });
+
+      if (this.$refs.submitform.reportValidity()) {
+        this.submitting = true;
+        this.error = null;
+        this.$bakta
+          .submit(this.request)
+          .then((x) => {
+            console.debug("Job submitted", x);
+            vm.submitting = false;
+            vm.$router.push({ name: "Jobs" });
+          })
+          .catch((ex) => {
+            console.log("Submission failed", ex);
+            vm.submitting = false;
+            vm.error = ex;
+          });
+      }
     },
   },
   watch: {
