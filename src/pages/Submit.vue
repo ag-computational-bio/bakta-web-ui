@@ -59,8 +59,10 @@
                 id="locus"
                 placeholder="Locus prefix (optional)"
                 v-model="options.locus"
-                pattern="[^\s]+"
-                oninvalid="this.setCustomValidity('Only characters and numbers allowed, no whitespaces')"
+                :pattern="locusValidation.regex"
+                :oninvalid="
+                  `this.setCustomValidity('${locusValidation.message}')`
+                "
                 oninput="this.setCustomValidity('')"
               />
             </div>
@@ -71,8 +73,10 @@
                 id="locustag"
                 placeholder="Locus tag prefix (optional)"
                 v-model="options.locus_tag"
-                pattern="[^\s]+"
-                oninvalid="this.setCustomValidity('Only characters and numbers allowed, no whitespaces')"
+                :pattern="locusTagValidation.regex"
+                :oninvalid="
+                  `this.setCustomValidity('${locusTagValidation.message}')`
+                "
                 oninput="this.setCustomValidity('')"
               />
             </div>
@@ -459,9 +463,29 @@ export default {
         options: this.options,
       };
     },
+
+    locusTagValidation() {
+      if (this.options.compliant) {
+        return this.insdcLocusTagValidation;
+      } else {
+        return this.defaultLocusTagValidation;
+      }
+    },
   },
   data() {
     return {
+      locusValidation: {
+        regex: "[#.*A-Za-z0-9_-]{1,20}",
+        message: "Only alphanumeric charaters and _-*.# allowed, max 20 chars",
+      },
+      defaultLocusTagValidation: {
+        regex: "[A-Z][A-Z0-9]{2,11}",
+        message: "Only uppercase alphanumeric characters allowed, max 12 chars",
+      },
+      insdcLocusTagValidation: {
+        regex: "[A-Z][A-Z0-9]{2,11}",
+        mesage: "Only uppercase alphanumeric characters allowed, max 12 chars",
+      },
       sequence: "",
       sequenceInput: "",
       sequenceFile: null,
