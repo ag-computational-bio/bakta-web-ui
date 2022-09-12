@@ -229,6 +229,14 @@
               </table>
             </div>
           </div>
+          <div class="row " v-if="!valid && !idsAreINSDCCompliant">
+            <div class="col">
+              <div class="alert alert-danger">
+                The contig ids are not INSDC compliant.
+              </div>
+            </div>
+          </div>
+
           <div class="d-flex justify-content-end mb-5">
             <button
               v-if="!submitting"
@@ -323,7 +331,7 @@ export default {
             return {
               id: x.name,
               length: x.seq.length,
-              newid: "",
+              new: "",
               type: "contig",
               topology: "l",
               name: "",
@@ -450,6 +458,8 @@ export default {
       return this.replicons.length > 0;
     },
     valid() {
+      if (this.options.keepContigHeaders && this.options.compliant)
+        return this.idsAreINSDCCompliant;
       return this.showDetails;
     },
     request() {
@@ -470,6 +480,18 @@ export default {
       } else {
         return this.defaultLocusTagValidation;
       }
+    },
+    contigNames() {
+      const getId = (n) => (n.new ? n.new : n.id);
+      return this.replicons.map(getId);
+    },
+    idsAreINSDCCompliant() {
+      const insdecRe = /^[A-Za-z\d_.:*#-]{1,25}$/;
+      const matchesRe = (x) => insdecRe.exec(x);
+      const hasNonCompliantEntries = this.contigNames
+        .map(matchesRe)
+        .some((x) => x === null);
+      return !hasNonCompliantEntries;
     },
   },
   data() {
