@@ -5,7 +5,7 @@
       <span class="float-end version"> ({{ versionString }}) </span>
     </h1>
     <h3>
-      Rapid &amp; standardized annotation of bacterial genomes &amp; plasmids
+      Rapid &amp; standardized annotation of bacterial genomes, MAGs &amp; plasmids
     </h3>
   </div>
 </template>
