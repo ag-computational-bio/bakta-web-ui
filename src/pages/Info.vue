@@ -27,7 +27,7 @@
               <h4 class="card-title">Included DBs</h4>
               <ul class="card-text">
                 <li>Rfam</li>
-                <li>UniProt UniRef100/UniRef90</li>
+                <li>UniProt UniRef100/UniRef90/UniRef50</li>
                 <li>UniProtKB/SwissProt</li>
                 <li>NCBI non-redundant proteins</li>
                 <li>NCBI AMRFinderPlus</li>

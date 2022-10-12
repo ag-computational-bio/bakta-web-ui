@@ -22,7 +22,7 @@
             <div class="card-body">
               <p class="card-text list-unstyled">
                 Bakta stands on the shoulders of giants as it takes advantage of
-                many publicly available databases. If you find any of those used
+                many publicly available tools &amp; databases. If you find any of those used
                 within Bakta useful, please also cite these primary sources.
               </p>
             </div>
@@ -96,6 +96,13 @@
                     href="https://doi.org/10.1038/s41598-021-91456-0"
                     target="_blank"
                     >10.1038/s41598-021-91456-0</a
+                  >)
+                </li>
+                <li>
+                  DeepSig (<a
+                    href="https://doi.org/10.1093/bioinformatics/btx818"
+                    target="_blank"
+                    >10.1093/bioinformatics/btx818</a
                   >)
                 </li>
               </ul>

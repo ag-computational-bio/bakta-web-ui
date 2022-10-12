@@ -1,6 +1,6 @@
 import { createWebHistory, createRouter } from "vue-router";
 import Citation from "@/pages/Citation";
-import Download from "@/pages/Download";
+import About from "@/pages/About";
 import Submit from "@/pages/Submit";
 import Jobs from "@/pages/Jobs";
 import Job from "@/pages/Job";
@@ -21,9 +21,9 @@ const routes = [
     component: Citation,
   },
   {
-    path: "/download",
-    name: "Download",
-    component: Download,
+    path: "/about",
+    name: "About",
+    component: About,
   },
   {
     path: "/info",
