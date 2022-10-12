@@ -15,6 +15,7 @@ This webservice is licensed as GPL-3.
 ## Data protection
 
 Detailed data protection information are listed at https://www.uni-giessen.de/fbz/fb08/Inst/bioinformatik/bcf/data-privacy.
+All input data is stored on our servers and automatically removed after 30 days.
 
 ## Citation
 

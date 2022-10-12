@@ -23,6 +23,7 @@
             </li>
             <li>
                 Data protection: <a href="https://www.uni-giessen.de/fbz/fb08/Inst/bioinformatik/bcf/data-privacy">https://www.uni-giessen.de/fbz/fb08/Inst/bioinformatik/bcf/data-privacy</a>
+                All input data is stored on our servers and automatically removed after 30 days.
             </li>
             <li>
                 Terms of Use document: <a href="/tou.md" target="_blank">ToU</a>
