@@ -56,14 +56,10 @@ export default {
         { label: "Submit", href: "/submit", local: true },
         { label: "Jobs", href: "/jobs", local: true },
         { label: "Viewer", href: "/viewer", local: true },
-        { label: "Docs", href: "https://bakta.readthedocs.io/", local: false },
         { label: "Citation", href: "/citation", local: true },
-        { label: "Download", href: "/download", local: true },
-        {
-          label: "GitHub",
-          href: "https://github.com/oschwengers/bakta",
-          local: false,
-        },
+        { label: "Docs", href: "https://bakta.readthedocs.io/", local: false },
+        { label: "CLI", href: "https://github.com/oschwengers/bakta", local: false },
+        { label: "About", href: "/about", local: true },
       ],
     };
   },
