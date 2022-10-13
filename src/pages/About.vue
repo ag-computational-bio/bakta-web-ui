@@ -29,6 +29,9 @@
                 Terms of Use document: <a href="/tou.md" target="_blank">ToU</a>
             </li>
             <li>
+                Service evaluation: <a href="https://www.surveymonkey.de/r/denbi-service?sc=hd-hub&tool=band" target="_blank">https://www.surveymonkey.de/r/denbi-service?sc=hd-hub&tool=band</a>
+            </li>
+            <li>
                 <a href="/citation">Citation</a>
             </li>
         </ul>
