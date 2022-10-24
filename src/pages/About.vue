@@ -22,11 +22,20 @@
                 License: GPL-3
             </li>
             <li>
-                Data protection: <a href="https://www.uni-giessen.de/fbz/fb08/Inst/bioinformatik/bcf/data-privacy">https://www.uni-giessen.de/fbz/fb08/Inst/bioinformatik/bcf/data-privacy</a>
-                All input data is stored on our servers and automatically removed after 30 days.
+                Fair Use Policy: As there are no technical rate limitations implemented, we kindly ask all users to act responsibly and with due respect.
+            </li>
+            <li>
+                Data protection and level of security: <a href="https://www.uni-giessen.de/fbz/fb08/Inst/bioinformatik/bcf/data-privacy">https://www.uni-giessen.de/fbz/fb08/Inst/bioinformatik/bcf/data-privacy</a>
+                All data transfer is conducted via HTTPS and secured end-to-end via TLS. Data stored on our system is accessible only by bakta maintainers and automatically deleted after 30 days. This service is not recommended for confidential, sensitive or personal data. In case you would like to analyze such data, please consider using the local CLI Bakta version.
+            </li>
+            <li>
+                Waranty: The service providers do not express or imply any warranty. The service providers are neither responsible for decisions that are made based on the output of this service nor assume any liability for damages that may result from using this service.
             </li>
             <li>
                 Terms of Use document: <a href="/tou.md" target="_blank">ToU</a>
+            </li>
+            <li>
+                Service evaluation: <a href="https://www.surveymonkey.de/r/denbi-service?sc=hd-hub&tool=band" target="_blank">https://www.surveymonkey.de/r/denbi-service?sc=hd-hub&tool=band</a>
             </li>
             <li>
                 <a href="/citation">Citation</a>

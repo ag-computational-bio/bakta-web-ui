@@ -12,10 +12,17 @@ All technical questions and bug reports should be filed at GitHub: https://githu
 
 This webservice is licensed as GPL-3.
 
-## Data protection
+## Fair Use Policy
 
-Detailed data protection information are listed at https://www.uni-giessen.de/fbz/fb08/Inst/bioinformatik/bcf/data-privacy.
-All input data is stored on our servers and automatically removed after 30 days.
+As there are no technical rate limitations implemented, we kindly ask all users to act responsibly and with due respect.
+
+## Data protection and level of security
+
+Detailed data protection information are listed at https://www.uni-giessen.de/fbz/fb08/Inst/bioinformatik/bcf/data-privacy. All data transfer is conducted via HTTPS and secured end-to-end via TLS. Data stored on our system is accessible only by bakta maintainers and automatically deleted after 30 days. This service is not recommended for confidential, sensitive or personal data. In case you would like to analyze such data, please consider using the local CLI Bakta version.
+
+## Warranty
+
+The service providers do not express or imply any warranty. The service providers are neither responsible for decisions that are made based on the output of this service nor assume any liability for damages that may result from using this service.
 
 ## Citation
 
