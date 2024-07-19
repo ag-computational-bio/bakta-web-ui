@@ -39,7 +39,7 @@ function loadJobs() {
 function generateRepliconTable(replicons) {
   return replicons
     .map((x) => [x.id, x.new, x.type, x.topology, x.name].join("\t"))
-    .join("\t");
+    .join("\n");
 }
 
 // eslint-disable-next-line no-unused-vars
