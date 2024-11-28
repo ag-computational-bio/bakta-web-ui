@@ -1,37 +1,34 @@
 <template>
   <span class="shield">
-    <span :class="leftClass">
-      <span :class="iconClass"></span>
+    <span :class="_leftClass">
+      <span :class="_iconClass"></span>
     </span>
-    <span :class="rightClass">
+    <span :class="_rightClass">
       <slot></slot>
     </span>
   </span>
 </template>
-<script>
-export default {
-  name: "Shield",
-  props: {
-    icon: { type: String, default: "bi-globe" },
-    leftclass: { type: String, default: "bg-secondary" },
-    rightclass: { type: String, default: "bg-success" },
+<script setup lang="ts">
+import { computed } from 'vue'
+
+const props = withDefaults(
+  defineProps<{
+    icon?: string
+    leftClass?: string
+    rightClass?: string
+  }>(),
+  {
+    icon: 'bi-globe',
+    leftClass: 'bg-secondary',
+    rightClass: 'bg-success',
   },
-  computed: {
-    leftClass() {
-      return "badge left " + this.leftclass;
-    },
-    rightClass() {
-      return "badge right " + this.rightclass;
-    },
-    iconClass() {
-      return "bi " + this.icon;
-    },
-  },
-};
+)
+
+const _leftClass = computed(() => 'badge left ' + props.leftClass)
+const _rightClass = computed(() => 'badge right ' + props.rightClass)
+const _iconClass = computed(() => 'bi ' + props.icon)
 </script>
 <style scoped>
-.shield {
-}
 .shield .left {
   border-radius: 0.25rem 0rem 0rem 0.25rem;
 }

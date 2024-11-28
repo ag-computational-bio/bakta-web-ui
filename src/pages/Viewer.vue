@@ -1,5 +1,4 @@
 <template>
-  <page-header page="" />
   <div class="container flex-grow-1">
     <notification
       message="You can visualize bakta json files with this viewer. The data is visualized inside your browser. None of your data is send to the server."
@@ -10,7 +9,7 @@
         class="form-control"
         type="file"
         id="bakta-json"
-        @change="jsonFileChanged($event.target.name, $event.target.files)"
+        @change="jsonFileChanged"
         accept=".json"
       />
     </div>
@@ -23,20 +22,16 @@
 
     <div v-if="!loadingProgress.enabled && !error && data">
       <div class="mt-5">
-        <h4>
-          Job statistics
-        </h4>
+        <h4>Job statistics</h4>
         <div class="" id="stats">
           <div class="card card-body">
-            <bakta-stats :data="data" />
+            <bakta-stats :data="data" :job="job" />
           </div>
         </div>
       </div>
       <hr />
       <div class="row">
-        <h4>
-          Genomeviewer
-        </h4>
+        <h4>Genomeviewer</h4>
         <div class="" id="genomeBrowser">
           <div class="card card-body">
             <bakta-genome-viewer ref="genomeview" :data="data" />
@@ -44,9 +39,7 @@
         </div>
       </div>
       <hr />
-      <h4>
-        Annotations
-      </h4>
+      <h4>Annotations</h4>
       <div class="" id="annotationTable">
         <div class="card card-body">
           <bakta-annotation-table :data="data" />
@@ -55,71 +48,64 @@
       <hr />
     </div>
   </div>
-  <page-footer />
 </template>
-<script>
-import PageHeader from "@/components/PageHeader";
-import PageFooter from "@/components/PageFooter.vue";
-import Notification from "@/components/Notification";
-import ProgressBar from "@/components/ProgressBar";
-import BaktaGenomeViewer from "@/components/BaktaGenomeViewer";
-import BaktaStats from "@/components/BaktaStats";
-import BaktaAnnotationTable from "@/components/BaktaAnnotationTable";
+<script setup lang="ts">
+import Notification from '@/components/Notification.vue'
+import ProgressBar from '@/components/ProgressBar.vue'
+import BaktaGenomeViewer from '@/components/BaktaGenomeViewer.vue'
+import BaktaStats from '@/components/BaktaStats.vue'
+import BaktaAnnotationTable from '@/components/BaktaAnnotationTable.vue'
+import { computed, ref } from 'vue'
+import type { BaktaResult } from '@/model/result-data'
+import { type JobResult } from '@/model/job'
+import type { Progress } from '@/components/progress'
 
-export default {
-  name: "Job",
-  components: {
-    PageHeader,
-    PageFooter,
-    ProgressBar,
-    BaktaGenomeViewer,
-    BaktaStats,
-    BaktaAnnotationTable,
-    Notification,
-  },
-  computed: {},
-  data: function() {
-    return {
-      pollInterval: 2000,
-      loadingProgress: {
-        enabled: false,
-        min: 0,
-        max: 100,
-        value: 0,
-        title: "Loading results...",
-      },
-      error: null,
-      data: null,
-    };
-  },
-  methods: {
-    handleError: function(err) {
-      this.error = err;
-    },
-    jsonFileChanged: function(name, file) {
-      this.loadData(file.item(0));
-    },
-    loadData: function(file) {
-      this.loadingProgress.enabled = true;
-      this.loadingProgress.value = 0;
-      const vm = this;
+const data = ref<BaktaResult>()
+const job = computed<JobResult>(() => {
+  return { jobID: '', name: '', ResultFiles: {}, started: '', updated: '' }
+})
+const loadingProgress = ref<Progress & { enabled: boolean; title: string }>({
+  enabled: false,
+  min: 0,
+  max: 100,
+  value: 0,
+  title: 'Loading results...',
+  type: 'static',
+})
 
-      this.loadingProgress.title =
-        "Processing data. This may take a while for larger genomes.";
-      this.loadingProgress.type = "indeterminate";
-      var reader = new FileReader();
-      reader.onload = function(event) {
-        vm.data = JSON.parse(event.target.result);
-        vm.loadingProgress.enabled = false;
-      };
-      reader.readAsText(file);
-    },
-    setError(err) {
-      this.error = err;
-      this.loadingProgress.enabled = false;
-    },
-  },
-  mounted: function() {},
-};
+function jsonFileChanged(evt: Event) {
+  if (evt.target instanceof HTMLInputElement && evt.target.files) {
+    if (evt.target.files?.length == 0) {
+      data.value = undefined
+    } else {
+      const f = evt.target.files.item(0)
+      if (f) loadData(f)
+    }
+  }
+}
+
+function loadData(file: File) {
+  loadingProgress.value.enabled = true
+  loadingProgress.value.value = 0
+  loadingProgress.value.title = 'Processing data. This may take a while for larger genomes.'
+  loadingProgress.value.type = 'indeterminate'
+
+  const reader = new FileReader()
+  reader.onload = function (event) {
+    if (event.target == null || !(typeof event.target.result == 'string')) {
+      setError('Loading data failed')
+      return
+    }
+    data.value = JSON.parse(event.target.result)
+    loadingProgress.value.enabled = false
+  }
+  reader.readAsText(file)
+}
+
+const error = ref<string>()
+function setError(err: string) {
+  error.value = err
+  loadingProgress.value.enabled = false
+}
 </script>
 <style scoped></style>

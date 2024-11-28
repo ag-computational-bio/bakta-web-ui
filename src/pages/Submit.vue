@@ -1,5 +1,4 @@
 <template>
-  <page-header page="Submit" />
   <div class="container flex-grow-1 page-body">
     <notification :message="error" />
     <form ref="submitform">
@@ -22,11 +21,7 @@
         />
       </div>
 
-      <progress-bar
-        v-if="loading"
-        :progress="loadingProgress"
-        :title="loadingProgress.title"
-      />
+      <progress-bar v-if="loading" :progress="loadingProgress" :title="loadingProgress.title" />
 
       <div v-if="showDetails">
         <hr />
@@ -90,9 +85,7 @@
                   v-model="options.completeGenome"
                   id="complete-genome"
                 />
-                <label class="form-check-label" for="complete-genome">
-                  Complete genome
-                </label>
+                <label class="form-check-label" for="complete-genome"> Complete genome </label>
               </div>
               <div class="form-check">
                 <input
@@ -101,9 +94,7 @@
                   v-model="options.keepContigHeaders"
                   id="keep-headers"
                 />
-                <label class="form-check-label" for="keep-headers">
-                  Keep contig headers
-                </label>
+                <label class="form-check-label" for="keep-headers"> Keep contig headers </label>
               </div>
               <div class="form-check">
                 <input
@@ -112,15 +103,11 @@
                   v-model="options.compliant"
                   id="compliant"
                 />
-                <label class="form-check-label" for="compliant">
-                  INSDC compliant output
-                </label>
+                <label class="form-check-label" for="compliant"> INSDC compliant output </label>
               </div>
             </div>
             <div class="col">
-              <label class="form-label" for="min-contig-length">
-                Min contig length
-              </label>
+              <label class="form-label" for="min-contig-length"> Min contig length </label>
               <input
                 class="form-control"
                 type="number"
@@ -129,9 +116,7 @@
               />
             </div>
             <div class="col">
-              <label class="form-label" for="translation-table">
-                Translation table
-              </label>
+              <label class="form-label" for="translation-table"> Translation table </label>
               <select-translation-table
                 id="translation-table"
                 v-model="options.translationTable"
@@ -139,10 +124,7 @@
             </div>
             <div class="col">
               <label class="form-label" for="mono-diderm">Mono-/Diderm</label>
-              <select-derm-type
-                id="mono-diderm"
-                v-model="options.dermType"
-              ></select-derm-type>
+              <select-derm-type id="mono-diderm" v-model="options.dermType"></select-derm-type>
             </div>
             <div class="col">
               <label class="form-label" for="prodigal-training-file">
@@ -153,9 +135,7 @@
                 class="form-control"
                 type="file"
                 id="prodigal-training-file"
-                @change="
-                  prodigalFileChanged($event.target.name, $event.target.files)
-                "
+                @change="prodigalFileChanged($event.target.name, $event.target.files)"
                 accept=".tf"
               />
             </div>
@@ -177,20 +157,10 @@
                 <tbody>
                   <tr v-for="item in replicons" :key="item.id">
                     <td>
-                      <input
-                        class="form-control"
-                        type="text"
-                        readonly
-                        :value="item.id"
-                      />
+                      <input class="form-control" type="text" readonly :value="item.id" />
                     </td>
                     <td>
-                      <input
-                        class="form-control"
-                        type="number"
-                        readonly
-                        :value="item.length"
-                      />
+                      <input class="form-control" type="number" readonly :value="item.length" />
                     </td>
                     <td>
                       <input
@@ -207,10 +177,7 @@
                       />
                     </td>
                     <td>
-                      <select-topology
-                        v-model="item.topology"
-                        :complete="options.completeGenome"
-                      />
+                      <select-topology v-model="item.topology" :complete="options.completeGenome" />
                     </td>
                     <td>
                       <input
@@ -227,9 +194,7 @@
           </div>
           <div class="row" v-if="!valid && !idsAreINSDCCompliant">
             <div class="col">
-              <div class="alert alert-danger">
-                The contig ids are not INSDC compliant.
-              </div>
+              <div class="alert alert-danger">The contig ids are not INSDC compliant.</div>
             </div>
           </div>
 
@@ -244,12 +209,7 @@
             >
               Submit
             </button>
-            <button
-              v-if="submitting"
-              class="btn btn-secondary"
-              type="button"
-              disabled
-            >
+            <button v-if="submitting" class="btn btn-secondary" type="button" disabled>
               Submitting...
             </button>
           </div>
@@ -257,24 +217,24 @@
       </div>
     </form>
   </div>
-  <page-footer />
 </template>
 <script>
-import PageHeader from "@/components/PageHeader";
-import SelectTranslationTable from "@/components/SelectTranslationTable";
-import SelectDermType from "@/components/SelectDermType.vue";
-import SelectTopology from "@/components/SelectTopology";
-import SelectSequenceType from "../components/SelectSequenceType.vue";
-import Notification from "@/components/Notification";
-import PageFooter from "@/components/PageFooter";
-import fasta from "biojs-io-fasta";
-import { validateDna } from "@/fasta-validator";
-import ProgressBar from "../components/ProgressBar.vue";
-import readFileWithProgress from "@/read-file-with-progress";
-import { RemoteTypeahead } from "@ljelonek-public/vue-bootstrap5-components";
-
+import PageHeader from '@/components/PageHeader'
+import SelectTranslationTable from '@/components/SelectTranslationTable'
+import SelectDermType from '@/pages/submit-job/SelectDermType.vue'
+import SelectTopology from '@/components/SelectTopology'
+import SelectSequenceType from './submit-job/SelectSequenceType.vue'
+import Notification from '@/components/Notification'
+import PageFooter from '@/components/PageFooter'
+import fasta from 'biojs-io-fasta'
+import { validateDna } from '@/fasta/validate-fasta'
+import ProgressBar from '../components/ProgressBar.vue'
+import readFileWithProgress from '@/read-file-with-progress'
+import { RemoteTypeahead } from '@ljelonek-public/vue-bootstrap5-components'
+import { currentView } from '@/page/page'
+currentView('Submit')
 export default {
-  name: "Submit",
+  name: 'Submit',
   components: {
     PageHeader,
     PageFooter,
@@ -290,236 +250,224 @@ export default {
   methods: {
     lookupTaxonomy: function (input, result) {
       window
-        .fetch(
-          "https://www.ebi.ac.uk/ena/taxonomy/rest/suggest-for-search/" + input
-        )
+        .fetch('https://www.ebi.ac.uk/ena/taxonomy/rest/suggest-for-search/' + input)
         .then((r) => r.json())
         .then((j) => {
-          result(
-            j.map((x) => ({ value: x.scientificName, label: x.scientificName }))
-          );
-        });
+          result(j.map((x) => ({ value: x.scientificName, label: x.scientificName })))
+        })
     },
     setSequence(seq) {
       // fix windows newline characters as the fasta parser has problems to handle them
-      this.sequence = seq.replaceAll("\r", "");
-      this.loading = false;
+      this.sequence = seq.replaceAll('\r', '')
+      this.loading = false
     },
     fastaFileChanged: function (name, file) {
-      let vm = this;
-      this.sequenceFile = file.item(0);
+      const vm = this
+      this.sequenceFile = file.item(0)
       if (this.sequenceFile === null) {
-        vm.setSequence(null);
+        vm.setSequence(null)
       } else {
         this.readTextFile(this.sequenceFile)
           .then((r) => vm.setSequence(r))
-          .catch((e) => (vm.error = e));
+          .catch((e) => (vm.error = e))
       }
     },
     parseAndSetSeqquence: function () {
       try {
-        let seq = fasta.parse(this.sequence);
+        const seq = fasta.parse(this.sequence)
 
-        let valid = validateDna(seq);
+        const valid = validateDna(seq)
         if (valid.valid) {
           this.replicons = seq.map(function (x) {
             return {
               id: x.name,
               length: x.seq.length,
-              new: "",
-              type: "contig",
-              topology: "l",
-              name: "",
-            };
-          });
-          this.loading = false;
-          this.validSequenceFile = true;
-          this.error = null;
+              new: '',
+              type: 'contig',
+              topology: 'l',
+              name: '',
+            }
+          })
+          this.loading = false
+          this.validSequenceFile = true
+          this.error = null
         } else {
-          this.loading = false;
-          this.validSequenceFile = false;
-          this.error = ["Invalid fasta:", ...valid.messages];
+          this.loading = false
+          this.validSequenceFile = false
+          this.error = ['Invalid fasta:', ...valid.messages]
         }
       } catch (e) {
-        this.loading = false;
-        this.validSequenceFile = false;
-        this.error = "Invalid fasta file. Please provide a valid fasta.";
+        this.loading = false
+        this.validSequenceFile = false
+        this.error = 'Invalid fasta file. Please provide a valid fasta.'
       }
     },
     readTextFile: function (file) {
-      this.loading = true;
-      this.sequence = null;
-      const vm = this;
+      this.loading = true
+      this.sequence = null
+      const vm = this
       return readFileWithProgress(
         file,
-        (x) => (vm.loadingProgress.value = Math.floor(x * 100))
+        (x) => (vm.loadingProgress.value = Math.floor(x * 100)),
       ).then((buffer) => {
         return new Promise((r) => {
-          let decoder = new TextDecoder("utf-8");
-          r(decoder.decode(buffer));
-        });
-      });
+          const decoder = new TextDecoder('utf-8')
+          r(decoder.decode(buffer))
+        })
+      })
     },
     prodigalFileChanged: function (name, file) {
-      this.prodigalTrainingFile = file[0];
+      this.prodigalTrainingFile = file[0]
     },
     submit: function () {
-      let vm = this;
+      const vm = this
 
       if (this.$refs.submitform.reportValidity()) {
-        this.submitting = true;
-        this.error = null;
+        this.submitting = true
+        this.error = null
         this.$bakta
           .submit(this.request)
           .then((x) => {
-            console.debug("Job submitted", x);
-            vm.submitting = false;
-            vm.$router.push({ name: "Jobs" });
+            console.debug('Job submitted', x)
+            vm.submitting = false
+            vm.$router.push({ name: 'Jobs' })
           })
           .catch((ex) => {
-            console.log("Submission failed", ex);
-            vm.submitting = false;
-            vm.error = ex;
-          });
+            console.log('Submission failed', ex)
+            vm.submitting = false
+            vm.error = ex
+          })
       }
     },
   },
   watch: {
     sequenceInput(newValue) {
-      if (
-        this.sequenceFile === null ||
-        (this.sequenceFile !== null && !this.validSequenceFile)
-      ) {
-        this.sequence = newValue;
+      if (this.sequenceFile === null || (this.sequenceFile !== null && !this.validSequenceFile)) {
+        this.sequence = newValue
       }
     },
     sequence() {
       if (this.sequence !== null) {
         try {
-          this.loading = true;
-          this.loadingProgress.title = "Parsing file";
-          setTimeout(this.parseAndSetSeqquence, 0);
+          this.loading = true
+          this.loadingProgress.title = 'Parsing file'
+          setTimeout(this.parseAndSetSeqquence, 0)
         } catch (e) {
-          this.error = "Can't read fasta data";
-          this.replicons = [];
-          this.validSequenceFile = false;
+          this.error = "Can't read fasta data"
+          this.replicons = []
+          this.validSequenceFile = false
         }
       } else {
-        this.validSequenceFile = false;
-        this.error = null;
-        this.replicons = [];
+        this.validSequenceFile = false
+        this.error = null
+        this.replicons = []
       }
     },
     genus_species() {
       if (this.genus_species) {
-        const split = this.genus_species.indexOf(" ");
+        const split = this.genus_species.indexOf(' ')
         if (split >= 0) {
-          this.options.genus = this.genus_species.substring(0, split);
-          this.options.species = this.genus_species.substring(split + 1);
+          this.options.genus = this.genus_species.substring(0, split)
+          this.options.species = this.genus_species.substring(split + 1)
         } else {
-          this.options.genus = this.genus_species;
-          this.options.species = "";
+          this.options.genus = this.genus_species
+          this.options.species = ''
         }
       }
     },
-    "options.completeGenome": function () {
-      let possibleTopologies = [];
-      let possibleTypes = [];
-      let newTopology = null;
-      let newType = null;
+    'options.completeGenome': function () {
+      let possibleTopologies = []
+      let possibleTypes = []
+      let newTopology = null
+      let newType = null
 
       if (this.options.completeGenome) {
-        possibleTypes = ["chromosome", "plasmid"];
-        possibleTopologies = ["c"];
-        newTopology = "c";
-        newType = "chromosome";
+        possibleTypes = ['chromosome', 'plasmid']
+        possibleTopologies = ['c']
+        newTopology = 'c'
+        newType = 'chromosome'
       } else {
-        possibleTypes = ["contig"];
-        possibleTopologies = ["l"];
-        newTopology = "l";
-        newType = "contig";
+        possibleTypes = ['contig']
+        possibleTopologies = ['l']
+        newTopology = 'l'
+        newType = 'contig'
       }
 
       this.replicons
         .filter((x) => !possibleTypes.some((y) => x.type === y))
-        .forEach((x) => (x.type = newType));
+        .forEach((x) => (x.type = newType))
       this.replicons
         .filter((x) => !possibleTopologies.some((y) => x.topology === y))
-        .forEach((x) => (x.topology = newTopology));
+        .forEach((x) => (x.topology = newTopology))
     },
   },
   computed: {
     showDetails() {
-      return this.replicons.length > 0;
+      return this.replicons.length > 0
     },
     valid() {
-      if (this.options.keepContigHeaders && this.options.compliant)
-        return this.idsAreINSDCCompliant;
-      return this.showDetails;
+      if (this.options.keepContigHeaders && this.options.compliant) return this.idsAreINSDCCompliant
+      return this.showDetails
     },
     request() {
       return {
-        jobname: this.sequenceFile
-          ? this.sequenceFile.name
-          : "Manually entered sequence(s)",
+        jobname: this.sequenceFile ? this.sequenceFile.name : 'Manually entered sequence(s)',
         sequence: this.sequence,
         prodigal: this.prodigalTrainingFile,
         replicons: this.replicons,
         options: this.options,
-      };
+      }
     },
 
     locusTagValidation() {
       if (this.options.compliant) {
-        return this.insdcLocusTagValidation;
+        return this.insdcLocusTagValidation
       } else {
-        return this.defaultLocusTagValidation;
+        return this.defaultLocusTagValidation
       }
     },
     contigNames() {
-      const getId = (n) => (n.new ? n.new : n.id);
-      return this.replicons.map(getId);
+      const getId = (n) => (n.new ? n.new : n.id)
+      return this.replicons.map(getId)
     },
     idsAreINSDCCompliant() {
-      const insdecRe = /^[A-Za-z\d_.:*#-]{1,25}$/;
-      const matchesRe = (x) => insdecRe.exec(x);
-      const hasNonCompliantEntries = this.contigNames
-        .map(matchesRe)
-        .some((x) => x === null);
-      return !hasNonCompliantEntries;
+      const insdecRe = /^[A-Za-z\d_.:*#-]{1,25}$/
+      const matchesRe = (x) => insdecRe.exec(x)
+      const hasNonCompliantEntries = this.contigNames.map(matchesRe).some((x) => x === null)
+      return !hasNonCompliantEntries
     },
   },
   data() {
     return {
       locusValidation: {
-        regex: "[#.*A-Za-z0-9_-]{1,20}",
-        message: "Only alphanumeric charaters and _-*.# allowed, max 20 chars",
+        regex: '[#.*A-Za-z0-9_-]{1,20}',
+        message: 'Only alphanumeric charaters and _-*.# allowed, max 20 chars',
       },
       defaultLocusTagValidation: {
-        regex: "[A-Z][A-Z0-9]{2,11}",
-        message: "Only uppercase alphanumeric characters allowed, max 12 chars",
+        regex: '[A-Z][A-Z0-9]{2,11}',
+        message: 'Only uppercase alphanumeric characters allowed, max 12 chars',
       },
       insdcLocusTagValidation: {
-        regex: "[A-Z][A-Z0-9]{2,11}",
-        mesage: "Only uppercase alphanumeric characters allowed, max 12 chars",
+        regex: '[A-Z][A-Z0-9]{2,11}',
+        mesage: 'Only uppercase alphanumeric characters allowed, max 12 chars',
       },
-      sequence: "",
-      sequenceInput: "",
+      sequence: '',
+      sequenceInput: '',
       sequenceFile: null,
       validSequenceFile: false,
-      genus_species: "",
+      genus_species: '',
       options: {
         translationTable: 11,
         completeGenome: false,
         keepContigHeaders: false,
         minContigLength: 1,
-        dermType: "UNKNOWN",
+        dermType: 'UNKNOWN',
         prodigalTrainingFile: null,
-        genus: "",
-        species: "",
-        strain: "",
-        locus: "",
-        locus_tag: "",
+        genus: '',
+        species: '',
+        strain: '',
+        locus: '',
+        locus_tag: '',
         compliant: false,
       },
       replicons: [],
@@ -527,14 +475,14 @@ export default {
       error: null,
       loading: false,
       loadingProgress: {
-        title: "Loading fasta file",
+        title: 'Loading fasta file',
         min: 0,
         max: 100,
         value: 0,
       },
-    };
+    }
   },
-};
+}
 </script>
 <style scoped>
 h4 {

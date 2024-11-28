@@ -3,35 +3,25 @@
     <template v-for="(m, i) in messages" :key="i"> {{ m }} <br /> </template>
   </div>
 </template>
-<script>
-/**
- * The notification is only visible when the message is non-null.
- */
-export default {
-  name: "Notification",
-  props: {
-    message: {
-      type: [String, Array],
-      default: null,
-    },
-    type: {
-      type: String,
-      default: "danger",
-    },
-  },
-  computed: {
-    messages: function() {
-      if (Array.isArray(this.message)) {
-        return this.message;
-      } else if (this.message) {
-        return [this.message];
-      } else {
-        return null;
-      }
-    },
-    classes: function() {
-      return "alert alert-" + this.type;
-    },
-  },
-};
+<script setup lang="ts">
+import { computed } from 'vue'
+
+const props = withDefaults(
+  defineProps<{
+    message: string | string[] | undefined
+    type?: 'danger' | 'warning' | 'info' | 'secondary'
+  }>(),
+  {},
+)
+
+const messages = computed(() => {
+  if (Array.isArray(props.message)) {
+    return props.message
+  } else if (props.message) {
+    return [props.message]
+  } else {
+    return null
+  }
+})
+const classes = computed(() => 'alert alert-' + (props.type ?? 'secondary'))
 </script>

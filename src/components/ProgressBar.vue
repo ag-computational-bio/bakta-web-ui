@@ -1,40 +1,51 @@
 <template>
-  {{ title }}
-  <div class="progress">
-    <div
-      class="progress-bar bg-secondary"
-      :class="classes"
-      role="progressbar"
-      :style="'width: ' + progress.value + '%;'"
-      :aria-valuenow="progress.value"
-      :aria-valuemin="progress.min"
-      :aria-valuemax="progress.max"
-    >
-      <template v-if="showLabel"> {{ progress.value }} % </template>
+  <div>
+    <div v-if="progress.title">{{ progress.title }}</div>
+    <div class="progress">
+      <div
+        class="progress-bar bg-secondary"
+        :class="classes"
+        role="progressbar"
+        :style="'width: ' + _progress + '%;'"
+        :aria-valuenow="progress.value"
+        :aria-valuemin="progress.min"
+        :aria-valuemax="progress.max"
+      >
+        <template v-if="showLabel"> {{ _progress }} % </template>
+      </div>
     </div>
   </div>
 </template>
 
-<script>
-export default {
-  props: {
-    progress: {
-      type: Object,
-      default: () => ({ min: 0, max: 100, value: 0, type: "static" }),
-    },
-    title: String,
-    showLabel: { type: Boolean, default: false },
+<script setup lang="ts">
+import { computed } from 'vue'
+import type { Progress } from './progress'
+
+const props = withDefaults(
+  defineProps<{
+    progress: Progress
+    showLabel?: boolean
+  }>(),
+  {
+    showLabel: true,
   },
-  computed: {
-    classes: function () {
-      if (this.progress.type === "indeterminate") {
-        return "progress-bar-striped progress-bar-animated";
-      } else {
-        return "";
-      }
-    },
-  },
-};
+)
+
+const _progress = computed(() => {
+  const p = props.progress
+  const l = Math.abs(p.max - p.min)
+  const cur = p.value - p.min
+  const percent = Math.round((cur / l) * 100)
+  return percent
+})
+
+const classes = computed(() => {
+  if (props.progress.type === 'indeterminate') {
+    return 'progress-bar-striped progress-bar-animated'
+  } else {
+    return ''
+  }
+})
 </script>
 
 <style>

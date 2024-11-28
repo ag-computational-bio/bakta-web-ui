@@ -1,5 +1,4 @@
 <template>
-  <page-header page="About" />
   <div class="page-body flex-grow-1 ">
     <div class="container">
       <h2>General</h2>
@@ -44,15 +43,8 @@
       </p>
     </div>
   </div>
-  <page-footer />
 </template>
-<script>
-import PageHeader from "@/components/PageHeader";
-import PageFooter from "@/components/PageFooter";
-export default {
-  name: "About",
-  components: { PageHeader, PageFooter},
-};
+<script setup lang="ts">
 </script>
 <style scoped>
 .shield {

@@ -1,150 +1,153 @@
 <template>
-  <div ref="igv"></div>
+  <div ref="igvref"></div>
 </template>
 
-<script>
-import igv from "igv";
-import fasta from "biojs-io-fasta";
-import cog from "@/cog-helper";
-import bakta from "@/bakta-helper";
+<script setup lang="ts">
+import type { Result, Feature, Sequence } from '@/model/result-data'
+import type { IGVBrowser } from 'igv'
+import igv from 'igv'
+import { computed, onMounted, onBeforeUnmount, ref, watch, type PropType, type Ref } from 'vue'
+import bakta from '@/bakta-helper'
+import cog from '@/cog-helper'
 
-export default {
-  name: "IgvViewer",
-  props: {
-    data: { type: Object, default: () => {} },
-  },
-  watch: {
-    data: function() {
-      this.setupIgv();
-    },
-  },
-  computed: {
-    features: function() {
-      return this.data.features
-        .map((x) => {
-          return this.createFeatures(x, this.data.sequences);
-        })
-        .flat();
-    },
-    seqEntries: function() {
-      return this.data.sequences.map((x) => {
-        // In bakta <1.10 the sequence is stored in the sequence field
-        // In bakta >=1.10 the sequence is stored in the nt field
-        const sequence = x.sequence ?? x.nt;
-        return { name: x.id, seq: sequence };
-      });
-    },
-    fasta: function() {
-      return fasta.write(this.seqEntries);
-    },
-    fastaUrl: function() {
-      const blob = new Blob([this.fasta], { type: "text/plain" });
-      return URL.createObjectURL(blob);
-    },
-  },
-  data: function() {
-    return {
-      igv: null,
-    };
-  },
-  methods: {
-    setupIgv: function() {
-      const track = (name, types) => ({ name: name, types: types });
-      const featuretracks = [
-        track("CDS/sORF", ["cds", "sorf"]),
-        track("tRNA/tmRNA/rRNA", ["tRNA", "tmRNA", "rRNA"]),
-        track("ncRNA", ["ncRNA"]),
-        track("ncRNA-region", ["ncRNA-region"]),
-        track("CRISPR", ["crispr"]),
-        track("Gap", ["gap"]),
-        track("oriC/oriV/oriT", ["oriC", "oriV", "oriT"]),
-      ];
-      const tracks = [];
-      for (let t of featuretracks) {
-        const features =
-          this.features.filter((x) => t.types.some((y) => x.type === y)) || [];
-        tracks.push({
-          name: t.name,
-          type: "annotation",
-          features: features,
-        });
-      }
+const props = defineProps({
+  data: { type: Object as PropType<Result> },
+})
+const igvObj: Ref<IGVBrowser | undefined> = ref()
 
-      const config = {
-        reference: {
-          id: this.data.genome.genus,
-          fastaURL: this.fastaUrl,
-          indexed: false,
-          tracks: tracks,
-          wholeGenomeView: false,
-        },
-        loadDefaultGenomes: false,
-      };
-      igv.createBrowser(this.$refs.igv, config).then((x) => {
-        this.igv = x;
-      });
-    },
-    createFeatures: function(baktaEntry, sequences) {
-      // In bakta <1.10 the sequenceid is stored in contig field
-      // In bakta >=1.10 the sequenceid is stored in sequence field
-      const sequenceId = baktaEntry.contig ?? baktaEntry.sequence;
-      const feature = {
-        chr: sequenceId,
-        // Bakta coordinates are 1-based closed intervals, but igvjs uses zero based open intervals
-        // so we need to transform them here
-        start: baktaEntry.start - 1,
-        end: baktaEntry.stop,
-        strand: baktaEntry.strand,
-        type: baktaEntry.type,
-        color: this.color(baktaEntry),
-      };
+function color(feature: Feature) {
+  if (feature.type === 'cds') return cog.lookupCogColor(lookupCog(feature))
+  if (feature.type === 'tRNA') return 'rgb(255,0,0)'
+  if (feature.type === 'rRNA') return 'rgb(0,255,100)'
+  return 'rgb(100,0,0)'
+}
+function lookupCog(feature: Feature): string[] {
+  return bakta.lookupCogFunctionalCategories(feature)
+}
 
-      if ("locus" in baktaEntry) feature.locus = baktaEntry.locus || "";
-      if ("gene" in baktaEntry) feature.gene = baktaEntry.gene || "";
+type IgvFeature = {
+  chr: string
+  start: number
+  end: number
+  strand: string
+  type: string
+  color: string
+  locus?: string
+  gene?: string
+  product?: string
+  name?: string
+  cog?: string
+}
+function createFeatures(baktaEntry: Feature, sequences: Sequence[]): IgvFeature | IgvFeature[] {
+  const feature: IgvFeature = {
+    chr: baktaEntry.sequence,
+    // Bakta coordinates are 1-based closed intervals, but igvjs uses zero based open intervals
+    // so we need to transform them here
+    start: baktaEntry.start - 1,
+    end: baktaEntry.stop,
+    strand: baktaEntry.strand,
+    type: baktaEntry.type,
+    color: color(baktaEntry),
+  }
 
-      if ("product" in baktaEntry) feature.product = baktaEntry.product || "";
-      if ("product" in baktaEntry) feature.name = baktaEntry.product || "";
-      if ("cds" === baktaEntry.type) {
-        const cogs = this.lookupCog(baktaEntry);
-        if (cogs.length > 0) feature.cog = cog.lookupCogLabels(cogs);
-      }
+  if ('locus' in baktaEntry && baktaEntry) feature.locus = baktaEntry.locus || ''
+  if ('gene' in baktaEntry) feature.gene = baktaEntry.gene || ''
 
-      // split into two feature when end < start
-      if (baktaEntry.stop < baktaEntry.start) {
-        const seq = sequences.filter((s) => sequenceId === s.id)[0];
-        return [
-          { ...feature, start: feature.start, end: seq.length },
-          { ...feature, start: 0, end: feature.end },
-        ];
-      }
-      return feature;
+  if ('product' in baktaEntry) feature.product = baktaEntry.product || ''
+  if ('product' in baktaEntry) feature.name = baktaEntry.product || ''
+  if ('cds' === baktaEntry.type) {
+    const cogs = lookupCog(baktaEntry)
+    if (cogs.length > 0) feature.cog = cog.lookupCogLabels(cogs).join('<br>')
+  }
+
+  // split into two feature when end < start
+  if (baktaEntry.stop < baktaEntry.start) {
+    const seq = sequences.filter((s) => baktaEntry.sequence === s.id)[0]
+    return [
+      { ...feature, start: feature.start, end: seq.length },
+      { ...feature, start: 0, end: feature.end },
+    ]
+  }
+  return feature
+}
+const igvref = ref()
+function setupIgv() {
+  const track = (name: string, types: string[]) => ({
+    name: name,
+    types: types,
+  })
+  const featuretracks = [
+    track('CDS/sORF', ['cds', 'sorf']),
+    track('tRNA/tmRNA/rRNA', ['tRNA', 'tmRNA', 'rRNA']),
+    track('ncRNA', ['ncRNA']),
+    track('ncRNA-region', ['ncRNA-region']),
+    track('CRISPR', ['crispr']),
+    track('Gap', ['gap']),
+    track('oriC/oriV/oriT', ['oriC', 'oriV', 'oriT']),
+  ]
+  const tracks = []
+  for (const t of featuretracks) {
+    const ftrs = features.value.filter((x) => t.types.some((y) => x.type === y)) || []
+    tracks.push({
+      name: t.name,
+      type: 'annotation',
+      features: ftrs,
+    })
+  }
+
+  const config = {
+    reference: {
+      id: genus.value,
+      fastaURL: fastaUrl.value,
+      indexed: false,
+      tracks: tracks,
+      wholeGenomeView: false,
     },
-    refresh: function() {
-      if (this.igv) this.igv.visibilityChange();
-    },
-    lookupName: function(feature) {
-      if (feature.product) return feature.product;
-      else if (feature.gene) return feature.gene;
-      else return feature.locus;
-    },
-    lookupCogLabels: function(coglist) {
-      return cog.lookupCogLabels(coglist).join("<br>");
-    },
-    lookupCog(feature) {
-      return bakta.lookupCogFunctionalCategories(feature);
-    },
-    color: function(feature) {
-      if (feature.type === "cds")
-        return cog.lookupCogColor(this.lookupCog(feature));
-      if (feature.type === "tRNA") return "rgb(255,0,0)";
-      if (feature.type === "rRNA") return "rgb(0,255,100)";
-      return "rgb(100,0,0)";
-    },
-  },
-  mounted: function() {
-    this.setupIgv();
-  },
-};
+    loadDefaultGenomes: false,
+  }
+  igv.createBrowser(igvref.value, config).then((x) => {
+    igvObj.value = x
+  })
+}
+function destroyIgv() {
+  if (igvObj.value) {
+    igv.removeBrowser(igvObj.value)
+  }
+}
+
+function refresh() {
+  if (igvObj.value) igvObj.value.visibilityChange()
+}
+
+const features = computed(() => {
+  if (props.data === undefined) return []
+  const res = props.data
+  return props.data.features
+    .map((x) => {
+      return createFeatures(x, res.sequences)
+    })
+    .flat()
+})
+
+const seqEntries = computed(() => {
+  if (props.data === undefined) return []
+  return props.data.sequences.map((x) => {
+    return { name: x.id, seq: x.nt }
+  })
+})
+
+const fastaData = computed(() => {
+  return seqEntries.value.map((x) => `>${x.name}\n${x.seq}`).join('\n')
+})
+const fastaUrl = computed(() => {
+  const blob = new Blob([fastaData.value], { type: 'text/plain' })
+  return URL.createObjectURL(blob)
+})
+const genus = computed(() => {
+  if (props.data) return props.data.genome.genus
+  return ''
+})
+watch(() => props.data, refresh)
+onMounted(setupIgv)
+onBeforeUnmount(destroyIgv)
 </script>
-
-<style></style>

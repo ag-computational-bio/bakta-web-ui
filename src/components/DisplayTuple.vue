@@ -5,22 +5,21 @@
   </div>
 </template>
 
-<script>
-export default {
-  props: {
-    label: { type: String, default: "" },
-    value: { type: String, default: "" },
-    break: { type: Number, default: 4 },
+<script setup lang="ts">
+import { computed } from 'vue'
+
+const props = withDefaults(
+  defineProps<{
+    label: string
+    value: string | number
+    break?: number
+  }>(),
+  {
+    break: 4,
   },
-  computed: {
-    labelClass: function () {
-      return "col-md-" + this.break;
-    },
-    valueClass: function () {
-      return "col-md-" + (12 - this.break);
-    },
-  },
-};
+)
+const labelClass = computed(() => 'col-md-' + props.break)
+const valueClass = computed(() => 'col-md-' + (12 - props.break))
 </script>
 
 <style>

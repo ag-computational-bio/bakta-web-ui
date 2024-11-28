@@ -1,6 +1,5 @@
 <template>
-  <page-header page="Info" />
-  <div class="page-body flex-grow-1 ">
+  <div class="page-body flex-grow-1">
     <div class="container">
       <div class="row">
         <div class="col-sm-6">
@@ -45,13 +44,4 @@
   </div>
   <page-footer />
 </template>
-<script>
-import PageHeader from "@/components/PageHeader";
-import PageFooter from "@/components/PageFooter.vue";
-export default {
-  name: "Info",
-  components: { PageHeader, PageFooter },
-};
-</script>
-<style scoped>
-</style>
+<script setup lang="ts"></script>

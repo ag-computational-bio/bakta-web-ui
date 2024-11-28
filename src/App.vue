@@ -1,13 +1,15 @@
 <template>
   <div class="d-flex flex-column page">
+    <page-header :page="route.name" />
     <router-view />
+    <page-footer />
   </div>
 </template>
 
-<script>
-export default {
-  name: "App",
-};
+<script setup lang="ts">
+import { useRoute } from 'vue-router'
+
+const route = useRoute()
 </script>
 <style>
 .page {

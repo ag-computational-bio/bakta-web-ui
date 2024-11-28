@@ -1,5 +1,4 @@
 <template>
-  <page-header page="" />
   <div class="container flex-grow-1">
     <notification :message="error" />
     <progress-bar
@@ -8,11 +7,9 @@
       :title="loadingProgress.title"
     />
 
-    <div v-if="!loadingProgress.enabled && !error && data">
+    <div v-if="!loadingProgress.enabled && !error && data && result">
       <div class="mt-5">
-        <h4>
-          Job statistics
-        </h4>
+        <h4>Job statistics</h4>
         <div class="" id="stats">
           <div class="card card-body">
             <bakta-stats :data="data" :job="result" />
@@ -21,9 +18,7 @@
       </div>
       <hr />
       <div class="row">
-        <h4>
-          Genomeviewer
-        </h4>
+        <h4>Genomeviewer</h4>
         <div class="" id="genomeBrowser">
           <div class="card card-body">
             <bakta-genome-viewer ref="genomeview" :data="data" />
@@ -31,9 +26,7 @@
         </div>
       </div>
       <hr />
-      <h4>
-        Annotations
-      </h4>
+      <h4>Annotations</h4>
       <div class="" id="annotationTable">
         <div class="card card-body">
           <bakta-annotation-table :data="data" />
@@ -42,158 +35,107 @@
       <hr />
     </div>
   </div>
-  <page-footer />
 </template>
-<script>
-import PageHeader from "@/components/PageHeader";
-import PageFooter from "@/components/PageFooter.vue";
-import Notification from "@/components/Notification";
-import notifyFetchProgress from "@/notify-fetch-progress";
-import ProgressBar from "@/components/ProgressBar";
-import BaktaGenomeViewer from "@/components/BaktaGenomeViewer";
-import BaktaStats from "@/components/BaktaStats";
-import BaktaAnnotationTable from "@/components/BaktaAnnotationTable";
-import { expectOk } from "@/fetch-helper";
+<script setup lang="ts">
+import BaktaAnnotationTable from '@/components/BaktaAnnotationTable.vue'
+import BaktaGenomeViewer from '@/components/BaktaGenomeViewer.vue'
+import BaktaStats from '@/components/BaktaStats.vue'
+import Notification from '@/components/Notification.vue'
+import ProgressBar from '@/components/ProgressBar.vue'
+import { BaktaResultSchema, type BaktaResult } from '@/model/result-data'
+import { JobSchema, type JobResult } from '@/model/job'
+import type { JobInfo } from '@/model/submit'
+import notifyFetchProgress from '@/notify-fetch-progress'
+import { useBaktaService } from '@/page/page'
+import { onMounted, ref } from 'vue'
+import { useRoute } from 'vue-router'
 
-export default {
-  name: "Job",
-  components: {
-    PageHeader,
-    PageFooter,
-    ProgressBar,
-    BaktaGenomeViewer,
-    BaktaStats,
-    BaktaAnnotationTable,
-    Notification,
-  },
-  computed: {},
-  data: function() {
-    return {
-      job: null,
-      result: null,
-      pollInterval: 2000,
-      loadingProgress: {
-        enabled: true,
-        min: 0,
-        max: 100,
-        value: 0,
-        title: "Loading results...",
-      },
-      error: null,
-      data: {},
-    };
-  },
-  methods: {
-    handleError: function(err) {
-      this.error = err;
-    },
-    udpateJob: function() {
-      let token = this.$router.currentRoute.value.params.id;
-      if (token) {
-        try {
-          let job = JSON.parse(atob(token));
-          let vm = this;
-          this.$bakta
-            .job(job)
-            .then((x) => {
-              if (x.length > 0) {
-                vm.job = x[0];
-                vm.loadResult({ jobID: vm.job.jobID, secret: vm.job.secret });
-                this.planRefresh();
-              } else {
-                this.loadingProgress.enabled = false;
-                vm.handleError("Job not found.");
-              }
-            })
-            .catch(this.handleError);
-        } catch (err) {
-          this.loadingProgress.enabled = false;
-          console.error("Job token is not valid json.", atob(token));
-          this.handleError("Can't process job token. Invalid format.");
-        }
-      }
-    },
-    loadResult: function(job) {
-      this.$bakta
-        .result(job)
-        .then((x) => (this.result = x))
-        .then(() => {
-          if (
-            this.result &&
-            this.result.ResultFiles &&
-            this.result.ResultFiles.JSON
-          ) {
-            this.loadData(this.result.ResultFiles.JSON);
-          } else {
-            this.error = "No result found for job.";
-          }
-        });
-    },
-    loadData: function(url) {
-      this.loadingProgress.enabled = true;
-      this.loadingProgress.value = 0;
-      const vm = this;
-      window
-        .fetch(url)
-        .then(expectOk)
-        .then((response) =>
-          notifyFetchProgress(
-            response,
-            (x) => {
-              this.loadingProgress.value = Math.floor(x * 100);
-            },
-            () => {
-              this.loadingProgress.title =
-                "Processing data. This may take a while for larger genomes.";
-              this.loadingProgress.type = "indeterminate";
-            }
-          )
-        )
-        .then((stream) => new Response(stream))
-        .then((response) => response.text())
-        .then((text) => {
-          try {
-            vm.data = JSON.parse(text);
-            return Promise.resolve(vm.data);
-          } catch (ex) {
-            try {
-              vm.data = JSON.parse(text.replace(/:\s?NaN/g, ": null"));
-              return Promise.resolve(vm.data);
-            } catch (ex2) {
-              return Promise.reject(ex2);
-            }
-          }
+const job = ref<JobInfo>()
+const result = ref<JobResult>()
+const data = ref<BaktaResult>()
+const pollInterval = 2000
+const loadingProgress = ref<Progress & { enabled: boolean; title: string }>({
+  enabled: false,
+  min: 0,
+  max: 100,
+  value: 0,
+  title: 'Loading results...',
+  type: 'static',
+})
+const error = ref<string>()
+
+const bakta = useBaktaService()
+const route = useRoute()
+
+function loadJobData() {
+  const token = route.params.id
+  if (!(typeof token == 'string')) {
+    loadingProgress.value.enabled = false
+    handleError("Can't process job token. Invalid format.")
+    return
+  }
+  const jobToken = JobSchema.parse(JSON.parse(atob(token)))
+  bakta
+    .job(jobToken)
+    .then((j) => {
+      job.value = j
+      const status = job.value.jobStatus
+      if (status === 'SUCCESSFULL' || status === 'ERROR') {
+        //  jobs is in finished state. No retry required
+        console.debug('Jobs is finished or failed, no need to refresh', job.value)
+        return bakta.result(jobToken).then((r) => {
+          result.value = r
+          if (r.ResultFiles.JSON == undefined) throw 'No json result available'
+          return fetchResultFile(r.ResultFiles.JSON)
         })
-        .then(() => (this.loadingProgress.enabled = false))
-        .catch(vm.setError);
-    },
-    setError(err) {
-      this.error = err;
-      this.loadingProgress.enabled = false;
-    },
-    planRefresh: function() {
-      if (
-        this.job.jobStatus === "SUCCESSFULL" ||
-        this.job.jobStatus === "SUCCESFULL" ||
-        this.job.jobStatus === "ERROR"
-      ) {
-        //  jobs is in finished state. No polling needed anymore
-        console.debug(
-          "Jobs is finished or failed, no need to refresh",
-          this.job
-        );
       } else {
-        console.debug("Job is still running, need to refresh", this.job);
+        console.debug('Job is still running, need to refresh', job.value)
         // trigger reload
         window.setTimeout(() => {
-          this.udpateJob();
-        }, this.pollInterval);
+          loadJobData()
+        }, pollInterval)
       }
-    },
-  },
-  mounted: function() {
-    this.udpateJob();
-  },
-};
+    })
+    .catch(handleError)
+}
+function handleError(err: string) {
+  error.value = err
+}
+
+function fetchResultFile(url: string): Promise<BaktaResult> {
+  return fetch(url)
+    .then((response) =>
+      notifyFetchProgress(
+        response,
+        (x) => {
+          loadingProgress.value.value = Math.floor(x * 100)
+        },
+        () => {
+          loadingProgress.value.title = 'Processing data. This may take a while for larger genomes.'
+          loadingProgress.value.type = 'indeterminate'
+        },
+      ),
+    )
+    .then((stream) => new Response(stream))
+    .then((response) => response.text())
+    .then((text) => {
+      try {
+        const json = JSON.parse(text)
+        return BaktaResultSchema.parse(json)
+      } catch (ex) {
+        try {
+          const json = JSON.parse(text.replace(/:\s?NaN/g, ': null'))
+          return BaktaResultSchema.parse(json)
+        } catch (ex2) {
+          return Promise.reject(ex2)
+        }
+      }
+    })
+    .then((x) => {
+      loadingProgress.value.enabled = false
+      return x
+    })
+}
+onMounted(loadJobData)
 </script>
 <style scoped></style>
