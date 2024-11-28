@@ -28,7 +28,10 @@ export default {
     },
     seqEntries: function() {
       return this.data.sequences.map((x) => {
-        return { name: x.id, seq: x.sequence };
+        // In bakta <1.10 the sequence is stored in the sequence field
+        // In bakta >=1.10 the sequence is stored in the nt field
+        const sequence = x.sequence ?? x.nt;
+        return { name: x.id, seq: sequence };
       });
     },
     fasta: function() {
@@ -75,15 +78,18 @@ export default {
           tracks: tracks,
           wholeGenomeView: false,
         },
-        loadDefaultGenomes: false
+        loadDefaultGenomes: false,
       };
       igv.createBrowser(this.$refs.igv, config).then((x) => {
         this.igv = x;
       });
     },
     createFeatures: function(baktaEntry, sequences) {
+      // In bakta <1.10 the sequenceid is stored in contig field
+      // In bakta >=1.10 the sequenceid is stored in sequence field
+      const sequenceId = baktaEntry.contig ?? baktaEntry.sequence;
       const feature = {
-        chr: baktaEntry.contig,
+        chr: sequenceId,
         // Bakta coordinates are 1-based closed intervals, but igvjs uses zero based open intervals
         // so we need to transform them here
         start: baktaEntry.start - 1,
@@ -105,7 +111,7 @@ export default {
 
       // split into two feature when end < start
       if (baktaEntry.stop < baktaEntry.start) {
-        const seq = sequences.filter((s) => baktaEntry.contig === s.id)[0];
+        const seq = sequences.filter((s) => sequenceId === s.id)[0];
         return [
           { ...feature, start: feature.start, end: seq.length },
           { ...feature, start: 0, end: feature.end },
