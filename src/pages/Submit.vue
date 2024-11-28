@@ -60,9 +60,7 @@
                 placeholder="Locus prefix (optional)"
                 v-model="options.locus"
                 :pattern="locusValidation.regex"
-                :oninvalid="
-                  `this.setCustomValidity('${locusValidation.message}')`
-                "
+                :oninvalid="`this.setCustomValidity('${locusValidation.message}')`"
                 oninput="this.setCustomValidity('')"
               />
             </div>
@@ -74,9 +72,7 @@
                 placeholder="Locus tag prefix (optional)"
                 v-model="options.locus_tag"
                 :pattern="locusTagValidation.regex"
-                :oninvalid="
-                  `this.setCustomValidity('${locusTagValidation.message}')`
-                "
+                :oninvalid="`this.setCustomValidity('${locusTagValidation.message}')`"
                 oninput="this.setCustomValidity('')"
               />
             </div>
@@ -229,7 +225,7 @@
               </table>
             </div>
           </div>
-          <div class="row " v-if="!valid && !idsAreINSDCCompliant">
+          <div class="row" v-if="!valid && !idsAreINSDCCompliant">
             <div class="col">
               <div class="alert alert-danger">
                 The contig ids are not INSDC compliant.
@@ -292,7 +288,7 @@ export default {
   },
 
   methods: {
-    lookupTaxonomy: function(input, result) {
+    lookupTaxonomy: function (input, result) {
       window
         .fetch(
           "https://www.ebi.ac.uk/ena/taxonomy/rest/suggest-for-search/" + input
@@ -305,10 +301,11 @@ export default {
         });
     },
     setSequence(seq) {
-      this.sequence = seq;
+      // fix windows newline characters as the fasta parser has problems to handle them
+      this.sequence = seq.replaceAll("\r", "");
       this.loading = false;
     },
-    fastaFileChanged: function(name, file) {
+    fastaFileChanged: function (name, file) {
       let vm = this;
       this.sequenceFile = file.item(0);
       if (this.sequenceFile === null) {
@@ -319,15 +316,13 @@ export default {
           .catch((e) => (vm.error = e));
       }
     },
-    parseAndSetSeqquence: function() {
+    parseAndSetSeqquence: function () {
       try {
         let seq = fasta.parse(this.sequence);
-        // fix windows newline characters as the fasta parser has problems to handle them
-        seq.forEach((x) => (x.seq = x.seq.replaceAll("\r", "")));
 
         let valid = validateDna(seq);
         if (valid.valid) {
-          this.replicons = seq.map(function(x) {
+          this.replicons = seq.map(function (x) {
             return {
               id: x.name,
               length: x.seq.length,
@@ -351,7 +346,7 @@ export default {
         this.error = "Invalid fasta file. Please provide a valid fasta.";
       }
     },
-    readTextFile: function(file) {
+    readTextFile: function (file) {
       this.loading = true;
       this.sequence = null;
       const vm = this;
@@ -365,10 +360,10 @@ export default {
         });
       });
     },
-    prodigalFileChanged: function(name, file) {
+    prodigalFileChanged: function (name, file) {
       this.prodigalTrainingFile = file[0];
     },
-    submit: function() {
+    submit: function () {
       let vm = this;
 
       if (this.$refs.submitform.reportValidity()) {
@@ -427,7 +422,7 @@ export default {
         }
       }
     },
-    "options.completeGenome": function() {
+    "options.completeGenome": function () {
       let possibleTopologies = [];
       let possibleTypes = [];
       let newTopology = null;
