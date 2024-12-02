@@ -59,8 +59,8 @@ const navElements = ref([
 ])
 
 const nav = computed(() => {
-  let nav = []
-  for (let i of navElements.value) {
+  const nav = []
+  for (const i of navElements.value) {
     nav.push({
       label: i.label,
       href: i.href,
@@ -71,3 +71,8 @@ const nav = computed(() => {
   return nav
 })
 </script>
+<style>
+.nav-link.active {
+  font-weight: 600;
+}
+</style>

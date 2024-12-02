@@ -1,8 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/vue3'
 
+import { expect } from '@storybook/test'
 import NavBar from './NavBar.vue'
-import { expect, fn } from '@storybook/test'
-import { ref } from 'vue'
 const meta: Meta<typeof NavBar> = {
   component: NavBar,
 }
@@ -17,7 +16,7 @@ export const WithSelectedElement: Story = {
   args: {
     active: 'Jobs',
   },
-  play: async ({ canvas, step }) => {
+  play: async ({ canvas }) => {
     const el = canvas.getByText('Jobs')
     await expect(el).toHaveClass('active')
   },
