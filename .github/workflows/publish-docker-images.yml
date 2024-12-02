@@ -26,7 +26,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           push: true
-          tags: quay.io/agcomputationalbio/bakta-web-ui:${{GITHUB_REF_NAME}}
+          tags: quay.io/agcomputationalbio/bakta-web-ui:${{github.ref_name}}
           build-args: ""
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
