@@ -23,6 +23,7 @@ export const Default: Story = {
     await userEvent.type(el, '>123')
     await expect(el).toBeValid()
     await expect(args['onUpdate:sequences']).toHaveBeenLastCalledWith({
+      name: 'Manually entered sequence',
       sequence: '>123',
       parsed: [
         {

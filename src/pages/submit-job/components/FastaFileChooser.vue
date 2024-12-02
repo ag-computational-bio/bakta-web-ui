@@ -38,16 +38,17 @@ function fileUpdated(evt: Event) {
   if (evt.target instanceof HTMLInputElement) {
     const files = evt.target.files
     if (files == null || files.length == 0) {
-      emit('update:sequences', { sequence: '', parsed: [] })
+      emit('update:sequences', { sequence: '', parsed: [], name: '' })
     } else {
-      readFile(files.item(0) as File)
+      const file = files.item(0) as File
+      readFile(file)
         .then(({ sequence, parsed }) => {
-          emit('update:sequences', { sequence: sequence, parsed: parsed })
+          emit('update:sequences', { sequence: sequence, parsed: parsed, name: file.name })
         })
         .catch((err: string) => {
           error.value = 'Invalid fasta file: ' + err
           _progress.value = undefined
-          emit('update:sequences', { sequence: '', parsed: [] })
+          emit('update:sequences', { sequence: '', parsed: [], name: '' })
         })
     }
   }

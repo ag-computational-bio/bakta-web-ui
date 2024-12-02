@@ -6,6 +6,7 @@ export type Seq = {
 export type SequenceInput = {
   sequence: string
   parsed: Seq[]
+  name: string
 }
 
 export function parseFasta(input: string): Seq[] {

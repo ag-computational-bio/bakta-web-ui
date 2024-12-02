@@ -289,7 +289,7 @@ function updateParsedSequence(source: SequenceSource, s: SequenceInput) {
   if (s.parsed.length == 0) {
     seqSource.value = 'none'
     emit('update:valid', false)
-    updateRequest({ sequence: '', replicons: [] })
+    updateRequest({ sequence: '', replicons: [], jobName: '' })
   } else {
     validateSequences(s.parsed)
 
@@ -306,7 +306,7 @@ function updateParsedSequence(source: SequenceSource, s: SequenceInput) {
       })
     }
 
-    updateRequest({ sequence: s.sequence, replicons: replicons })
+    updateRequest({ sequence: s.sequence, replicons: replicons, jobName: s.name })
   }
 }
 

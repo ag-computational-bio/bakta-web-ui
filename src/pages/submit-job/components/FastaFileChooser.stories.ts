@@ -18,6 +18,7 @@ export const Default: Story = {
     const file = new File(['>1\naaa'], '1.fas')
     await userEvent.upload(filechooser, file, { applyAccept: false, delay: 10 })
     await expect(args['onUpdate:sequences']).toHaveBeenLastCalledWith({
+      name: '1.fas',
       sequence: '>1\naaa',
       parsed: [
         {
@@ -37,7 +38,11 @@ export const InvalidFile: Story = {
     const filechooser = canvasElement.querySelector('input') as HTMLInputElement
     const file = new File(['@@@'], '1.dat')
     await userEvent.upload(filechooser, file, { applyAccept: false, delay: 100 })
-    await expect(args['onUpdate:sequences']).toHaveBeenLastCalledWith({ sequence: '', parsed: [] })
+    await expect(args['onUpdate:sequences']).toHaveBeenLastCalledWith({
+      sequence: '',
+      parsed: [],
+      name: '',
+    })
     expect(canvas.queryByRole('progressbar')).toBe(null)
     expect(canvas.queryByText(/Invalid fasta file/)).toHaveTextContent('Invalid fasta file')
   },

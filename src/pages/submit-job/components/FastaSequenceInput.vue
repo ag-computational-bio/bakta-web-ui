@@ -29,9 +29,9 @@ const sequenceInput = computed({
       // ignore
     }
     if (p.length > 0) {
-      emit('update:sequences', { sequence: v, parsed: p })
+      emit('update:sequences', { sequence: v, parsed: p, name: 'Manually entered sequence' })
     } else {
-      emit('update:sequences', { sequence: '', parsed: [] })
+      emit('update:sequences', { sequence: '', parsed: [], name: '' })
       if (textarea.value) {
         if (v.trim().length !== 0) {
           textarea.value.setCustomValidity('Invalid fasta')
