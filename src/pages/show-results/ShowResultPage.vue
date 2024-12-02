@@ -1,13 +1,9 @@
 <template>
   <div class="container flex-grow-1">
     <notification :message="error" />
-    <progress-bar
-      v-if="loadingProgress.enabled"
-      :progress="loadingProgress"
-      :title="loadingProgress.title"
-    />
+    <ProgressBar v-if="loadingProgress" :progress="loadingProgress" />
 
-    <div v-if="!loadingProgress.enabled && !error && data && result">
+    <div v-if="!loadingProgress && !error && data && result">
       <div class="mt-5">
         <h4>Job statistics</h4>
         <div class="" id="stats">
@@ -41,9 +37,10 @@ import BaktaAnnotationTable from '@/components/BaktaAnnotationTable.vue'
 import BaktaGenomeViewer from '@/components/BaktaGenomeViewer.vue'
 import BaktaStats from '@/components/BaktaStats.vue'
 import Notification from '@/components/Notification.vue'
+import { useProgress, type Progress } from '@/components/progress'
 import ProgressBar from '@/components/ProgressBar.vue'
-import { BaktaResultSchema, type BaktaResult } from '@/model/result-data'
 import { JobSchema, type JobResult } from '@/model/job'
+import { parseBaktaData, type Result } from '@/model/result-data'
 import type { JobInfo } from '@/model/submit'
 import notifyFetchProgress from '@/notify-fetch-progress'
 import { useBaktaService } from '@/page/page'
@@ -52,16 +49,9 @@ import { useRoute } from 'vue-router'
 
 const job = ref<JobInfo>()
 const result = ref<JobResult>()
-const data = ref<BaktaResult>()
+const data = ref<Result>()
 const pollInterval = 2000
-const loadingProgress = ref<Progress & { enabled: boolean; title: string }>({
-  enabled: false,
-  min: 0,
-  max: 100,
-  value: 0,
-  title: 'Loading results...',
-  type: 'static',
-})
+const loadingProgress = ref<Progress>()
 const error = ref<string>()
 
 const bakta = useBaktaService()
@@ -70,7 +60,7 @@ const route = useRoute()
 function loadJobData() {
   const token = route.params.id
   if (!(typeof token == 'string')) {
-    loadingProgress.value.enabled = false
+    loadingProgress.value = undefined
     handleError("Can't process job token. Invalid format.")
     return
   }
@@ -102,37 +92,36 @@ function handleError(err: string) {
   error.value = err
 }
 
-function fetchResultFile(url: string): Promise<BaktaResult> {
+function fetchResultFile(url: string): Promise<Result> {
+  const { progress, updateProgress } = useProgress({ min: 0, max: 1 })
+  loadingProgress.value = progress
   return fetch(url)
     .then((response) =>
-      notifyFetchProgress(
-        response,
-        (x) => {
-          loadingProgress.value.value = Math.floor(x * 100)
-        },
-        () => {
+      notifyFetchProgress(response, updateProgress, () => {
+        if (loadingProgress.value) {
           loadingProgress.value.title = 'Processing data. This may take a while for larger genomes.'
           loadingProgress.value.type = 'indeterminate'
-        },
-      ),
+        }
+      }),
     )
     .then((stream) => new Response(stream))
     .then((response) => response.text())
     .then((text) => {
       try {
         const json = JSON.parse(text)
-        return BaktaResultSchema.parse(json)
-      } catch (ex) {
+        return parseBaktaData(json)
+      } catch {
         try {
           const json = JSON.parse(text.replace(/:\s?NaN/g, ': null'))
-          return BaktaResultSchema.parse(json)
+          return parseBaktaData(json)
         } catch (ex2) {
           return Promise.reject(ex2)
         }
       }
     })
     .then((x) => {
-      loadingProgress.value.enabled = false
+      if (loadingProgress.value) loadingProgress.value = undefined
+      data.value = x
       return x
     })
 }

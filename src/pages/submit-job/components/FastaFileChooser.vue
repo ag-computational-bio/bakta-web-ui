@@ -16,7 +16,7 @@
 import Notification from '@/components/Notification.vue'
 import { useProgress, type Progress } from '@/components/progress'
 import ProgressBar from '@/components/ProgressBar.vue'
-import { parseFasta, type Seq } from '@/fasta/parse-fasta'
+import { parseFasta, type Seq, type SequenceInput } from '@/fasta/parse-fasta'
 import read_gzip_file from '@/read-file-with-progress'
 import { ref, useTemplateRef } from 'vue'
 const props = withDefaults(
@@ -25,9 +25,9 @@ const props = withDefaults(
   }>(),
   {},
 )
+
 const emit = defineEmits<{
-  (e: 'update:sequence', v: string): void
-  (e: 'update:sequences', v: Seq[]): void
+  (e: 'update:sequences', v: SequenceInput): void
 }>()
 
 const _progress = ref<Progress>()
@@ -38,19 +38,16 @@ function fileUpdated(evt: Event) {
   if (evt.target instanceof HTMLInputElement) {
     const files = evt.target.files
     if (files == null || files.length == 0) {
-      emit('update:sequence', '')
-      emit('update:sequences', [])
+      emit('update:sequences', { sequence: '', parsed: [] })
     } else {
       readFile(files.item(0) as File)
         .then(({ sequence, parsed }) => {
-          emit('update:sequence', sequence)
-          emit('update:sequences', parsed)
+          emit('update:sequences', { sequence: sequence, parsed: parsed })
         })
         .catch((err: string) => {
           error.value = 'Invalid fasta file: ' + err
           _progress.value = undefined
-          emit('update:sequence', '')
-          emit('update:sequences', [])
+          emit('update:sequences', { sequence: '', parsed: [] })
         })
     }
   }

@@ -5,6 +5,7 @@ import {
   type InitRequest,
   type InitResponse,
   type ListResponse,
+  type StartRequest,
 } from './submit'
 import { VersionSchema, type Version } from './Version'
 
@@ -13,7 +14,7 @@ export interface BaktaApi {
   initJob(req: InitRequest): Promise<InitResponse>
   listJob(req: Job[]): Promise<ListResponse>
   jobResult(req: Job): Promise<JobResult>
-  startJob(req: Job): Promise<void>
+  startJob(req: StartRequest): Promise<void>
   getVersions(): Promise<Version>
 }
 
@@ -57,9 +58,12 @@ class BaktaApiImpl implements BaktaApi {
       JobResultSchema.parse(j),
     )
   }
-  startJob(req: Job): Promise<void> {
+  startJob(req: StartRequest): Promise<void> {
     return fetch(this.baseUrl + '/job/start', {
       method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
       body: JSON.stringify(req),
     }).then((r) => {
       if (r.ok) return
@@ -73,7 +77,7 @@ class BaktaApiImpl implements BaktaApi {
   }
 
   delete(j: Job): Promise<void> {
-    return fetch(this.baseUrl + `/delete?jobID=${j.jobId}&secret=${j.secret}`, {
+    return fetch(this.baseUrl + `/delete?jobID=${j.jobID}&secret=${j.secret}`, {
       method: 'DELETE',
     }).then((x) => {
       if (!x.ok) return Promise.reject('Deletion failed')

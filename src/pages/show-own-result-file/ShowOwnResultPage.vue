@@ -56,13 +56,19 @@ import BaktaGenomeViewer from '@/components/BaktaGenomeViewer.vue'
 import BaktaStats from '@/components/BaktaStats.vue'
 import BaktaAnnotationTable from '@/components/BaktaAnnotationTable.vue'
 import { computed, ref } from 'vue'
-import type { BaktaResult } from '@/model/result-data'
+import { parseBaktaData, type Result } from '@/model/result-data'
 import { type JobResult } from '@/model/job'
 import type { Progress } from '@/components/progress'
 
-const data = ref<BaktaResult>()
+const data = ref<Result>()
 const job = computed<JobResult>(() => {
-  return { jobID: '', name: '', ResultFiles: {}, started: '', updated: '' }
+  return {
+    jobID: '',
+    name: '',
+    ResultFiles: {},
+    started: new Date().toISOString(),
+    updated: new Date().toISOString(),
+  }
 })
 const loadingProgress = ref<Progress & { enabled: boolean; title: string }>({
   enabled: false,
@@ -96,7 +102,9 @@ function loadData(file: File) {
       setError('Loading data failed')
       return
     }
-    data.value = JSON.parse(event.target.result)
+    const json = JSON.parse(event.target.result)
+    const parsed = parseBaktaData(json)
+    data.value = parsed
     loadingProgress.value.enabled = false
   }
   reader.readAsText(file)

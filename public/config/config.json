@@ -1,4 +1,4 @@
 {
-  "api": "https://api.bakta.computational.bio",
+  "api": "https://api.bakta.computational.bio/api/v1",
   "token": null
 }

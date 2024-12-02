@@ -3,15 +3,19 @@
     <FastaSequenceInput
       v-if="seqSource == 'none' || seqSource == 'text'"
       ref="fastaSequenceInput"
-      @update:sequence="updateSequence"
       @update:sequences="(evt) => updateParsedSequence('text', evt)"
     />
     <FastaFileChooser
       v-if="seqSource == 'none' || seqSource == 'file'"
       ref="fastaFileInput"
       :class="seqSource == 'none' ? 'mt-3' : ''"
-      @update:sequence="updateSequence"
       @update:sequences="(evt) => updateParsedSequence('file', evt)"
+    />
+    <Notification
+      class="mt-2"
+      v-if="validationError.length > 0"
+      :message="validationError"
+      type="warning"
     />
   </div>
   <div v-if="seqSource != 'none'" class="d-flex justify-content-end">
@@ -122,7 +126,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import type { Seq } from '@/fasta/parse-fasta'
+import type { Seq, SequenceInput } from '@/fasta/parse-fasta'
 import { createBaktaJobRequest, type BaktaJobRequest, type Replicon } from '@/model/bakta-service'
 import type { JobConfig } from '@/model/submit'
 import { computed, ref, useTemplateRef } from 'vue'
@@ -134,19 +138,23 @@ import LocusInput from './LocusInput.vue'
 import LocusTagInput from './LocusTagInput.vue'
 import SelectDermType from './SelectDermType.vue'
 import SelectTranslationTable from './SelectTranslationTable.vue'
+import { validateDna } from '@/fasta/validate-fasta'
+import Notification from '@/components/Notification.vue'
 
 const props = defineProps<{
   modelValue: BaktaJobRequest
 }>()
 const emit = defineEmits<{
   (e: 'update:modelValue', v: BaktaJobRequest): void
+  (e: 'update:valid', v: boolean): void
 }>()
 
 type SequenceSource = 'none' | 'text' | 'file'
 
 const seqSource = ref<SequenceSource>('none')
 const sequenceSelected = computed(() => seqSource.value != 'none')
-
+const parsed = ref<Seq[]>([])
+const validationError = ref<string[]>([])
 const config = computed(() => props.modelValue.config)
 
 function updateConfig(update: Partial<JobConfig>) {
@@ -169,7 +177,35 @@ const locus_tag = computed({
 })
 const completeGenome = computed({
   get: () => config.value.completeGenome,
-  set: (v) => updateConfig({ completeGenome: v }),
+  set: (v) => {
+    let possibleTopologies = []
+    let possibleTypes = []
+    let newTopology = null
+    let newType = null
+
+    if (v) {
+      possibleTypes = ['chromosome', 'plasmid']
+      possibleTopologies = ['c']
+      newTopology = 'c'
+      newType = 'chromosome'
+    } else {
+      possibleTypes = ['contig']
+      possibleTopologies = ['l']
+      newTopology = 'l'
+      newType = 'contig'
+    }
+
+    const repliconsUpdate: Replicon[] = []
+
+    for (const oldReplicon of replicons.value) {
+      const copy = { ...oldReplicon }
+      if (!possibleTypes.some((y) => oldReplicon.type === y)) copy.type = newType
+      if (!possibleTopologies.some((y) => oldReplicon.topology === y)) copy.topology = newTopology
+      repliconsUpdate.push(copy)
+    }
+
+    updateRequest({ replicons: repliconsUpdate, config: { ...config.value, completeGenome: v } })
+  },
 })
 const keepContigHeaders = computed({
   get: () => config.value.keepContigHeaders,
@@ -221,10 +257,9 @@ const idsAreINSDCCompliant = computed(() => {
 })
 
 const valid = computed(() => {
-  // return true
   const emptySequence = props.modelValue.sequence.length == 0
   if (keepContigHeaders.value || compliant.value) return idsAreINSDCCompliant.value
-  return emptySequence
+  return !emptySequence
 })
 
 function updateProdigalFile(evt: Event) {
@@ -237,27 +272,41 @@ function updateProdigalFile(evt: Event) {
     }
   }
 }
-function updateSequence(s: string) {
-  updateRequest({ sequence: s })
+function validateSequences(seqs: Seq[]) {
+  const messages = []
+  const dna = validateDna(seqs)
+  if (!dna.valid) messages.push(...dna.messages)
+  for (const s of seqs) {
+    if (s.sequence.length < 1) messages.push(`The sequence ${s.id} has no content`)
+  }
+  validationError.value = messages
+  emit('update:valid', messages.length == 0)
 }
-function updateParsedSequence(source: SequenceSource, s: Seq[]) {
-  if (s.length == 0) {
+
+function updateParsedSequence(source: SequenceSource, s: SequenceInput) {
+  parsed.value = s.parsed
+  validationError.value = []
+  if (s.parsed.length == 0) {
     seqSource.value = 'none'
-    updateRequest({ replicons: [] })
+    emit('update:valid', false)
+    updateRequest({ sequence: '', replicons: [] })
   } else {
+    validateSequences(s.parsed)
+
     seqSource.value = source
     const replicons: Replicon[] = []
-    for (const seq of s) {
+    for (const seq of s.parsed) {
       replicons.push({
         id: seq.id,
         new: '',
         length: seq.sequence.length,
         name: '',
-        topology: 'linear',
+        topology: 'l',
         type: 'contig',
       })
     }
-    updateRequest({ replicons: replicons })
+
+    updateRequest({ sequence: s.sequence, replicons: replicons })
   }
 }
 
@@ -278,6 +327,7 @@ function lookupGenusSpecies(n: string) {
 const fastaSequenceInput = useTemplateRef('fastaSequenceInput')
 const fastaFileInput = useTemplateRef('fastaFileInput')
 function reset() {
+  parsed.value = []
   fastaSequenceInput.value?.reset()
   fastaFileInput.value?.reset()
   seqSource.value = 'none'

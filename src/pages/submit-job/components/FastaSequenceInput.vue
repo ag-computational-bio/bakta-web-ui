@@ -9,12 +9,11 @@
   ></textarea>
 </template>
 <script setup lang="ts">
-import { parseFasta, type Seq } from '@/fasta/parse-fasta'
+import { parseFasta, type Seq, type SequenceInput } from '@/fasta/parse-fasta'
 import { computed, ref, useTemplateRef } from 'vue'
 
 const emit = defineEmits<{
-  (e: 'update:sequence', v: string): void
-  (e: 'update:sequences', v: Seq[]): void
+  (e: 'update:sequences', v: SequenceInput): void
 }>()
 
 const input = ref('')
@@ -30,11 +29,9 @@ const sequenceInput = computed({
       // ignore
     }
     if (p.length > 0) {
-      emit('update:sequence', v)
-      emit('update:sequences', p)
+      emit('update:sequences', { sequence: v, parsed: p })
     } else {
-      emit('update:sequence', '')
-      emit('update:sequences', [])
+      emit('update:sequences', { sequence: '', parsed: [] })
       if (textarea.value) {
         if (v.trim().length !== 0) {
           textarea.value.setCustomValidity('Invalid fasta')

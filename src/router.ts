@@ -1,13 +1,12 @@
-import { createWebHistory, createRouter } from 'vue-router'
-import Citation from '@/pages/Citation.vue'
-import About from '@/pages/About.vue'
-import Submit from '@/pages/Submit.vue'
-import Jobs from '@/pages/Jobs.vue'
-import Job from '@/pages/Job.vue'
-import Viewer from '@/pages/Viewer.vue'
-import Info from '@/pages/Info.vue'
-
-import NotFound from '@/pages/NotFound.vue'
+import About from '@/pages/AboutPage.vue'
+import Citation from '@/pages/CitationPage.vue'
+import Info from '@/pages/InfoPage.vue'
+import NotFound from '@/pages/NotFoundPage.vue'
+import Submit from '@/pages/submit-job/SubmitJobPage.vue'
+import ShowOwnResultPage from '@/pages/show-own-result-file/ShowOwnResultPage.vue'
+import { createRouter, createWebHistory } from 'vue-router'
+import ListJobsPage from './pages/show-job-list/ListJobsPage.vue'
+import ShowResultPage from './pages/show-results/ShowResultPage.vue'
 
 const routes = [
   {
@@ -33,17 +32,17 @@ const routes = [
   {
     path: '/jobs',
     name: 'Jobs',
-    component: Jobs,
+    component: ListJobsPage,
   },
   {
     path: '/job/:id',
     name: 'Job',
-    component: Job,
+    component: ShowResultPage,
   },
   {
     path: '/viewer',
     name: 'Viewer',
-    component: Viewer,
+    component: ShowOwnResultPage,
   },
   {
     path: '/submit',

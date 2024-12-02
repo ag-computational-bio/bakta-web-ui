@@ -3,6 +3,10 @@ export type Seq = {
   id: string
   sequence: string
 }
+export type SequenceInput = {
+  sequence: string
+  parsed: Seq[]
+}
 
 export function parseFasta(input: string): Seq[] {
   const lines = input.split(/\n|\r|\n\r/)

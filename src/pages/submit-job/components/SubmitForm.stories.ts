@@ -53,6 +53,15 @@ export const Default: Story = {
       await userEvent.clear(fastaTextInput)
     })
 
+    await step('Form shows warning when fasta contains invalid characters', async () => {
+      await userEvent.clear(fastaTextInput)
+      await userEvent.type(fastaTextInput, '>1\n;2')
+      await expect(canvas.queryByText(/Invalid dna character ';'/)).toHaveTextContent(
+        "Invalid dna character ';'",
+      )
+      await userEvent.clear(fastaTextInput)
+    })
+
     const fileInput = canvasElement.querySelector('input[type="file"]') as HTMLInputElement
     await step('Form is visible when fasta file is selected', async () => {
       await userEvent.clear(fastaTextInput)
