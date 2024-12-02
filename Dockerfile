@@ -1,9 +1,9 @@
-FROM node:16-alpine as builder
+FROM mcr.microsoft.com/playwright:v1.49.0-noble as builder
 
 COPY . /src
 WORKDIR /src
-RUN apk update && apk add git
-RUN npm i
+RUN npm ci
+RUN npx vitest --run
 RUN npm run build
 
 FROM nginx:stable-alpine

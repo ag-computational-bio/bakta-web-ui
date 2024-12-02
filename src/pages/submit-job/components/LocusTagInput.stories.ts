@@ -1,8 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/vue3'
 
-import LocusTagInput from './LocusTagInput.vue'
 import { expect, fn, userEvent } from '@storybook/test'
-import { ref } from 'vue'
+import LocusTagInput from './LocusTagInput.vue'
 const meta: Meta<typeof LocusTagInput> = {
   component: LocusTagInput,
 }
@@ -14,8 +13,9 @@ export const Default: Story = {
   args: {
     modelValue: 'XXX',
     'onUpdate:modelValue': fn(),
+    compliant: true,
   },
-  play: async ({ canvas, step }) => {
+  play: async ({ canvas }) => {
     const el = canvas.getByRole('textbox')
     async function insert(t: string) {
       await userEvent.clear(el)

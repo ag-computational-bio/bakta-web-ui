@@ -10,7 +10,9 @@ export default meta
 type Story = StoryObj<typeof NavBar>
 
 export const Default: Story = {
-  args: {},
+  args: {
+    active: '/',
+  },
 }
 export const WithSelectedElement: Story = {
   args: {

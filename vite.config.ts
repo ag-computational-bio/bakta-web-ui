@@ -12,7 +12,4 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
-  server: {
-    proxy: { '/api': 'https://api.bakta.computational.bio/api/v1/' },
-  },
 })

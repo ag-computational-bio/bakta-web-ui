@@ -21,7 +21,7 @@ import read_gzip_file from '@/read-file-with-progress'
 import { ref, useTemplateRef } from 'vue'
 const props = withDefaults(
   defineProps<{
-    class: string
+    class?: string
   }>(),
   {},
 )
