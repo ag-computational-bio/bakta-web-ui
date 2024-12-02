@@ -1,5 +1,5 @@
-import baktaResult_post_1_10 from '@/bakta-result-post-1_10.json'
-import baktaResult_pre_1_10 from '@/bakta-result-pre-1_10.json'
+import baktaResult_post_1_10 from '@/test-data/bakta-result-post-1_10.json'
+import baktaResult_pre_1_10 from '@/test-data/bakta-result-pre-1_10.json'
 import { describe, expect, it } from 'vitest'
 import { safeParseResult } from './result-data'
 
