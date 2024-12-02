@@ -1,7 +1,6 @@
 import 'bootstrap'
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-icons/font/bootstrap-icons.css'
-import { expectJson } from './fetch-helper'
 import { createApp } from 'vue'
 import App from './page/App.vue'
 import router from './router'
@@ -23,7 +22,7 @@ function init(config: Config) {
 
 window
   .fetch('/config/config.json')
-  .then(expectJson)
+  .then((r) => r.json())
   .then(ConfigSchema.parse)
   .then((j) => init(j))
   .catch(
