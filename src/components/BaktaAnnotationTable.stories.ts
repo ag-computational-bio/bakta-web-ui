@@ -12,12 +12,17 @@ type Story = StoryObj<typeof BaktaAnnotationTable>
 
 export const BaktaPre1_10Data: Story = {
   args: {
-    data: fixtures.result['<1.10'],
+    data: fixtures.result['<1.9'],
   },
 }
 
 export const Bakta1_10Data: Story = {
   args: {
     data: fixtures.result['1.10'],
+  },
+}
+export const Bakta1_9Data: Story = {
+  args: {
+    data: fixtures.result['1.9'],
   },
 }
