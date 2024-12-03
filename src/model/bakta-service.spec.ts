@@ -130,16 +130,18 @@ describe('bakta service', () => {
     const storage = new SimpleJobStorage()
     it('should make api call and pass the jobinfo to the caller', async () => {
       const api: BaktaApi = createBaktaApi('')
-      const mock = vi.fn(api.listJob).mockResolvedValue({ failedJobs: [], jobs: [job('A')] })
+      const res = { failedJobs: [], jobs: [job('A')] }
+      const mock = vi.fn(api.listJob).mockResolvedValue(res)
       api.listJob = mock
       const service = createBaktaService(api, storage)
-      await expect(service.job(fixtures.A)).resolves.to.deep.eq(job('A'))
+      await expect(service.job(fixtures.A)).resolves.to.deep.eq(res.jobs[0])
       expect(mock).toHaveBeenCalledOnce()
       expect(mock).toHaveBeenCalledWith([fixtures.A])
     })
     it('should make api call and fail when the job does not exist', async () => {
       const api: BaktaApi = createBaktaApi('')
-      const mock = vi.fn(api.listJob).mockResolvedValue({ failedJobs: [failed('A')], jobs: [] })
+      const res = { failedJobs: [failed('A')], jobs: [] }
+      const mock = vi.fn(api.listJob).mockResolvedValue(res)
       api.listJob = mock
       const service = createBaktaService(api, storage)
       await expect(service.job(fixtures.A)).rejects.toThrow()
