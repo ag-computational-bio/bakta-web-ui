@@ -13,14 +13,14 @@
         accept=".json"
       />
     </div>
-    <notification :message="error" />
+    <notification type="danger" :message="error" />
     <progress-bar
       v-if="loadingProgress.enabled"
       :progress="loadingProgress"
       :title="loadingProgress.title"
     />
 
-    <div v-if="!loadingProgress.enabled && !error && data">
+    <div v-if="!loadingProgress.enabled && data">
       <div class="mt-5">
         <h4>Job statistics</h4>
         <div class="" id="stats">
@@ -91,6 +91,7 @@ function jsonFileChanged(evt: Event) {
 }
 
 function loadData(file: File) {
+  error.value = undefined
   loadingProgress.value.enabled = true
   loadingProgress.value.value = 0
   loadingProgress.value.title = 'Processing data. This may take a while for larger genomes.'
@@ -102,9 +103,14 @@ function loadData(file: File) {
       setError('Loading data failed')
       return
     }
-    const json = JSON.parse(event.target.result)
-    const parsed = parseBaktaData(json)
-    data.value = parsed
+    try {
+      const json = JSON.parse(event.target.result)
+      const parsed = parseBaktaData(json)
+      data.value = parsed
+    } catch (err) {
+      console.error(err)
+      setError('The provided file output is not supported')
+    }
     loadingProgress.value.enabled = false
   }
   reader.readAsText(file)
