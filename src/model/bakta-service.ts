@@ -60,6 +60,7 @@ export interface BaktaService {
   removeOutdatedJobs(): Promise<void>
   job(job: Job): Promise<JobInfo>
   result(job: Job): Promise<JobResult>
+  removeJob(jobID: string): Promise<void>
 }
 
 function generateRepliconTable(replicons: Replicon[]): string {
@@ -70,12 +71,21 @@ class BaktaServiceImpl implements BaktaService {
   #api: BaktaApi
   #storage: BaktaJobStorage
 
-  constructor(baktaApi: BaktaApi) {
+  constructor(baktaApi: BaktaApi, storage?: BaktaJobStorage) {
     this.#api = baktaApi
-    this.#storage = useJobStorage()
+    this.#storage = storage ?? useJobStorage()
   }
   removeOutdatedJobs(): Promise<void> {
-    throw new Error('Method not implemented.')
+    const jobs = this.#storage.get()
+    return this.listJobs().then((resp) => {
+      const availableJobIds = new Set()
+      for (const j of resp) {
+        if (j.jobStatus !== 'NOT_FOUND') availableJobIds.add(j.jobID)
+      }
+      const availableJobs = jobs.filter((x) => availableJobIds.has(x.jobID))
+      this.#storage.save(availableJobs)
+      return
+    })
   }
   submitJob(request: BaktaJobRequest): Promise<void> {
     return this.#api.initJob({ name: request.jobName, repliconTableType: 'TSV' }).then((job) => {
@@ -107,6 +117,7 @@ class BaktaServiceImpl implements BaktaService {
   }
   listJobs(): Promise<JobList> {
     const allJobs = this.#storage.get()
+    if (allJobs.length == 0) return Promise.resolve([])
     const jobIdx: Record<string, Job> = {}
     for (const j of allJobs) {
       jobIdx[j.jobID] = j
@@ -121,23 +132,22 @@ class BaktaServiceImpl implements BaktaService {
   }
 
   job(job: Job): Promise<JobInfo> {
-    return this.#api.listJob([job]).then((x) =>
-      x.jobs.length > 0
-        ? x.jobs[0]
-        : {
-            jobID: job.jobID,
-            jobStatus: 'ERROR',
-            name: '',
-            started: new Date().toISOString(),
-            updated: new Date().toISOString(),
-          },
-    )
+    return this.#api
+      .listJob([job])
+      .then((x) => (x.jobs.length > 0 ? x.jobs[0] : Promise.reject('Job not found')))
   }
   result(job: Job): Promise<JobResult> {
     return this.#api.jobResult(job)
   }
+  removeJob(jobID: string): Promise<void> {
+    const jobs = this.#storage.get()
+    const idx = jobs.findIndex((x) => x.jobID === jobID)
+    if (idx < 0) return Promise.reject('Job not found')
+    const job = jobs[idx]
+    return this.#api.delete(job)
+  }
 }
 
-export function createBaktaService(baktaApi: BaktaApi) {
-  return new BaktaServiceImpl(baktaApi)
+export function createBaktaService(baktaApi: BaktaApi, storage?: BaktaJobStorage) {
+  return new BaktaServiceImpl(baktaApi, storage)
 }
