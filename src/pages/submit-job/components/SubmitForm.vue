@@ -126,7 +126,9 @@
   </div>
 </template>
 <script setup lang="ts">
+import Notification from '@/components/Notification.vue'
 import type { Seq, SequenceInput } from '@/fasta/parse-fasta'
+import { validateDna } from '@/fasta/validate-fasta'
 import { createBaktaJobRequest, type BaktaJobRequest, type Replicon } from '@/model/bakta-service'
 import type { JobConfig } from '@/model/submit'
 import { computed, ref, useTemplateRef } from 'vue'
@@ -138,8 +140,6 @@ import LocusInput from './LocusInput.vue'
 import LocusTagInput from './LocusTagInput.vue'
 import SelectDermType from './SelectDermType.vue'
 import SelectTranslationTable from './SelectTranslationTable.vue'
-import { validateDna } from '@/fasta/validate-fasta'
-import Notification from '@/components/Notification.vue'
 
 const props = defineProps<{
   modelValue: BaktaJobRequest
@@ -288,6 +288,7 @@ function updateParsedSequence(source: SequenceSource, s: SequenceInput) {
   validationError.value = []
   if (s.parsed.length == 0) {
     seqSource.value = 'none'
+    parsed.value = []
     emit('update:valid', false)
     updateRequest({ sequence: '', replicons: [], jobName: '' })
   } else {
@@ -319,7 +320,6 @@ function lookupGenusSpecies(n: string) {
     .fetch('https://www.ebi.ac.uk/ena/taxonomy/rest/suggest-for-search/' + n)
     .then((r) => r.json())
     .then((j) => {
-      console.log(j)
       return j.map((x: EbiTaxonomySuggestion) => x.scientificName)
     })
 }
