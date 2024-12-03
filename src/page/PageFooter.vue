@@ -4,18 +4,21 @@
       <div class="row">
         <hr />
       </div>
-      <div class="row">
-        <div class="col">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
           <a href="http://www.computational.bio/" target="_blank"
-            ><img src="@/assets/logo-cb.svg" alt="Computational Biology" style="height: 120px"
+            ><img
+              src="@/assets/logo-cb.svg"
+              alt="Computational Biology"
+              style="width: 120px; height: 120px"
           /></a>
         </div>
-        <div class="col">
+        <div>
           <a href="http://www.denbi.de/" target="_blank"
             ><img src="@/assets/logo-denbi.svg" alt="deNBI" style="height: 80px"
           /></a>
         </div>
-        <div class="col"></div>
+        <div style="width: 120px; height: 120px"></div>
       </div>
     </div>
   </footer>
