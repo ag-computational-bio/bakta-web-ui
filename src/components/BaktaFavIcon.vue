@@ -7,7 +7,7 @@ import * as d3 from 'd3'
 const colors = {
   green: '#719049',
   orange: '#8a401d',
-  darkgrey: '#232323',
+  darkgrey: '#404040',
 }
 const data = [
   { start: 12, end: 45, dir: '+', color: colors.darkgrey },

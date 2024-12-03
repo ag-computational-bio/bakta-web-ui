@@ -1,0 +1,97 @@
+{
+  "genome": {
+    "genus": null,
+    "species": null,
+    "strain": null,
+    "complete": false,
+    "gram": "?",
+    "translation_table": 11
+  },
+  "stats": {
+    "no_sequences": 111,
+    "size": 4027690,
+    "gc": 0.4746544545384575,
+    "n_ratio": 0.0,
+    "n50": 199013,
+    "coding_ratio": 0.8777607015435647
+  },
+  "features": [
+    {
+      "type": "cds",
+      "contig": "SAMD00059641.contig00100",
+      "start": 49,
+      "stop": 216,
+      "strand": "+",
+      "frame": 1,
+      "gene": null,
+      "product": "hypothetical protein",
+      "db_xrefs": [
+        "RefSeq:WP_000170632.1",
+        "SO:0001217",
+        "UniParc:UPI00000C2FCD",
+        "UniRef:UniRef100_A0A0H3AIU8",
+        "UniRef:UniRef50_A0A0H3AIU8",
+        "UniRef:UniRef90_A0A0H3AIU8"
+      ],
+      "nt": "ATGACTAAATACGTGCGGCTCAACAATGTCGGAGCTGCTTGGATTAAGTCAACCAGAGAAAAAATGTTCCTAGTGCGCATTATGTATGTAGAGAAAGTGAAGACTACGAAACACAAACCAAGCTTAACCGCTTGGTTTTTCTATTTTTATATCCCTAAAACATCGTAA",
+      "aa": "MTKYVRLNNVGAAWIKSTREKMFLVRIMYVEKVKTTKHKPSLTAWFFYFYIPKTS",
+      "aa_hexdigest": "3d9aa71a1339ec3befec91689064a212",
+      "start_type": "ATG",
+      "rbs_motif": "AGGA",
+      "ups": {
+        "uniparc_id": "UPI00000C2FCD",
+        "ncbi_nrp_id": "WP_000170632.1",
+        "uniref100_id": "UniRef100_A0A0H3AIU8",
+        "db_xrefs": [
+          "SO:0001217",
+          "UniParc:UPI00000C2FCD",
+          "RefSeq:WP_000170632.1",
+          "UniRef:UniRef100_A0A0H3AIU8"
+        ]
+      },
+      "ips": {
+        "uniref100_id": "UniRef100_A0A0H3AIU8",
+        "uniref90_id": "UniRef90_A0A0H3AIU8"
+      },
+      "psc": {
+        "uniref90_id": "UniRef90_A0A0H3AIU8",
+        "uniref50_id": "UniRef50_A0A0H3AIU8"
+      },
+      "pscc": {
+        "uniref50_id": "UniRef50_A0A0H3AIU8",
+        "db_xrefs": ["SO:0001217", "UniRef:UniRef50_A0A0H3AIU8"]
+      },
+      "hypothetical": true,
+      "genes": [],
+      "seq_stats": {
+        "molecular_weight": 6649.8904,
+        "isoelectric_point": 10.291749000549316
+      },
+      "id": "BENEKANNFJ_3743",
+      "locus": "BENEKA_18600"
+    }
+  ],
+  "sequences": [
+    {
+      "id": "SAMD00059641.contig00100",
+      "description": "len=237 cov=37.8 corr=0 origname=NODE_100_length_237_cov_37.809524_pilon sw=shovill-spades/1.0.4 date=20181209",
+      "sequence": "AACGCAAACTCGGCATTCCAGAGCAAGAAACTGTGATAAGGATATGTTATGACTAAATACGTGCGGCTCAACAATGTCGGAGCTGCTTGGATTAAGTCAACCAGAGAAAAAATGTTCCTAGTGCGCATTATGTATGTAGAGAAAGTGAAGACTACGAAACACAAACCAAGCTTAACCGCTTGGTTTTTCTATTTTTATATCCCTAAAACATCGTAAGGATTGGCAGGGCAATTTGTC",
+      "length": 237,
+      "complete": false,
+      "type": "contig",
+      "topology": "linear",
+      "simple_id": "contig_100"
+    }
+  ],
+  "run": {
+    "start": "2024-10-19 21:44:50",
+    "end": "2024-10-19 21:59:01"
+  },
+  "version": {
+    "bakta": "1.9.4",
+    "db": {
+      "version": "5.1",
+      "type": "full"
+    }
+  }
+}

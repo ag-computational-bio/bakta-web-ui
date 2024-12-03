@@ -18,7 +18,7 @@ export const BaktaStatsSchema = z.object({
   coding_ratio: z.number(),
 })
 
-const BaktaFeatureSchema = z.object({
+export const BaktaFeatureSchema = z.object({
   type: z.string(),
   contig: z.string(),
   start: z.number(),
@@ -39,7 +39,7 @@ const BaktaFeatureSchema = z.object({
   locus: z.optional(z.string()),
 })
 
-const BaktaSequenceSchema = z.object({
+export const BaktaSequenceSchema = z.object({
   id: z.string(),
   description: z.string(),
   sequence: z.string(),

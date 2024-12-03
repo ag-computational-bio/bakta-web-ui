@@ -10,7 +10,8 @@ import {
   type BaktaFeature,
   type BaktaResult,
   type BaktaSequence,
-} from './input/bakta-result-pre-1_10'
+} from './input/bakta-result-pre_1_9'
+import { BaktaResultSchema_1_9, type BaktaResult_1_9 } from './input/bakta-result-1_9'
 
 export type Feature = {
   db_xrefs: string[] | undefined
@@ -44,7 +45,11 @@ export type Result = {
   sequences: Sequence[]
 }
 
-const AllBaktaResultSchemas = z.union([BaktaResultSchema, BaktaResultSchema_1_10])
+const AllBaktaResultSchemas = z.union([
+  BaktaResultSchema,
+  BaktaResultSchema_1_10,
+  BaktaResultSchema_1_9,
+])
 
 function toFeature(f: BaktaFeature | BaktaFeature_1_10): Feature {
   return {
@@ -70,7 +75,7 @@ function toSequence(f: BaktaSequence | BaktaSequence_1_10): Sequence {
   }
 }
 
-function toResult(input: BaktaResult | BaktaResult_1_10): Result {
+function toResult(input: BaktaResult | BaktaResult_1_9 | BaktaResult_1_10): Result {
   return {
     genome: {
       genus: input.genome.genus ?? '',

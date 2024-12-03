@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { BaktaGenomeSchema, BaktaRunSchema } from './bakta-result-pre-1_10'
+import { BaktaGenomeSchema, BaktaRunSchema } from './bakta-result-pre_1_9'
 
 const BaktaVersionSchema_1_10 = z.object({
   bakta: z.string(),
