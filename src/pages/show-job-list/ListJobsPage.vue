@@ -12,7 +12,7 @@
         Remove 'NOT_FOUND' jobs from list
       </button>
     </div>
-    <JobsTable :jobs="jobs" @delete:job="deleteJob" class="mt-2" :showDelete="true" />
+    <JobsTable :jobs="jobs" @delete:job="deleteJob" class="mt-2" :showDelete="false" />
     <div v-if="!hasJobs">No jobs found</div>
   </div>
 </template>
