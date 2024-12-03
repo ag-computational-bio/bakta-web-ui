@@ -12,7 +12,7 @@
         Remove 'NOT_FOUND' jobs from list
       </button>
     </div>
-    <JobsTable :jobs="jobs" @delete:job="deleteJob" class="mt-2" :showDelete="false" />
+    <JobsTable :jobs="jobs" @delete:job="deleteJob" class="mt-2" :showDelete="true" />
     <div v-if="!hasJobs">No jobs found</div>
   </div>
 </template>
@@ -46,7 +46,10 @@ const { start, polling, cancel } = usePollManager(
 
 function removeUnknownJobs() {
   error.value = undefined
-  bakta.removeOutdatedJobs().catch((err) => (error.value = err))
+  bakta
+    .removeOutdatedJobs()
+    .catch((err) => (error.value = err))
+    .then(updateJobs)
 }
 
 function updateJobs(): Promise<JobList> {
