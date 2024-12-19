@@ -1,0 +1,284 @@
+{
+    "genome": {
+        "genus": null,
+        "species": null,
+        "strain": null,
+        "taxon": null,
+        "complete": false,
+        "gram": "?",
+        "translation_table": 11
+    },
+    "stats": {
+        "size": 3306,
+        "gc": 0.4340592861464005,
+        "n_ratio": 0.0,
+        "n50": 3306,
+        "n90": 3306,
+        "coding_ratio": 0.7431941923774955
+    },
+    "features": [
+        {
+            "type": "cds",
+            "sequence": "contig_1",
+            "start": 32,
+            "stop": 736,
+            "strand": "+",
+            "frame": 2,
+            "gene": "mobA",
+            "product": "plasmid mobilization protein MobA",
+            "db_xrefs": [
+                "GO:0006355",
+                "SO:0001217",
+                "UniRef:UniRef50_G4VUV6",
+                "UniRef:UniRef90_G4VUV6"
+            ],
+            "nt": "ATGGTGGCCTGCTCGTCAGCATCGAGTGCGTCCAGTTTTTCGAGCAGCGTCAGGCTCTGGCTTTTTATGAATCCCGCCATGTTGAGTGCAGTTTGCTGCTGCTTGTTCATCTTTCTGTTTTCTCCGTTCTGTCTGTCATCTGCGTCGTGTGATTATATCGCGCACCACTTTTCGACCGTCTTACCGCCGGTATTCTGCCGACGGACATTTCAGTCAGACAACACTGTCACTGCCAAAAAACAGCAGTGCTTTGTTGGTAATTCGAACTTGCAGACAGGACAGGATGTGCAATTGTTATACCGCGCATACATGCACGCTATTACAATTACCCTGGTCAGGGCTTCGCCCCGACACCCCATGTCAGATACGGAGCCATGTTTTATGACAAAACGAAGTGGAAGTAATACGCGCAGGCGGGCTATCAGTCGCCCTGTTCGTCTGACGGCAGAAGAAGACCAGGAAATCAGAAAAAGGGCTGCTGAATGCGGCAAGACCGTTTCTGGTTTTTTACGGGCGGCAGCTCTCGGTAAGAAAGTTAACTCACTGACTGATGACCGGGTGCTGAAAGAAGTTATGCGACTGGGGGCGTTGCAGAAAAAACTCTTTATCGACGGCAAGCGTGTCGGGGACAGAGAGTATGCGGAGGTGCTGATCGCTATTACGGAGTATCACCGTGCCCTGTTATCCAGGCTTATGGCAGATTAG",
+            "aa": "MVACSSASSASSFSSSVRLWLFMNPAMLSAVCCCLFIFLFSPFCLSSASCDYIAHHFSTVLPPVFCRRTFQSDNTVTAKKQQCFVGNSNLQTGQDVQLLYRAYMHAITITLVRASPRHPMSDTEPCFMTKRSGSNTRRRAISRPVRLTAEEDQEIRKRAAECGKTVSGFLRAAALGKKVNSLTDDRVLKEVMRLGALQKKLFIDGKRVGDREYAEVLIAITEYHRALLSRLMAD",
+            "aa_hexdigest": "c3557a88d21b11fb2c4d870cd984c9b7",
+            "start_type": "ATG",
+            "rbs_motif": null,
+            "psc": {
+                "uniref90_id": "UniRef90_G4VUV6",
+                "query_cov": 1.0,
+                "subject_cov": 0.8602941176470589,
+                "identity": 0.991,
+                "score": 449.0,
+                "evalue": 1.02e-158,
+                "valid": true,
+                "gene": "mobA",
+                "product": "plasmid mobilization protein MobA",
+                "uniref50_id": "UniRef50_G4VUV6",
+                "go_ids": [
+                    "GO:0006355"
+                ]
+            },
+            "pscc": {
+                "uniref50_id": "UniRef50_G4VUV6",
+                "db_xrefs": [
+                    "SO:0001217",
+                    "UniRef:UniRef50_G4VUV6"
+                ],
+                "product": "Plasmid mobilization protein"
+            },
+            "genes": [
+                "mobA"
+            ],
+            "id": "DOGAIAIOFN_2",
+            "locus": "DOGAIA_01"
+        },
+        {
+            "type": "oriT",
+            "sequence": "contig_1",
+            "start": 179,
+            "stop": 404,
+            "strand": "?",
+            "product": "origin of transfer",
+            "nt": "TGTGATTATATCGCGCACCACTTTTCGACCGTCTTACCGCCGGTATTCTGCCGACGGACATTTCAGTCAGACAACACTGTCACTGCCAAAAAACAGCAGTGCTTTGTTGGTAATTCGAACTTGCAGACAGGACAGGATGTGCAATTGTTATACCGCGCATACATGCACGCTATTACAATTACCCTGGTCAGGGCTTCGCCCCGACACCCCATGTCAGATACGGAGC",
+            "id": "DOGAIAIOFN_5"
+        },
+        {
+            "type": "cds",
+            "sequence": "contig_1",
+            "start": 971,
+            "stop": 1351,
+            "strand": "-",
+            "frame": 3,
+            "gene": "lsoB",
+            "product": "type II toxin-antitoxin system antitoxin LsoB",
+            "db_xrefs": [
+                "BlastRules:WP_000710826",
+                "RefSeq:WP_000710826.1",
+                "SO:0001217",
+                "UniParc:UPI00000BEEC7",
+                "UniRef:UniRef100_Q7DKW4",
+                "UniRef:UniRef50_Q7DKW4",
+                "UniRef:UniRef90_Q7DKW4"
+            ],
+            "nt": "ATGAAAAAAGATAAAAAATATCAAATAGAAGCAATAAAAAATAAAGATAAAACTTTATTTATTGTCTATGCTACTGATATTTATAGCCCGAGCGAATTTTTCTCAAAAATCGAATCCGACTTGAAGAAAAAGAAAAGCAAGGGTGATGTTTTTTTTGATTTAATAATTCCTAACGGTGGAAAAAAAGATCGTTACGTCTATACGTCATTTAATGGCGAGAAGTTTTCAAGTTACACATTAAACAAAGTTACGAAAACTGATGAATATAATGATTTATCTGAGCTCTCGGCTTCGTTCTTTAAAAAAAACTTTGATAAGATCAACGTAAACCTTCTATCCAAAGCCACATCATTTGCTTTGAAAAAAGGCATTCCAATATAA",
+            "aa": "MKKDKKYQIEAIKNKDKTLFIVYATDIYSPSEFFSKIESDLKKKKSKGDVFFDLIIPNGGKKDRYVYTSFNGEKFSSYTLNKVTKTDEYNDLSELSASFFKKNFDKINVNLLSKATSFALKKGIPI",
+            "aa_hexdigest": "ed7e6002701269c907bf57f264e763c1",
+            "start_type": "ATG",
+            "rbs_motif": "GGA/GAG/AGG",
+            "ups": {
+                "uniparc_id": "UPI00000BEEC7",
+                "ncbi_nrp_id": "WP_000710826.1",
+                "uniref100_id": "UniRef100_Q7DKW4",
+                "db_xrefs": [
+                    "SO:0001217",
+                    "UniParc:UPI00000BEEC7",
+                    "RefSeq:WP_000710826.1",
+                    "UniRef:UniRef100_Q7DKW4"
+                ]
+            },
+            "ips": {
+                "uniref100_id": "UniRef100_Q7DKW4",
+                "uniref90_id": "UniRef90_Q7DKW4"
+            },
+            "psc": {
+                "uniref90_id": "UniRef90_Q7DKW4",
+                "gene": "lsoB",
+                "product": "Antitoxin LsoB",
+                "uniref50_id": "UniRef50_Q7DKW4"
+            },
+            "pscc": {
+                "uniref50_id": "UniRef50_Q7DKW4",
+                "db_xrefs": [
+                    "SO:0001217",
+                    "UniRef:UniRef50_Q7DKW4"
+                ],
+                "product": "Antitoxin LsoB"
+            },
+            "expert": [
+                {
+                    "type": "expert_proteins",
+                    "source": "BlastRules",
+                    "rank": 80,
+                    "id": "WP_000710826",
+                    "gene": "lsoB",
+                    "product": "type II toxin-antitoxin system antitoxin LsoB",
+                    "query_cov": 1.0,
+                    "subject_cov": 1.0,
+                    "identity": 1.0,
+                    "score": 245.0,
+                    "evalue": 6.3e-86,
+                    "db_xrefs": [
+                        "BlastRules:WP_000710826"
+                    ]
+                }
+            ],
+            "genes": [
+                "lsoB"
+            ],
+            "id": "DOGAIAIOFN_3",
+            "locus": "DOGAIA_02"
+        },
+        {
+            "type": "cds",
+            "sequence": "contig_1",
+            "start": 1348,
+            "stop": 2388,
+            "strand": "-",
+            "frame": 1,
+            "gene": "lsoA",
+            "product": "type II toxin-antitoxin system mRNA endoribonuclease LsoA",
+            "db_xrefs": [
+                "BlastRules:WP_000068433",
+                "EC:3.1.-.-",
+                "GO:0004521",
+                "RefSeq:WP_000068433.1",
+                "SO:0001217",
+                "UniParc:UPI00000B51BA",
+                "UniRef:UniRef100_O82881",
+                "UniRef:UniRef50_O82881",
+                "UniRef:UniRef90_O82881"
+            ],
+            "nt": "ATGGCACAGAACCCGTTTAAAGCACTAAATATCAATATTGACAAGATTGAGTCTGCTCTGACGCAGAATGGCGTCACAAACTATTCCTCTAATGTAAAAAACGAAAGAGAAACTCACATATCTGGCACATATAAAGGAATAGACTTCTTAATAAAACTAATGCCATCAGGCGGAAATACCACTATCGGAAGAGCGTCTGGGCAAAATAACACTTACTTTGATGAAATCGCCTTGATTATAAAAGAAAACTGTTTGTATTCAGACACAAAGAACTTTGAATACACCATTCCAAAATTCAGTGATGATGACAGGGCAAATCTATTTGAATTTCTTTCTGAAGAGGGGATAACAATAACAGAAGATAATAATAACGATCCTAATTGTAAACACCAATATATTATGACCACCAGCAATGGTGACAGGGTCAGGGCAAAAATTTACAAGCGCGGCTCTATTCAATTCCAAGGAAAATACCTTCAAATCGCGAGTTTGATTAACGATTTCATGTGCTCAATACTAAACATGAAAGAGATTGTCGAACAAAAAAATAAAGAATTTAATGTTGACATAAAAAAAGAAACTATTGAGTCCGAGTTGCATAGCAAACTACCAAAAAGCATCGATAAAATCCATGAAGATATCAAAAAACAGCTATCATGCTCGCTAATAATGAAAAAAATAGATGTCGAAATGGAAGATTACTCAACATACTGCTTCTCTGCATTAAGAGCCATAGAAGGCTTTATATATCAAATACTTAATGATGTTTGCAATCCATCATCATCAAAGAACCTTGGCGAATACTTCACTGAAAACAAACCCAAATATATAATCAGAGAAATACACCAAGAAACTATAAATGGTGAAATAGCGGAAGTTTTGTGTGAATGCTACACTTACTGGCATGAGAACAGGCATGGTTTGTTTCATATGAAACCAGGAATAGCTGACACGAAGACAATTAACAAATTAGAATCAATCGCAATCATCGATACCGTTTGCCAATTAATAGATGGTGGCGTAGCTAGGTTGAAATTATGA",
+            "aa": "MAQNPFKALNINIDKIESALTQNGVTNYSSNVKNERETHISGTYKGIDFLIKLMPSGGNTTIGRASGQNNTYFDEIALIIKENCLYSDTKNFEYTIPKFSDDDRANLFEFLSEEGITITEDNNNDPNCKHQYIMTTSNGDRVRAKIYKRGSIQFQGKYLQIASLINDFMCSILNMKEIVEQKNKEFNVDIKKETIESELHSKLPKSIDKIHEDIKKQLSCSLIMKKIDVEMEDYSTYCFSALRAIEGFIYQILNDVCNPSSSKNLGEYFTENKPKYIIREIHQETINGEIAEVLCECYTYWHENRHGLFHMKPGIADTKTINKLESIAIIDTVCQLIDGGVARLKL",
+            "aa_hexdigest": "f38c7538741cc7996a5564ff430abad7",
+            "start_type": "ATG",
+            "rbs_motif": "GGA/GAG/AGG",
+            "ups": {
+                "uniparc_id": "UPI00000B51BA",
+                "ncbi_nrp_id": "WP_000068433.1",
+                "uniref100_id": "UniRef100_O82881",
+                "db_xrefs": [
+                    "SO:0001217",
+                    "UniParc:UPI00000B51BA",
+                    "RefSeq:WP_000068433.1",
+                    "UniRef:UniRef100_O82881"
+                ]
+            },
+            "ips": {
+                "uniref100_id": "UniRef100_O82881",
+                "uniref90_id": "UniRef90_O82881"
+            },
+            "psc": {
+                "uniref90_id": "UniRef90_O82881",
+                "gene": "lsoA",
+                "product": "mRNA endoribonuclease LsoA",
+                "ec_ids": [
+                    "3.1.-.-"
+                ],
+                "uniref50_id": "UniRef50_O82881",
+                "go_ids": [
+                    "GO:0004521"
+                ]
+            },
+            "pscc": {
+                "uniref50_id": "UniRef50_O82881",
+                "db_xrefs": [
+                    "SO:0001217",
+                    "UniRef:UniRef50_O82881"
+                ],
+                "product": "mRNA endoribonuclease LsoA"
+            },
+            "expert": [
+                {
+                    "type": "expert_proteins",
+                    "source": "BlastRules",
+                    "rank": 80,
+                    "id": "WP_000068433",
+                    "gene": "lsoA",
+                    "product": "type II toxin-antitoxin system mRNA endoribonuclease LsoA",
+                    "query_cov": 1.0,
+                    "subject_cov": 1.0,
+                    "identity": 1.0,
+                    "score": 693.0,
+                    "evalue": 9.17e-256,
+                    "db_xrefs": [
+                        "BlastRules:WP_000068433"
+                    ]
+                }
+            ],
+            "genes": [
+                "lsoA"
+            ],
+            "id": "DOGAIAIOFN_4",
+            "locus": "DOGAIA_03"
+        },
+        {
+            "type": "ncRNA",
+            "class": null,
+            "sequence": "contig_1",
+            "start": 2495,
+            "stop": 2598,
+            "strand": "-",
+            "gene": "RNAI",
+            "product": "RNAI",
+            "score": 83.6,
+            "evalue": 4.6e-14,
+            "db_xrefs": [
+                "RFAM:RF00106",
+                "SO:0000655"
+            ],
+            "nt": "AGATTTTGGTGACTGCGCTCCTCCAAGCCAGTTACCTTGGTTCAAAGAGTTGGTAGCTCAGCGAACCTTGAGAAAACCACCGTTGGTAGCGGTGGTTTTTCTTT",
+            "id": "DOGAIAIOFN_1",
+            "locus": "DOGAIA_04"
+        }
+    ],
+    "sequences": [
+        {
+            "id": "contig_1",
+            "description": "[gcode=11] [topology=linear]",
+            "nt": "TTCTTCTGCGAGTTCGTGCAGCTTCTCACACATGGTGGCCTGCTCGTCAGCATCGAGTGCGTCCAGTTTTTCGAGCAGCGTCAGGCTCTGGCTTTTTATGAATCCCGCCATGTTGAGTGCAGTTTGCTGCTGCTTGTTCATCTTTCTGTTTTCTCCGTTCTGTCTGTCATCTGCGTCGTGTGATTATATCGCGCACCACTTTTCGACCGTCTTACCGCCGGTATTCTGCCGACGGACATTTCAGTCAGACAACACTGTCACTGCCAAAAAACAGCAGTGCTTTGTTGGTAATTCGAACTTGCAGACAGGACAGGATGTGCAATTGTTATACCGCGCATACATGCACGCTATTACAATTACCCTGGTCAGGGCTTCGCCCCGACACCCCATGTCAGATACGGAGCCATGTTTTATGACAAAACGAAGTGGAAGTAATACGCGCAGGCGGGCTATCAGTCGCCCTGTTCGTCTGACGGCAGAAGAAGACCAGGAAATCAGAAAAAGGGCTGCTGAATGCGGCAAGACCGTTTCTGGTTTTTTACGGGCGGCAGCTCTCGGTAAGAAAGTTAACTCACTGACTGATGACCGGGTGCTGAAAGAAGTTATGCGACTGGGGGCGTTGCAGAAAAAACTCTTTATCGACGGCAAGCGTGTCGGGGACAGAGAGTATGCGGAGGTGCTGATCGCTATTACGGAGTATCACCGTGCCCTGTTATCCAGGCTTATGGCAGATTAGCTTCCCGGAGAGAAACTGTCGAAAACAGACGGTATGAACGCCGTAAGCCCCCAAACCGATCGCCATTCACTTTCATGCATAGCTATGCAGTGAGCTGAAAGCGATCCTGACGCATTTTTCCGGTTTACCCCGGGGAAAACATCTCTTTTTGCGGTGTCTGCGTCAGAATCGCGTTCAGCGCGTTTTGGCGGTGCGCGTAATGAGACGTTATGGTAAATGTCTTCTGGCTTGATATTATATTGGAATGCCTTTTTTCAAAGCAAATGATGTGGCTTTGGATAGAAGGTTTACGTTGATCTTATCAAAGTTTTTTTTAAAGAACGAAGCCGAGAGCTCAGATAAATCATTATATTCATCAGTTTTCGTAACTTTGTTTAATGTGTAACTTGAAAACTTCTCGCCATTAAATGACGTATAGACGTAACGATCTTTTTTTCCACCGTTAGGAATTATTAAATCAAAAAAAACATCACCCTTGCTTTTCTTTTTCTTCAAGTCGGATTCGATTTTTGAGAAAAATTCGCTCGGGCTATAAATATCAGTAGCATAGACAATAAATAAAGTTTTATCTTTATTTTTTATTGCTTCTATTTGATATTTTTTATCTTTTTTCATAATTTCAACCTAGCTACGCCACCATCTATTAATTGGCAAACGGTATCGATGATTGCGATTGATTCTAATTTGTTAATTGTCTTCGTGTCAGCTATTCCTGGTTTCATATGAAACAAACCATGCCTGTTCTCATGCCAGTAAGTGTAGCATTCACACAAAACTTCCGCTATTTCACCATTTATAGTTTCTTGGTGTATTTCTCTGATTATATATTTGGGTTTGTTTTCAGTGAAGTATTCGCCAAGGTTCTTTGATGATGATGGATTGCAAACATCATTAAGTATTTGATATATAAAGCCTTCTATGGCTCTTAATGCAGAGAAGCAGTATGTTGAGTAATCTTCCATTTCGACATCTATTTTTTTCATTATTAGCGAGCATGATAGCTGTTTTTTGATATCTTCATGGATTTTATCGATGCTTTTTGGTAGTTTGCTATGCAACTCGGACTCAATAGTTTCTTTTTTTATGTCAACATTAAATTCTTTATTTTTTTGTTCGACAATCTCTTTCATGTTTAGTATTGAGCACATGAAATCGTTAATCAAACTCGCGATTTGAAGGTATTTTCCTTGGAATTGAATAGAGCCGCGCTTGTAAATTTTTGCCCTGACCCTGTCACCATTGCTGGTGGTCATAATATATTGGTGTTTACAATTAGGATCGTTATTATTATCTTCTGTTATTGTTATCCCCTCTTCAGAAAGAAATTCAAATAGATTTGCCCTGTCATCATCACTGAATTTTGGAATGGTGTATTCAAAGTTCTTTGTGTCTGAATACAAACAGTTTTCTTTTATAATCAAGGCGATTTCATCAAAGTAAGTGTTATTTTGCCCAGACGCTCTTCCGATAGTGGTATTTCCGCCTGATGGCATTAGTTTTATTAAGAAGTCTATTCCTTTATATGTGCCAGATATGTGAGTTTCTCTTTCGTTTTTTACATTAGAGGAATAGTTTGTGACGCCATTCTGCGTCAGAGCAGACTCAATCTTGTCAATATTGATATTTAGTGCTTTAAACGGGTTCTGTGCCATTGGGTCAATCCGTTGTTTTTTTTGAATATGTACAGATCTTGTTTTTTTGTCAACGGAATAGCTGTTCGTTGACTTGATAGACCGATTGATTCATCATCTCATAAATAAAGAAAAACCACCGCTACCAACGGTGGTTTTCTCAAGGTTCGCTGAGCTACCAACTCTTTGAACCAAGGTAACTGGCTTGGAGGAGCGCAGTCACCAAAATCTGTTCTTTCAGTTTAGCCTTAACAGGTGCATAACTTCAAGACAAACTCCTCTAAATCAGTTACCAATGGCTGCTGCCAGTGGCGATAAGTCGTGTCTTACCGGGTTGGACTCAAGACGATAGTTACCGGATAAGGCGCAGCGGTCGGGCTGAACGGGGGGTTCGTGCACACAGCCCAGCTTGGAGCGAACGACCTACACCGAACTGAGATACCAACAGCGTGAGCTATGAGAAAGCGCCACGCTTCCCGAAGGGAGAAAGGCGGACAGGTATCCGGTAAGTGGCAGGGTCGGAACAGGAGAGCGCACGAGGGAGCTTCCGGGGGGAAACGCCTGGTATCTTTATAGTCCTGTCGGGTTTCGCCACCTCTGGCTTGAGCGTCGATTTTTGTGATGCTCGTCAGGGGGGCGGAGCCTATGGAAAAACGCCTGCGGTGCTGGCTTCTTCCGGTGCTTTGCTTTTTGCTCACATGTTCTTTCCGGCTTTATCCCCTGATTCTGTGGATAACCGTATTACCGCCTTTGAGTGAGCTGACACCGCTCGCCGCAGTCGAACGACCGAGCGTAGCGAGTCAGTGAGCGAGGAAGCGGAAGAGCGCCTTATGTGACATTTTCTCCTTACGCTCTGTTGTGCCGTTCGGCATCCTGCCCTGAGCGTTATATCTCTGTGCTATTTTCTACTTCAAAGCGTGTCTGTATGCTGTTCTGGAG",
+            "length": 3306,
+            "complete": false,
+            "type": "sequence",
+            "topology": "linear",
+            "orig_id": "NC_002127.1",
+            "orig_description": "Escherichia coli O157:H7 str. Sakai plasmid pOSAK1, complete sequence"
+        }
+    ],
+    "run": {
+        "start": "2024-12-19 14:30:24",
+        "end": "2024-12-19 14:32:13",
+        "duration": "1.81 min"
+    },
+    "version": {
+        "bakta": "1.10.1",
+        "db": {
+            "version": "5.1",
+            "type": "full"
+        }
+    }
+}

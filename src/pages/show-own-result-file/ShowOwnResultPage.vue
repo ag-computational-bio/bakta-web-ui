@@ -4,14 +4,19 @@
       message="You can visualize bakta json files with this viewer. The data is visualized inside your browser. None of your data is send to the server."
       type="warning"
     />
-    <div class="input-group mb-3">
-      <input
-        class="form-control"
-        type="file"
-        id="bakta-json"
-        @change="jsonFileChanged"
-        accept=".json"
-      />
+    <div class="mb-3">
+      <div class="input-group">
+        <input
+          class="form-control"
+          type="file"
+          id="bakta-json"
+          @change="jsonFileChanged"
+          accept=".json"
+        />
+      </div>
+      <button class="btn btn-sm btn-outline-secondary border-0" @click="loadExampleData">
+        Click here to use example result
+      </button>
     </div>
     <notification type="danger" :message="error" />
     <progress-bar
@@ -120,6 +125,15 @@ const error = ref<string>()
 function setError(err: string) {
   error.value = err
   loadingProgress.value.enabled = false
+}
+
+function loadExampleData() {
+  fetch('/NC_002127.1.json')
+    .then((r) => r.json())
+    .then((j) => {
+      data.value = parseBaktaData(j)
+    })
+    .catch((err) => console.warn(err))
 }
 </script>
 <style scoped></style>
