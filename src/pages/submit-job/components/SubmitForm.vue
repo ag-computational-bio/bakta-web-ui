@@ -1,7 +1,7 @@
 <template>
   <div class="alert alert-secondary">
-    The service is provided openly and free of charge for everyone. As there are no technical rate
-    limitations implemented, we kindly ask all users to act responsibly and with due respect.
+    This service is open to everyone and can be used free of charge. For more details
+    <RouterLink to="/about">click here</RouterLink>
   </div>
   <div class="mb-3">
     <FastaSequenceInput
