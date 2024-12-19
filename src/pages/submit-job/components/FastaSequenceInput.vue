@@ -4,7 +4,7 @@
     class="form-control"
     name="paste-fasta"
     rows="8"
-    placeholder="Paste your fasta sequences here or select a fasta file from your computer below..."
+    placeholder="Paste your fasta sequences here, click on 'Use example sequence' or select a fasta file from your computer below..."
     v-model="sequenceInput"
   ></textarea>
 </template>
@@ -47,6 +47,9 @@ const sequenceInput = computed({
 function reset() {
   input.value = ''
 }
+function set(s: string) {
+  input.value = s
+}
 
-defineExpose({ reset })
+defineExpose({ reset, set })
 </script>

@@ -5,10 +5,17 @@
       ref="fastaSequenceInput"
       @update:sequences="(evt) => updateParsedSequence('text', evt)"
     />
+    <button
+      v-if="seqSource === 'none'"
+      class="btn btn-sm btn-outline-secondary border-0 py-0 mb-2"
+      @click="loadExampleData"
+    >
+      Click here to use an example sequence
+    </button>
     <FastaFileChooser
       v-if="seqSource == 'none' || seqSource == 'file'"
       ref="fastaFileInput"
-      :class="seqSource == 'none' ? 'mt-3' : ''"
+      :class="seqSource == 'none' ? 'mt-1' : ''"
       @update:sequences="(evt) => updateParsedSequence('file', evt)"
     />
     <Notification
@@ -127,7 +134,7 @@
 </template>
 <script setup lang="ts">
 import Notification from '@/components/Notification.vue'
-import type { Seq, SequenceInput } from '@/fasta/parse-fasta'
+import { parseFasta, type Seq, type SequenceInput } from '@/fasta/parse-fasta'
 import { validateDna } from '@/fasta/validate-fasta'
 import { createBaktaJobRequest, type BaktaJobRequest, type Replicon } from '@/model/bakta-service'
 import type { JobConfig } from '@/model/submit'
@@ -332,5 +339,16 @@ function reset() {
   fastaFileInput.value?.reset()
   seqSource.value = 'none'
   emit('update:modelValue', createBaktaJobRequest())
+}
+
+function loadExampleData(evt: Event) {
+  evt.preventDefault()
+  fetch('/NC_002127.1.fna')
+    .then((r) => r.text())
+    .then((t) => {
+      fastaSequenceInput.value?.set(t)
+      updateParsedSequence('text', { name: 'NC_002127.1.fna', parsed: parseFasta(t), sequence: t })
+    })
+    .catch((err) => console.warn(err))
 }
 </script>
