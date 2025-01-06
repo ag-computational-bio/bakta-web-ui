@@ -4,7 +4,7 @@
     <ProgressBar v-if="loadingProgress" :progress="loadingProgress" />
 
     <div v-if="!loadingProgress && !error && data && result" class="mt-3">
-      <BaktaResultVisualization :job="result" :bakta="data" />
+      <BaktaResultVisualization :job="result" :bakta="data" :show-share-button="true" />
     </div>
   </div>
 </template>
