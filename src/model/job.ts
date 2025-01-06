@@ -24,6 +24,10 @@ export const ResultFileKeys = [
   'JSON',
   'TSV',
   'TSVHypothetical',
+  'TSVInterference',
+  'TXTLogs',
+  'PNGCircularPlot',
+  'SVGCircularPlot',
 ] as const
 
 export const ResultFilesSchema = z.record(z.enum(ResultFileKeys), z.string())
