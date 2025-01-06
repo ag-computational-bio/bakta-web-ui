@@ -1,8 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/vue3'
 
 import DisplayTuple from './DisplayTuple.vue'
-import { fn } from '@storybook/test'
-import { ref } from 'vue'
 const meta: Meta<typeof DisplayTuple> = {
   component: DisplayTuple,
 }

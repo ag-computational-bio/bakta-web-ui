@@ -24,46 +24,19 @@
       :progress="loadingProgress"
       :title="loadingProgress.title"
     />
-
     <div v-if="!loadingProgress.enabled && data">
-      <div class="mt-5">
-        <h4>Job statistics</h4>
-        <div class="" id="stats">
-          <div class="card card-body">
-            <bakta-stats :data="data" :job="job" />
-          </div>
-        </div>
-      </div>
-      <hr />
-      <div class="row">
-        <h4>Genomeviewer</h4>
-        <div class="" id="genomeBrowser">
-          <div class="card card-body">
-            <bakta-genome-viewer ref="genomeview" :data="data" />
-          </div>
-        </div>
-      </div>
-      <hr />
-      <h4>Annotations</h4>
-      <div class="" id="annotationTable">
-        <div class="card card-body">
-          <bakta-annotation-table :data="data" />
-        </div>
-      </div>
-      <hr />
+      <BaktaResultVisualization :job="job" :bakta="data" />
     </div>
   </div>
 </template>
 <script setup lang="ts">
 import Notification from '@/components/Notification.vue'
 import ProgressBar from '@/components/ProgressBar.vue'
-import BaktaGenomeViewer from '@/components/BaktaGenomeViewer.vue'
-import BaktaStats from '@/components/BaktaStats.vue'
-import BaktaAnnotationTable from '@/components/BaktaAnnotationTable.vue'
-import { computed, ref } from 'vue'
-import { parseBaktaData, type Result } from '@/model/result-data'
-import { type JobResult } from '@/model/job'
+import BaktaResultVisualization from '@/components/bakta-result/BaktaResultVisualization.vue'
 import type { Progress } from '@/components/progress'
+import { type JobResult } from '@/model/job'
+import { parseBaktaData, type Result } from '@/model/result-data'
+import { computed, ref } from 'vue'
 
 const data = ref<Result>()
 const job = computed<JobResult>(() => {

@@ -3,39 +3,13 @@
     <notification :message="error" />
     <ProgressBar v-if="loadingProgress" :progress="loadingProgress" />
 
-    <div v-if="!loadingProgress && !error && data && result">
-      <div class="mt-5">
-        <h4>Job statistics</h4>
-        <div class="" id="stats">
-          <div class="card card-body">
-            <bakta-stats :data="data" :job="result" />
-          </div>
-        </div>
-      </div>
-      <hr />
-      <div class="row">
-        <h4>Genomeviewer</h4>
-        <div class="" id="genomeBrowser">
-          <div class="card card-body">
-            <bakta-genome-viewer ref="genomeview" :data="data" />
-          </div>
-        </div>
-      </div>
-      <hr />
-      <h4>Annotations</h4>
-      <div class="" id="annotationTable">
-        <div class="card card-body">
-          <bakta-annotation-table :data="data" />
-        </div>
-      </div>
-      <hr />
+    <div v-if="!loadingProgress && !error && data && result" class="mt-3">
+      <BaktaResultVisualization :job="result" :bakta="data" />
     </div>
   </div>
 </template>
 <script setup lang="ts">
-import BaktaAnnotationTable from '@/components/BaktaAnnotationTable.vue'
-import BaktaGenomeViewer from '@/components/BaktaGenomeViewer.vue'
-import BaktaStats from '@/components/BaktaStats.vue'
+import BaktaResultVisualization from '@/components/bakta-result/BaktaResultVisualization.vue'
 import Notification from '@/components/Notification.vue'
 import { useProgress, type Progress } from '@/components/progress'
 import ProgressBar from '@/components/ProgressBar.vue'
