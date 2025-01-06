@@ -5,20 +5,23 @@ import {
   type BaktaResult_1_10,
   type BaktaSequence_1_10,
 } from './input/bakta-result-1_10'
+import { BaktaResultSchema_1_9, type BaktaResult_1_9 } from './input/bakta-result-1_9'
 import {
   BaktaResultSchema,
   type BaktaFeature,
   type BaktaResult,
   type BaktaSequence,
 } from './input/bakta-result-pre_1_9'
-import { BaktaResultSchema_1_9, type BaktaResult_1_9 } from './input/bakta-result-1_9'
 
 export type Feature = {
+  id: string
   db_xrefs: string[] | undefined
   type: string
   sequence: string
   start: number
   stop: number
+  frame?: number
+  rbs_motif?: string | null
   strand: string
   locus: string | undefined
   product: string | null | undefined
@@ -53,6 +56,9 @@ const AllBaktaResultSchemas = z.union([
 
 function toFeature(f: BaktaFeature | BaktaFeature_1_10): Feature {
   return {
+    id: f.id,
+    frame: f.frame,
+    rbs_motif: f.rbs_motif,
     db_xrefs: f.db_xrefs,
     gene: f.gene,
     locus: f.locus,
@@ -66,13 +72,14 @@ function toFeature(f: BaktaFeature | BaktaFeature_1_10): Feature {
 }
 
 function toSequence(f: BaktaSequence | BaktaSequence_1_10): Sequence {
-  return {
-    complete: f.complete,
+  const v: Sequence = {
     id: f.id,
+    complete: f.complete,
     length: f.length,
     nt: 'sequence' in f ? f.sequence : f.nt,
     type: f.type,
   }
+  return v
 }
 
 function toResult(input: BaktaResult | BaktaResult_1_9 | BaktaResult_1_10): Result {
@@ -93,7 +100,8 @@ function toResult(input: BaktaResult | BaktaResult_1_9 | BaktaResult_1_10): Resu
 export function safeParseResult(o: unknown): SafeParseReturnType<unknown, Result> {
   const r = AllBaktaResultSchemas.safeParse(o)
   if (!r.success) return { ...r }
-  return { success: true, data: toResult(r.data) }
+  const converted = toResult(r.data)
+  return { success: true, data: converted }
 }
 
 export function parseBaktaData(o: unknown): Result {

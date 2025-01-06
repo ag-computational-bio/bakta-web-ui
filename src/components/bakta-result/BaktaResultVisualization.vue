@@ -10,8 +10,8 @@
       </button>
     </li>
     <li v-if="showShareButton" class="nav-item ms-auto">
-      <button class="nav-link" @click="putLinkToClipboard">
-        <i title="Copy link to clipboard" class="bi bi-share"></i>
+      <button class="nav-link" @click="putLinkToClipboard" title="Copy link to clipboard">
+        <i class="bi bi-share"></i>
       </button>
     </li>
   </ul>
@@ -19,6 +19,7 @@
     <BaktaStats v-if="currentTab === 'job'" :data="bakta" :job="job" />
     <BaktaGenomeViewer v-if="currentTab === 'browser'" :data="bakta" />
     <BaktaAnnotationTable v-if="currentTab === 'table'" :data="bakta" />
+    <FeaturePlotViewer v-if="currentTab === 'circular'" :bakta="bakta" />
   </div>
   <div
     v-if="showShareButton"
@@ -39,6 +40,7 @@ import BaktaAnnotationTable from './BaktaAnnotationTable.vue'
 import BaktaStats from './BaktaStats.vue'
 import { ref, useTemplateRef } from 'vue'
 import { Toast } from 'bootstrap'
+import FeaturePlotViewer from './FeaturePlotViewer.vue'
 
 defineProps<{
   job: JobResult
@@ -59,6 +61,10 @@ const tabs: { key: tabs; label: string }[] = [
   {
     key: 'browser',
     label: 'Genomeviewer',
+  },
+  {
+    key: 'circular',
+    label: 'Circular plot',
   },
 ]
 const currentTab = ref<tabs>('job')
