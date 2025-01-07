@@ -24,7 +24,7 @@ export const ResultFileKeys = [
   'JSON',
   'TSV',
   'TSVHypothetical',
-  'TSVInterference',
+  'TSVInference',
   'TXTLogs',
   'PNGCircularPlot',
   'SVGCircularPlot',

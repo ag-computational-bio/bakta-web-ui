@@ -26,7 +26,7 @@ const downloads = computed(() => {
     FNA: { label: 'fna', position: 40 },
     JSON: { label: 'json', position: 50 },
     TSVHypothetical: { label: 'tsv (hypothetical)', position: 55 },
-    TSVInterference: { label: 'tsv (interference)', position: 57 },
+    TSVInference: { label: 'tsv (inference)', position: 57 },
     FAAHypothetical: { label: 'faa (hypothetical)', position: 60 },
     PNGCircularPlot: { label: 'circular plot (png)', position: 70 },
     SVGCircularPlot: { label: 'circular plot (svg)', position: 80 },
