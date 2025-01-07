@@ -1,19 +1,37 @@
 <template>
   <div class="container flex-grow-1">
     <Notification v-if="error" class="mb-2" type="warning" :message="error" />
-    <div class="alert alert-secondary mb-2" v-if="polling">
-      Automatically updating job list
-      <div v-if="loading" class="spinner-border spinner-border-sm text-secondary" role="status">
-        <span class="visually-hidden">Loading...</span>
+    <template v-if="log == undefined">
+      <div class="alert alert-secondary mb-2" v-if="polling">
+        Automatically updating job list
+        <div v-if="loading" class="spinner-border spinner-border-sm text-secondary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
       </div>
+      <div v-if="hasNotFoundJobs" class="d-flex flex-row-reverse row-cols-lg-auto align-items-end">
+        <button class="btn btn-secondary" @click="removeUnknownJobs">
+          Remove 'NOT_FOUND' jobs from list
+        </button>
+      </div>
+      <JobsTable
+        :jobs="jobs"
+        @delete:job="deleteJob"
+        @show:logs="showLogs"
+        class="mt-2"
+        :showDelete="true"
+        :showJobLog="true"
+      />
+      <div v-if="!hasJobs">No jobs found</div>
+    </template>
+    <div v-else>
+      <div class="w-100 d-flex justify-content-between my-2">
+        <h5>Job logs</h5>
+        <button class="btn btn-sm btn-secondary" @click="log = undefined">
+          <i class="bi bi-x"></i>
+        </button>
+      </div>
+      <pre class="border p-2 rounded-2">{{ log }}</pre>
     </div>
-    <div v-if="hasNotFoundJobs" class="d-flex flex-row-reverse row-cols-lg-auto align-items-end">
-      <button class="btn btn-secondary" @click="removeUnknownJobs">
-        Remove 'NOT_FOUND' jobs from list
-      </button>
-    </div>
-    <JobsTable :jobs="jobs" @delete:job="deleteJob" class="mt-2" :showDelete="false" />
-    <div v-if="!hasJobs">No jobs found</div>
   </div>
 </template>
 <script setup lang="ts">
@@ -79,7 +97,17 @@ function deleteJob(jobID: string) {
     .then(updateJobs)
     .catch((err) => (error.value = err))
 }
-
+function showLogs(jobID: string) {
+  error.value = undefined
+  bakta
+    .logs(jobID)
+    .then(showLog)
+    .catch((err) => (error.value = err))
+}
+const log = ref<string>()
+function showLog(l: string) {
+  log.value = l
+}
 onMounted(() => {
   start()
 })

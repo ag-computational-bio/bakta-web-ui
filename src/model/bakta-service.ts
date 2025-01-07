@@ -61,6 +61,7 @@ export interface BaktaService {
   job(job: Job): Promise<JobInfo>
   result(job: Job): Promise<JobResult>
   removeJob(jobID: string): Promise<void>
+  logs(jobID: string): Promise<string>
 }
 
 function generateRepliconTable(replicons: Replicon[]): string {
@@ -74,6 +75,13 @@ class BaktaServiceImpl implements BaktaService {
   constructor(baktaApi: BaktaApi, storage?: BaktaJobStorage) {
     this.#api = baktaApi
     this.#storage = storage ?? useJobStorage()
+  }
+  logs(jobID: string): Promise<string> {
+    const jobs = this.#storage.get()
+    const idx = jobs.findIndex((x) => x.jobID === jobID)
+    if (idx < 0) return Promise.reject('Job not found')
+    const job = jobs[idx]
+    return this.#api.jobLogs(job)
   }
   removeOutdatedJobs(): Promise<void> {
     const jobs = this.#storage.get()
@@ -144,7 +152,9 @@ class BaktaServiceImpl implements BaktaService {
     const idx = jobs.findIndex((x) => x.jobID === jobID)
     if (idx < 0) return Promise.reject('Job not found')
     const job = jobs[idx]
-    return this.#api.delete(job)
+    const updatedJobs = [...jobs]
+    updatedJobs.splice(idx, 1)
+    return this.#api.delete(job).then(() => this.#storage.save(updatedJobs))
   }
 }
 

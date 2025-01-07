@@ -16,6 +16,7 @@ export interface BaktaApi {
   jobResult(req: Job): Promise<JobResult>
   startJob(req: StartRequest): Promise<void>
   getVersions(): Promise<Version>
+  jobLogs(j: Job): Promise<string>
 }
 
 let instance: BaktaApi
@@ -58,6 +59,11 @@ class BaktaApiImpl implements BaktaApi {
       JobResultSchema.parse(j),
     )
   }
+  jobLogs(j: Job): Promise<string> {
+    return fetch(this.baseUrl + `/job/logs?jobID=${j.jobID}&secret=${j.secret}`).then((r) =>
+      r.text(),
+    )
+  }
   startJob(req: StartRequest): Promise<void> {
     return fetch(this.baseUrl + '/job/start', {
       method: 'POST',
@@ -80,8 +86,9 @@ class BaktaApiImpl implements BaktaApi {
     return fetch(this.baseUrl + `/delete?jobID=${j.jobID}&secret=${j.secret}`, {
       method: 'DELETE',
     }).then((x) => {
-      if (!x.ok) return Promise.reject('Deletion failed')
-      return Promise.resolve()
+      console.log(x.status)
+      if (x.ok || x.status == 404) return Promise.resolve()
+      return Promise.reject('Deletion failed')
     })
   }
 }

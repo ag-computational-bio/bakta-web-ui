@@ -7,30 +7,53 @@
         <th>Submission</th>
         <th>Last updated</th>
         <th>Status</th>
-        <th>Link</th>
-        <th v-if="showDelete"></th>
+        <th>Actions</th>
       </tr>
     </thead>
     <tbody>
-      <tr v-for="item in jobs" :key="item.jobID">
-        <td>{{ item.jobID }}</td>
+      <tr
+        v-for="item in jobs"
+        :key="item.jobID"
+        :class="{
+          'table-danger': item.jobStatus === 'ERROR',
+          'table-info': item.jobStatus === 'RUNNING',
+        }"
+      >
+        <td>
+          <router-link
+            v-if="item.jobStatus === 'SUCCESSFULL' || item.jobStatus === 'SUCCESSFUL'"
+            :to="{ name: 'Job', params: { id: item.key } }"
+          >
+            {{ item.jobID }}
+          </router-link>
+          <template v-else> {{ item.jobID }}</template>
+        </td>
         <td>{{ 'name' in item ? item.name : '' }}</td>
         <td>{{ 'started' in item ? formatDateTime(item.started) : 'unknown' }}</td>
         <td>{{ 'updated' in item ? formatDateTime(item.updated) : 'unknown' }}</td>
         <td>
           <i class="me-2" :class="stateIcon(item.jobStatus)"></i>{{ formatState(item.jobStatus) }}
         </td>
+
         <td>
           <router-link
             v-if="item.jobStatus === 'SUCCESSFULL' || item.jobStatus === 'SUCCESSFUL'"
             :to="{ name: 'Job', params: { id: item.key } }"
+            class="btn btn-sm btn-outline-secondary me-1 mb-1"
           >
-            Link
+            <i class="bi bi-eye"></i>
           </router-link>
-        </td>
-        <td v-if="showDelete">
           <button
-            class="btn btn-sm btn-outline-danger"
+            v-if="showJobLog"
+            class="btn btn-sm btn-outline-secondary me-1 mb-1"
+            title="Show job logs"
+            @click="emit('show:logs', item.jobID)"
+          >
+            <span class="bi bi-file-earmark-text"></span>
+          </button>
+          <button
+            v-if="showDelete"
+            class="btn btn-sm btn-outline-danger me-1 mb-1"
             title="Delete job"
             @click="emit('delete:job', item.jobID)"
           >
@@ -48,9 +71,11 @@ import type { FailedJobStatus, JobStatus } from '@/model/submit'
 defineProps<{
   jobs: JobList
   showDelete: boolean
+  showJobLog: boolean
 }>()
 const emit = defineEmits<{
   (e: 'delete:job', jobKey: string): void
+  (e: 'show:logs', jobKey: string): void
 }>()
 
 function formatState(state: JobStatus | FailedJobStatus): string {
