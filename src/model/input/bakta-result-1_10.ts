@@ -44,8 +44,8 @@ const BaktaSequenceSchema_1_10 = z.object({
   complete: z.boolean(),
   type: z.string(),
   topology: z.string(),
-  orig_description: z.string(),
-  orig_id: z.string(),
+  orig_description: z.string().optional(),
+  orig_id: z.string().optional(),
 })
 
 export const BaktaResultSchema_1_10 = z.object({
