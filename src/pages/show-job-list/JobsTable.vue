@@ -90,5 +90,6 @@ function stateIcon(state: JobStatus | FailedJobStatus): string {
     case 'ERROR':
       return 'bi bi-x-circle'
   }
+  return 'bi bi-x-circle'
 }
 </script>
