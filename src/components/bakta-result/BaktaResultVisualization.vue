@@ -20,6 +20,7 @@
     <BaktaGenomeViewer v-if="currentTab === 'browser'" :data="bakta" />
     <BaktaAnnotationTable v-if="currentTab === 'table'" :data="bakta" />
     <FeaturePlotViewer v-if="currentTab === 'circular'" :bakta="bakta" />
+    <BaktaDownloads v-if="currentTab === 'download'" :job="job" />
   </div>
   <div
     v-if="showShareButton"
@@ -38,35 +39,50 @@ import type { Result } from '@/model/result-data'
 import BaktaGenomeViewer from './BaktaGenomeViewer.vue'
 import BaktaAnnotationTable from './BaktaAnnotationTable.vue'
 import BaktaStats from './BaktaStats.vue'
-import { ref, useTemplateRef } from 'vue'
+import { computed, ref, useTemplateRef } from 'vue'
 import { Toast } from 'bootstrap'
 import FeaturePlotViewer from './FeaturePlotViewer.vue'
+import BaktaDownloads from './BaktaDownloads.vue'
 
-defineProps<{
+const props = defineProps<{
   job: JobResult
   bakta: Result
   showShareButton: boolean
 }>()
-type tabs = 'job' | 'table' | 'browser' | 'circular'
+type tabs = 'job' | 'table' | 'browser' | 'circular' | 'download'
 
-const tabs: { key: tabs; label: string }[] = [
-  {
-    key: 'job',
-    label: 'Job statistics',
-  },
-  {
-    key: 'table',
-    label: 'Annotation table',
-  },
-  {
-    key: 'browser',
-    label: 'Genomeviewer',
-  },
-  {
-    key: 'circular',
-    label: 'Circular plot',
-  },
-]
+type TabDefinition = {
+  key: tabs
+  label: string
+}
+
+const tabs = computed<TabDefinition[]>(() => {
+  const tabs: TabDefinition[] = [
+    {
+      key: 'job',
+      label: 'Job statistics',
+    },
+    {
+      key: 'table',
+      label: 'Annotation table',
+    },
+    {
+      key: 'browser',
+      label: 'Genomeviewer',
+    },
+    {
+      key: 'circular',
+      label: 'Circular plot',
+    },
+  ]
+
+  if (Object.keys(props.job.ResultFiles).length > 1)
+    tabs.push({
+      key: 'download',
+      label: 'Downloads',
+    })
+  return tabs
+})
 const currentTab = ref<tabs>('job')
 const toast = useTemplateRef('copyToast')
 function putLinkToClipboard() {

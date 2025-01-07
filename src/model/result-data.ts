@@ -43,6 +43,10 @@ export type Result = {
   }
   stats: {
     size: number
+    gc: number
+    n_ratio: number
+    n50: number
+    coding_ration: number
   }
   features: Feature[]
   sequences: Sequence[]
@@ -91,6 +95,10 @@ function toResult(input: BaktaResult | BaktaResult_1_9 | BaktaResult_1_10): Resu
     },
     stats: {
       size: input.stats.size,
+      gc: input.stats.gc,
+      coding_ration: input.stats.coding_ratio,
+      n50: input.stats.n50,
+      n_ratio: input.stats.n_ratio,
     },
     features: input.features.map(toFeature),
     sequences: input.sequences.map(toSequence),
