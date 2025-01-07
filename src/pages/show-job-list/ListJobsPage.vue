@@ -37,6 +37,7 @@ const { start, polling, cancel } = usePollManager(
     x.every(
       (j) =>
         j.jobStatus === 'SUCCESSFULL' ||
+        j.jobStatus === 'SUCCESSFUL' ||
         j.jobStatus === 'ERROR' ||
         j.jobStatus === 'UNAUTHORIZED' ||
         j.jobStatus === 'NOT_FOUND',

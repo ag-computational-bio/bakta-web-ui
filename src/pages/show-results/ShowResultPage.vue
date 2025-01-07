@@ -44,7 +44,7 @@ function loadJobData() {
     .then((j) => {
       job.value = j
       const status = job.value.jobStatus
-      if (status === 'SUCCESSFULL' || status === 'ERROR') {
+      if (status === 'SUCCESSFULL' || status === 'SUCCESSFUL' || status === 'ERROR') {
         //  jobs is in finished state. No retry required
         console.debug('Jobs is finished or failed, no need to refresh', job.value)
         return bakta.result(jobToken).then((r) => {

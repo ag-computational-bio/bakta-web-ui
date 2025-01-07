@@ -7,7 +7,7 @@ export const JobSchema = z.object({
 
 export const JobStatusSchema = z.object({
   jobId: z.string(),
-  jobStatus: z.enum(['INIT', 'RUNNING', 'SUCCESSFULL', 'ERROR']),
+  jobStatus: z.enum(['INIT', 'RUNNING', 'SUCCESSFULL', 'SUCCESSFUL', 'ERROR']),
   name: z.string(),
   started: z.string(),
   updated: z.string(),

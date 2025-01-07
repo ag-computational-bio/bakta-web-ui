@@ -40,7 +40,7 @@ export const Default: Story = {
       },
       {
         jobID: 'd',
-        jobStatus: 'SUCCESSFULL',
+        jobStatus: 'SUCCESSFUL',
         key: 'D',
         name: 'good genome',
         started: '2006-06-06T02:02:02Z',

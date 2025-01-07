@@ -83,6 +83,7 @@ function stateIcon(state: JobStatus | FailedJobStatus): string {
       return 'bi bi-hourglass'
     case 'RUNNING':
       return 'bi bi-gear'
+    case 'SUCCESSFUL':
     case 'SUCCESSFULL':
       return 'bi bi-check2-circle'
     case 'NOT_FOUND':
@@ -90,6 +91,5 @@ function stateIcon(state: JobStatus | FailedJobStatus): string {
     case 'ERROR':
       return 'bi bi-x-circle'
   }
-  return 'bi bi-x-circle'
 }
 </script>
