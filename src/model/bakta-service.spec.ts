@@ -113,7 +113,7 @@ describe('bakta service', () => {
       storage.save([fixtures.A])
       const api: BaktaApi = createBaktaApi('')
       const mock = vi.fn().mockImplementation(() => {})
-      api.delete = mock
+      api.delete = mock.mockReturnValue(Promise.resolve())
       const service = createBaktaService(api, storage)
       await service.removeJob('A')
       expect(mock).toHaveBeenCalledOnce()
