@@ -67,7 +67,10 @@ export const FailedJobInfoSchema: ZodType<FailedJobInfo> = z.object({
   jobStatus: z.enum(FailedJobStatuses),
 })
 
-const JobStatuses = ['INIT', 'RUNNING', 'SUCCESSFULL', 'ERROR'] as const
+// Migration quirk: In order to support the old SUCCESSFULL state and the new SUCCCESSFUL state
+// we include both here. As soon as the old server is replaced with one with the new spelling
+// the old SUCCESSFULL state can be removed
+const JobStatuses = ['INIT', 'RUNNING', 'SUCCESSFULL', 'ERROR', 'SUCCESSFUL'] as const
 export type JobStatus = (typeof JobStatuses)[number]
 export type JobInfo = {
   jobID: string

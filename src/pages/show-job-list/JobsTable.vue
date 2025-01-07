@@ -17,10 +17,12 @@
         <td>{{ 'name' in item ? item.name : '' }}</td>
         <td>{{ 'started' in item ? formatDateTime(item.started) : 'unknown' }}</td>
         <td>{{ 'updated' in item ? formatDateTime(item.updated) : 'unknown' }}</td>
-        <td>{{ formatState(item.jobStatus) }}</td>
+        <td>
+          <i class="me-2" :class="stateIcon(item.jobStatus)"></i>{{ formatState(item.jobStatus) }}
+        </td>
         <td>
           <router-link
-            v-if="item.jobStatus === 'SUCCESSFULL'"
+            v-if="item.jobStatus === 'SUCCESSFULL' || item.jobStatus === 'SUCCESSFUL'"
             :to="{ name: 'Job', params: { id: item.key } }"
           >
             Link
@@ -72,6 +74,21 @@ function formatDateTime(datestring: string): string {
     }
   } else {
     return ''
+  }
+}
+
+function stateIcon(state: JobStatus | FailedJobStatus): string {
+  switch (state) {
+    case 'INIT':
+      return 'bi bi-hourglass'
+    case 'RUNNING':
+      return 'bi bi-gear'
+    case 'SUCCESSFULL':
+      return 'bi bi-check2-circle'
+    case 'NOT_FOUND':
+    case 'UNAUTHORIZED':
+    case 'ERROR':
+      return 'bi bi-x-circle'
   }
 }
 </script>
