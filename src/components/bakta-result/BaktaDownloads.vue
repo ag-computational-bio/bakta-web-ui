@@ -1,8 +1,8 @@
 <template>
   <ul class="list-group">
     <li class="list-group-item" v-for="d of downloads" :key="d.label">
-      <a :href="d.url" class="me-2"><i class="bi bi-download"></i></a>
-      <a :href="d.url"> {{ d.label }}</a>
+      <a :href="d.url" class="me-2" download><i class="bi bi-download"></i></a>
+      <a :href="d.url" download> {{ d.label }}</a>
     </li>
   </ul>
 </template>
