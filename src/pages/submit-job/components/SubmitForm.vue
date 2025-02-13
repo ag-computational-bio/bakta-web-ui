@@ -259,7 +259,7 @@ const replicons = computed({
 const idsAreINSDCCompliant = computed(() => {
   const insdecRe = /^[A-Za-z\d_.:*#-]{1,25}$/
   for (const x of replicons.value) {
-    const id = x.new ?? x.id
+    const id = x.new.length > 0 ? x.new : x.id
     if (!insdecRe.exec(id)) {
       return false
     }
