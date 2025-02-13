@@ -62,6 +62,16 @@ export interface BaktaService {
   result(job: Job): Promise<JobResult>
   removeJob(jobID: string): Promise<void>
   logs(jobID: string): Promise<string>
+  /**
+   * Checks if the provided job is in the joblist of this machine.
+   * @param job
+   */
+  hasJob(job: Job): boolean
+  /**
+   * Adds the job to the joblist.
+   * @param job
+   */
+  addJob(job: Job): void
 }
 
 function generateRepliconTable(replicons: Replicon[]): string {
@@ -137,6 +147,16 @@ class BaktaServiceImpl implements BaktaService {
       ]
       return out
     })
+  }
+
+  hasJob(job: Job): boolean {
+    const allJobs = this.#storage.get()
+    return allJobs.some((x) => x.jobID === job.jobID)
+  }
+  addJob(job: Job): void {
+    const joblist = this.#storage.get()
+    joblist.push(job)
+    this.#storage.save(joblist)
   }
 
   job(job: Job): Promise<JobInfo> {

@@ -46,7 +46,13 @@
       <ProgressBar v-if="loadingProgress" :progress="loadingProgress" />
 
       <div v-if="!loadingProgress && !error && data && result" class="mt-3">
-        <BaktaResultVisualization :job="result" :bakta="data" :show-share-button="true" />
+        <BaktaResultVisualization
+          :job="result"
+          :bakta="data"
+          :show-share-button="true"
+          :show-add-job-button="!hasJob"
+          @add-job="addJobToJoblist"
+        />
       </div>
     </div>
   </div>
@@ -92,7 +98,14 @@ const jobStatusClass = computed(() => {
   return 'danger'
 })
 
+const hasJob = ref<boolean>(false)
+function addJobToJoblist() {
+  bakta.addJob(jobToken.value)
+  hasJob.value = true
+}
+
 function loadJobData() {
+  hasJob.value = bakta.hasJob(jobToken.value)
   bakta
     .job(jobToken.value)
     .then((j) => {

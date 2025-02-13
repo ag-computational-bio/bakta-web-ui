@@ -14,6 +14,15 @@
         <i class="bi bi-share"></i>
       </button>
     </li>
+    <li v-if="showAddJobButton" class="nav-item">
+      <button
+        class="nav-link text-secondary"
+        @click="addJobToJoblist"
+        title="Add this job your joblist"
+      >
+        <i class="bi bi-save2"></i>
+      </button>
+    </li>
   </ul>
   <div class="p-3 pb-5 pt-3 border border-top-0 my-0 py-0">
     <BaktaStats v-if="currentTab === 'job'" :data="bakta" :job="job" />
@@ -32,6 +41,15 @@
   >
     Copied shareable link to clipboard
   </div>
+  <div
+    ref="addedToast"
+    class="text-bg-secondary toast position-absolute px-2 py-1 bottom-0 end-0"
+    role="alert"
+    aria-live="assertive"
+    aria-atomic="true"
+  >
+    Added the job to your joblist
+  </div>
 </template>
 <script setup lang="ts">
 import type { JobResult } from '@/model/job'
@@ -48,6 +66,10 @@ const props = defineProps<{
   job: JobResult
   bakta: Result
   showShareButton: boolean
+  showAddJobButton: boolean
+}>()
+const emit = defineEmits<{
+  (e: 'addJob'): void
 }>()
 type tabs = 'job' | 'table' | 'browser' | 'circular' | 'download'
 
@@ -89,6 +111,14 @@ function putLinkToClipboard() {
   window.navigator.clipboard.writeText(window.location.href)
   if (toast.value) {
     const t = Toast.getOrCreateInstance(toast.value, { autohide: true })
+    t.show()
+  }
+}
+const addedToast = useTemplateRef('addedToast')
+function addJobToJoblist() {
+  emit('addJob')
+  if (addedToast.value) {
+    const t = Toast.getOrCreateInstance(addedToast.value, { autohide: true })
     t.show()
   }
 }
