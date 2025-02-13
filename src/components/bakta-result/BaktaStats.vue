@@ -21,7 +21,12 @@
       <div class="row mb-4">
         <div class="col-md-4 col-sm-12">
           <display-tuple :break="6" label="N50" :value="formatBp(data.stats.n50, 'bp')" />
-          <display-tuple :break="6" label="N90" :value="formatBp(data.stats.n90, 'bp')" />
+          <display-tuple
+            v-if="data.stats.n90"
+            :break="6"
+            label="N90"
+            :value="formatBp(data.stats.n90, 'bp')"
+          />
           <display-tuple :break="6" label="GC-content" :value="formatGc(data.stats.gc)" />
           <display-tuple
             :break="6"
