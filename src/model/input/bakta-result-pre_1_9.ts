@@ -15,6 +15,7 @@ export const BaktaStatsSchema = z.object({
   gc: z.number(),
   n_ratio: z.number(),
   n50: z.number(),
+  n90: z.number(),
   coding_ratio: z.number(),
 })
 
