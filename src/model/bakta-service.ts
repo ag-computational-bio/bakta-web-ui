@@ -49,7 +49,7 @@ export function createBaktaJobRequest(init?: Partial<BaktaJobRequest>): BaktaJob
 export type JobList = ((FailedJobInfo | JobInfo) & { key: string })[]
 
 export interface BaktaService {
-  submitJob(req: BaktaJobRequest): Promise<void>
+  submitJob(req: BaktaJobRequest): Promise<Job & { key: string }>
   /**
    * Retrieves information on all jobs that are stored locally.
    */
@@ -95,7 +95,7 @@ class BaktaServiceImpl implements BaktaService {
       return
     })
   }
-  submitJob(request: BaktaJobRequest): Promise<void> {
+  submitJob(request: BaktaJobRequest): Promise<Job & { key: string }> {
     return this.#api.initJob({ name: request.jobName, repliconTableType: 'TSV' }).then((job) => {
       const uploads = [
         fetch(job.uploadLinkFasta, { method: 'PUT', body: request.sequence }),
@@ -118,7 +118,7 @@ class BaktaServiceImpl implements BaktaService {
           const jobs = this.#storage.get()
           jobs.push(job.job)
           this.#storage.save(jobs)
-          return
+          return { ...job.job, key: this.#storage.key(job.job) }
         }),
       )
     })

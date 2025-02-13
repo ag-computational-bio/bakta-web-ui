@@ -20,13 +20,9 @@
         }"
       >
         <td>
-          <router-link
-            v-if="item.jobStatus === 'SUCCESSFULL' || item.jobStatus === 'SUCCESSFUL'"
-            :to="{ name: 'Job', params: { id: item.key } }"
-          >
+          <router-link :to="{ name: 'Job', params: { id: item.key } }">
             {{ item.jobID }}
           </router-link>
-          <template v-else> {{ item.jobID }}</template>
         </td>
         <td>{{ 'name' in item ? item.name : '' }}</td>
         <td>{{ 'started' in item ? formatDateTime(item.started) : 'unknown' }}</td>

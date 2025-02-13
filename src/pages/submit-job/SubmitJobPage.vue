@@ -41,8 +41,8 @@ function submitJob() {
   console.log(request.value)
   bakta
     .submitJob(request.value)
-    .then(() => {
-      router.push({ name: 'Jobs' })
+    .then((job) => {
+      router.push({ name: 'Job', params: { id: job.key } })
     })
     .catch((err) => {
       submitting.value = false
