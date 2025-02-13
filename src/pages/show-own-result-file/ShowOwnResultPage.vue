@@ -25,7 +25,12 @@
       :title="loadingProgress.title"
     />
     <div v-if="!loadingProgress.enabled && data">
-      <BaktaResultVisualization :job="job" :bakta="data" :show-share-button="false" />
+      <BaktaResultVisualization
+        :job="job"
+        :bakta="data"
+        :show-share-button="false"
+        :show-add-job-button="false"
+      />
     </div>
   </div>
 </template>
