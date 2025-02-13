@@ -29,13 +29,11 @@
 </template>
 <script setup lang="ts">
 import { type Result } from '@/model/result-data'
-import { computed, onMounted, ref, useTemplateRef } from 'vue'
+import { computed, onMounted, onUnmounted, ref, useTemplateRef } from 'vue'
 import BaktaCircularPlot from './feature-plot/BaktaCircularPlot.vue'
 import BaktaLinearPlot from './feature-plot/BaktaLinearPlot.vue'
 
-const props = defineProps<{
-  bakta: Result
-}>()
+const props = defineProps<{ bakta: Result }>()
 
 const currentId = ref<string>('')
 const type = ref<'circular' | 'linear'>('circular')
@@ -46,19 +44,25 @@ const data = computed(() => ({
 }))
 
 const component = useTemplateRef('comp')
+let resizeObs: ResizeObserver | null = null
 onMounted(() => {
   if (props.bakta.sequences.length > 0) {
     currentId.value = props.bakta.sequences[0].id
   }
   if (component.value) {
-    const obs = new ResizeObserver(() => {
-      if (component.value) {
-        const bbox = component.value.getBoundingClientRect()
-        const max = Math.max(bbox.width, bbox.height)
-        size.value = { width: max, height: max }
-      }
+    resizeObs = new ResizeObserver(() => {
+      requestAnimationFrame(() => {
+        if (component.value) {
+          const bbox = component.value.getBoundingClientRect()
+          const max = Math.max(bbox.width, bbox.height)
+          if (size.value.width !== max) size.value = { width: max, height: max }
+        }
+      })
     })
-    obs.observe(component.value)
+    resizeObs.observe(component.value)
   }
+})
+onUnmounted(() => {
+  if (resizeObs) resizeObs.disconnect()
 })
 </script>
