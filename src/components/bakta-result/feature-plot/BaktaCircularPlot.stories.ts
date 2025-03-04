@@ -33,3 +33,60 @@ export const Default: Story = {
       '<button @click="nextSequence">Toggle</button><BaktaCircularPlot v-bind="args" :sequence="seq" :features="feat" />',
   }),
 }
+
+export const FeatureAcrossOrigin: Story = {
+  args: {
+    sequence: { complete: true, id: 'x', length: 10, nt: 'aaaaaaaaaa', type: '' },
+    features: [
+      {
+        id: 'fwd_crossing',
+        sequence: 'x',
+        start: 9,
+        stop: 11,
+        strand: '+',
+        type: 'cds',
+        db_xrefs: [],
+        gene: null,
+        product: null,
+        locus: 'abc',
+      },
+      {
+        id: 'fwd',
+        sequence: 'x',
+        start: 4,
+        stop: 5,
+        strand: '+',
+        type: 'cds',
+        db_xrefs: [],
+        gene: null,
+        product: null,
+        locus: 'abc',
+      },
+      {
+        id: 'rev_crossing',
+        sequence: 'x',
+        start: 9,
+        stop: 11,
+        strand: '-',
+        type: 'cds',
+        db_xrefs: [],
+        gene: null,
+        product: null,
+        locus: 'abc',
+      },
+
+      {
+        id: 'rev',
+        sequence: 'x',
+        start: 5,
+        stop: 3,
+        strand: '-',
+        type: 'cds',
+        db_xrefs: [],
+        gene: null,
+        product: null,
+        locus: 'abc',
+      },
+    ],
+  },
+}

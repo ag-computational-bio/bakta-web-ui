@@ -59,7 +59,33 @@ const AllBaktaResultSchemas = z.union([
   BaktaResultSchema_1_9,
 ])
 
-function toFeature(f: BaktaFeature | BaktaFeature_1_10): Feature {
+/**
+ * Translates bakta json coordinates to gff3 coordinates.
+ *
+ * bakta coordinates:
+ *   start < stop => normal feature
+ *   start > stop => feature accross origin
+ * gff3 coordinates
+ *   start is always < end
+ *   features that cross the origin have a end coordinate > seqLength
+ *
+ * @param f
+ * @param seqLen
+ * @returns
+ */
+function baktaToGffCoordinates(
+  f: BaktaFeature | BaktaFeature_1_10,
+  seqLen: number,
+): [number, number] {
+  if (f.start > f.stop) {
+    return [f.start, seqLen + f.stop]
+  } else {
+    return [f.start, f.stop]
+  }
+}
+
+function toFeature(f: BaktaFeature | BaktaFeature_1_10, seqLen: number): Feature {
+  const coords = baktaToGffCoordinates(f, seqLen)
   return {
     id: f.id,
     frame: f.frame,
@@ -69,8 +95,8 @@ function toFeature(f: BaktaFeature | BaktaFeature_1_10): Feature {
     locus: f.locus,
     product: f.product,
     sequence: 'contig' in f ? f.contig : f.sequence,
-    start: f.start,
-    stop: f.stop,
+    start: coords[0],
+    stop: coords[1],
     strand: f.strand,
     type: f.type,
   }
@@ -88,6 +114,13 @@ function toSequence(f: BaktaSequence | BaktaSequence_1_10): Sequence {
 }
 
 function toResult(input: BaktaResult | BaktaResult_1_9 | BaktaResult_1_10): Result {
+  const sequences = input.sequences.map(toSequence)
+  const seqIdx: Record<string, number> = {}
+  for (const s of sequences) seqIdx[s.id] = s.length
+  const features = input.features.map((f) =>
+    toFeature(f, seqIdx['contig' in f ? f.contig : f.sequence]),
+  )
+
   return {
     genome: {
       genus: input.genome.genus ?? '',
@@ -102,8 +135,8 @@ function toResult(input: BaktaResult | BaktaResult_1_9 | BaktaResult_1_10): Resu
       n90: 'n90' in input.stats ? input.stats.n90 : undefined,
       n_ratio: input.stats.n_ratio,
     },
-    features: input.features.map(toFeature),
-    sequences: input.sequences.map(toSequence),
+    features: features,
+    sequences: sequences,
   }
 }
 
