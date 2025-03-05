@@ -17,9 +17,7 @@
     "build-storybook": "storybook build"
   },
   "dependencies": {
-    "@ljelonek-public/vue-bootstrap5-components": "^0.1.4",
     "@popperjs/core": "^2.8.4",
-    "biojs-io-fasta": "^0.1.17",
     "bootstrap": "^5.0.0",
     "bootstrap-icons": "^1.4.0",
     "btoa": "^1.2.1",
