@@ -104,7 +104,7 @@ function plotCirc() {
     .attr('fill', (d) => d.color)
 
   const gcScale = d3.scaleLinear([20, 40]).domain([0.3, 0.8])
-  const gc = gcData.map((x) => [scale(x[0]), gcScale(x[1])])
+  const gc: [number, number][] = gcData.map((x) => [scale(x[0]), gcScale(x[1])])
   g.append('path')
     .attr('class', 'gc')
     .attr('d', d3.areaRadial().curve(d3.curveLinearClosed).innerRadius(30)(gc))
