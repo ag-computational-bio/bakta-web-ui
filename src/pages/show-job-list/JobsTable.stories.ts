@@ -13,6 +13,7 @@ export const Default: Story = {
   args: {
     'onDelete:job': fn(),
     showDelete: true,
+    showJobLog: false,
     jobs: [
       {
         jobID: 'a',

@@ -13,6 +13,7 @@ export const Default: Story = {
   args: {
     bakta: fixtures.result['1.10'],
     showShareButton: true,
+    showAddJobButton: true,
     job: {
       jobID: '',
       name: '',
