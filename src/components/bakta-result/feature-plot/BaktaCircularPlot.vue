@@ -102,7 +102,7 @@ function fitId(id: string, mode: 'infix' | 'suffix' | 'prefix' | 'none' | 'multi
 function updateTitle(seq: Sequence, svg: d3.Selection<SVGGElement, undefined, null, undefined>) {
   let sel = svg.selectAll<SVGTSpanElement, string>('g.title > text > tspan')
   if (sel.empty()) sel = svg.append('g').attr('class', 'title').append('text').selectAll('tspan')
-  const id = fitId(seq.id, 'multiline')
+  const id = fitId(seq.id, 'suffix')
   const lines = [...id, formatBp(seq.length, 'bp'), 'GC: ' + formatGc(plotData.value.gc.mean)]
   sel
     .data(lines)
