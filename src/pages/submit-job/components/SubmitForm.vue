@@ -238,10 +238,11 @@ const dermType = computed({
   get: () => config.value.dermType,
   set: (v) => updateConfig({ dermType: v }),
 })
-const genus_species = computed({
-  get: () =>
-    [config.value.genus, config.value.species].filter((x) => x != null && x.length > 0).join(' '),
-  set: (v) => {
+
+const genus_species = ref<string>('')
+watch(
+  () => genus_species.value,
+  (v) => {
     const split = v.indexOf(' ')
     if (split >= 0) {
       updateConfig({ genus: v.substring(0, split), species: v.substring(split + 1) })
@@ -249,7 +250,7 @@ const genus_species = computed({
       updateConfig({ genus: v, species: '' })
     }
   },
-})
+)
 
 const replicons = computed({
   get: () => props.modelValue.replicons,
