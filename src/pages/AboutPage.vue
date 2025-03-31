@@ -42,6 +42,12 @@
           version.
         </li>
         <li>
+          We believe in data minimization for this service and store only essential data on our
+          servers. That comprises a unique access token, input files and results for each job. For
+          data access, a list of jobs is solely saved in your browser. We do not use cookies for
+          this service.
+        </li>
+        <li>
           Waranty: The service providers do not express or imply any warranty. The service providers
           are neither responsible for decisions that are made based on the output of this service
           nor assume any liability for damages that may result from using this service.
