@@ -6,7 +6,6 @@
     type="file"
     id="fastaFile"
     @change="fileUpdated"
-    accept="*.fa,*.fas,.fna,.fasta,*.fa.gz,.fna.gz,.fas.gz,.fasta.gz"
     :disabled="_progress != undefined"
   />
   <ProgressBar v-if="_progress" :progress="_progress" title="Loading fasta file..." />
