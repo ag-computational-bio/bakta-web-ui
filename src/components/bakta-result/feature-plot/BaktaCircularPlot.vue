@@ -108,7 +108,7 @@ function updateTitle(seq: Sequence, svg: d3.Selection<SVGGElement, undefined, nu
     .data(lines)
     .join('tspan')
     .attr('text-anchor', 'middle')
-    .attr('y', (d, i) => `${i * 1.2}rem`)
+    .attr('dy', (d, i) => (i == 0 ? `0em` : `1.2em`))
     .attr('x', '0')
     .text((d) => d)
 }
