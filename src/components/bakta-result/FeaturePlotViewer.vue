@@ -1,12 +1,30 @@
 <template>
   <div class="w-100 h-100">
-    <div v-if="bakta.sequences.length > 1" class="form-floating">
-      <select id="selectSequence" class="form-select" v-model="currentId">
-        <option v-for="s of bakta.sequences" :key="s.id" :value="s.id">
-          {{ s.id }}
-        </option>
-      </select>
-      <label for="selectSequence">Select sequence</label>
+    <div v-if="bakta.sequences.length > 1" class="d-flex">
+      <button
+        class="btn btn-sm btn-outline-secondary border-0"
+        @click="previousSeq"
+        :disabled="currentPos === 0"
+        title="Show previous sequence"
+      >
+        <i class="bi bi-chevron-left"></i>
+      </button>
+      <div class="flex-grow-1 form-floating">
+        <select id="selectSequence" class="form-select" v-model="currentPos">
+          <option v-for="(s, idx) of bakta.sequences" :key="s.id" :value="idx">
+            {{ s.id }}
+          </option>
+        </select>
+        <label for="selectSequence">Select sequence</label>
+      </div>
+      <button
+        class="btn btn-sm btn-outline-secondary border-0"
+        @click="nextSeq"
+        :disabled="currentPos >= sequencCount - 1"
+        title="Show next sequence"
+      >
+        <i class="bi bi-chevron-right"></i>
+      </button>
     </div>
     <select v-if="false" v-model="type">
       <option value="circular">circular</option>
@@ -35,7 +53,9 @@ import BaktaLinearPlot from './feature-plot/BaktaLinearPlot.vue'
 
 const props = defineProps<{ bakta: Result }>()
 
-const currentId = ref<string>('')
+const currentPos = ref<number>(0)
+const sequencCount = computed<number>(() => props.bakta.sequences.length)
+const currentId = computed<string>(() => props.bakta.sequences[currentPos.value].id)
 const type = ref<'circular' | 'linear'>('circular')
 const size = ref({ width: 1000, height: 1000 })
 const data = computed(() => ({
@@ -47,7 +67,7 @@ const component = useTemplateRef('comp')
 let resizeObs: ResizeObserver | null = null
 onMounted(() => {
   if (props.bakta.sequences.length > 0) {
-    currentId.value = props.bakta.sequences[0].id
+    currentPos.value = 0
   }
   if (component.value) {
     resizeObs = new ResizeObserver(() => {
@@ -65,4 +85,14 @@ onMounted(() => {
 onUnmounted(() => {
   if (resizeObs) resizeObs.disconnect()
 })
+
+function nextSeq() {
+  if (currentPos.value < sequencCount.value) {
+    currentPos.value = currentPos.value + 1
+  }
+}
+
+function previousSeq() {
+  if (currentPos.value > 0) currentPos.value = currentPos.value - 1
+}
 </script>
