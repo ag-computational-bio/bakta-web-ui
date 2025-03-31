@@ -4,7 +4,7 @@
     class="form-control"
     type="text"
     id="locustag"
-    placeholder="Locus tag prefix (optional)"
+    placeholder="Locus tag prefix, i.e. feature id prefix (optional)"
     v-model="modelValue"
     :pattern="locusTagValidation.regex"
     :oninput="validate"

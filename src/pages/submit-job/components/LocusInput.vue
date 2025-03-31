@@ -4,7 +4,7 @@
     class="form-control"
     type="text"
     id="locus"
-    placeholder="Locus prefix (optional)"
+    placeholder="Locus prefix, i.e. sequence id prefix (optional)"
     v-model="modelValue"
     :oninput="validate"
   />
