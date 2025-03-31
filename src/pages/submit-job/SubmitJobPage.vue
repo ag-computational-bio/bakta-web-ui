@@ -39,6 +39,7 @@ const submitting = ref(false)
 function submitJob() {
   error.value = undefined
   console.log(request.value)
+  submitting.value = true
   bakta
     .submitJob(request.value)
     .then((job) => {
