@@ -75,11 +75,37 @@ function createOrGetGroup(
   return group
 }
 
+function fitId(id: string, mode: 'infix' | 'suffix' | 'prefix' | 'none' | 'multiline'): string[] {
+  const maxlen = 25
+  if (id.length > maxlen) {
+    if (mode === 'infix') {
+      const toRemove = id.length - maxlen
+      const toKeep = Math.floor((id.length - toRemove) / 2)
+      return [id.substring(0, toKeep) + '[...]' + id.substring(id.length - toKeep)]
+    } else if (mode === 'suffix') {
+      return [id.substring(0, maxlen) + '[...]']
+    } else if (mode === 'prefix') {
+      return ['[...]' + id.substring(id.length - maxlen)]
+    } else if (mode === 'multiline') {
+      const split = []
+      for (let i = 0; i < id.length; i = i + maxlen) {
+        split.push(id.substring(i, Math.min(id.length, i + maxlen)))
+      }
+      return split
+    } else {
+      return [id]
+    }
+  }
+  return [id]
+}
+
 function updateTitle(seq: Sequence, svg: d3.Selection<SVGGElement, undefined, null, undefined>) {
   let sel = svg.selectAll<SVGTSpanElement, string>('g.title > text > tspan')
   if (sel.empty()) sel = svg.append('g').attr('class', 'title').append('text').selectAll('tspan')
+  const id = fitId(seq.id, 'multiline')
+  const lines = [...id, formatBp(seq.length, 'bp'), 'GC: ' + formatGc(plotData.value.gc.mean)]
   sel
-    .data([seq.id, formatBp(seq.length, 'bp'), 'GC: ' + formatGc(plotData.value.gc.mean)])
+    .data(lines)
     .join('tspan')
     .attr('text-anchor', 'middle')
     .attr('y', (d, i) => `${i * 1.2}rem`)
