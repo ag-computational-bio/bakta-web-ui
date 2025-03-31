@@ -49,6 +49,11 @@ const columns = [
     render: DataTablesCore.render.text(),
   },
   {
+    data: 'gene',
+    title: 'Gene',
+    render: DataTablesCore.render.text(),
+  },
+  {
     data: 'product',
     title: 'Product',
     render: DataTablesCore.render.text(),
@@ -65,6 +70,7 @@ const table = computed(() => {
     strand: x.strand || '',
     locus: x.locus || '',
     product: x.product || '',
+    gene: x.gene || '',
     dbxrefs: x.db_xrefs
       ? x.db_xrefs
           // url is hard coded for the moment. Should be moved to rest-api module
