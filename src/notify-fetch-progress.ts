@@ -23,25 +23,19 @@ function notifyReadProgress(
       return pump()
       function pump(): Promise<void> {
         return reader.read().then(({ done, value }) => {
+          // When no more data needs to be consumed, close the stream
+          if (done) {
+            handleProgress(1)
+            handleDone()
+            controller.close()
+            return
+          }
           if (value == undefined) throw 'Expecting array'
           pos += value.length
           const percentage = pos / total
           handleProgress(percentage)
-          // When no more data needs to be consumed, close the stream
-          if (done) {
-            handleDone()
-            controller.close()
-            return
-          }
           // Enqueue the next data chunk into our target stream
           controller.enqueue(value)
-          // lj: for some reason the done variable was never set to true, so I use
-          //     100% data transfered as a fallback close criterion
-          if (percentage == 1) {
-            handleDone()
-            controller.close()
-            return
-          }
           return pump()
         })
       }

@@ -14,15 +14,28 @@
           accept=".json"
         />
       </div>
-      <button class="btn btn-sm btn-outline-secondary border-0" @click="loadExampleData">
-        Click here to use example result
-      </button>
+      <div>
+        <span class="ms-1 text-sm text-secondary">Use example result: </span>
+        <button
+          class="btn btn-sm border-0 py-0 text-sm btn-outline-secondary"
+          @click="loadExampleData('plasmid')"
+        >
+          Plasmid
+        </button>
+        <button
+          class="btn btn-sm border-0 py-0 text-sm btn-outline-secondary"
+          @click="loadExampleData('genome')"
+        >
+          Genome
+        </button>
+      </div>
     </div>
     <notification type="danger" :message="error" />
     <progress-bar
       v-if="loadingProgress.enabled"
       :progress="loadingProgress"
       :title="loadingProgress.title"
+      :show-label="loadingProgress.showLabel"
     />
     <div v-if="!loadingProgress.enabled && data">
       <BaktaResultVisualization
@@ -38,9 +51,10 @@
 import Notification from '@/components/Notification.vue'
 import ProgressBar from '@/components/ProgressBar.vue'
 import BaktaResultVisualization from '@/components/bakta-result/BaktaResultVisualization.vue'
-import type { Progress } from '@/components/progress'
+import { type Progress } from '@/components/progress'
 import { type JobResult } from '@/model/job'
 import { parseBaktaData, type Result } from '@/model/result-data'
+import notifyFetchProgress from '@/notify-fetch-progress'
 import { computed, ref } from 'vue'
 
 const data = ref<Result>()
@@ -53,11 +67,12 @@ const job = computed<JobResult>(() => {
     updated: new Date().toISOString(),
   }
 })
-const loadingProgress = ref<Progress & { enabled: boolean; title: string }>({
+const loadingProgress = ref<Progress & { enabled: boolean; title: string; showLabel: boolean }>({
   enabled: false,
   min: 0,
   max: 100,
   value: 0,
+  showLabel: true,
   title: 'Loading results...',
   type: 'static',
 })
@@ -77,6 +92,7 @@ function loadData(file: File) {
   error.value = undefined
   loadingProgress.value.enabled = true
   loadingProgress.value.value = 0
+  loadingProgress.value.showLabel = true
   loadingProgress.value.title = 'Processing data. This may take a while for larger genomes.'
   loadingProgress.value.type = 'indeterminate'
 
@@ -105,13 +121,35 @@ function setError(err: string) {
   loadingProgress.value.enabled = false
 }
 
-function loadExampleData() {
-  fetch('/NC_002127.1.json')
+const examples = {
+  plasmid: '/NC_002127.1.json.gz',
+  genome: '/GCF_000008865.2.json.gz',
+} as const
+
+function loadExampleData(type: 'plasmid' | 'genome') {
+  loadingProgress.value.enabled = true
+  loadingProgress.value.type = 'indeterminate'
+  loadingProgress.value.showLabel = false
+  loadingProgress.value.value = 100
+
+  fetch(examples[type])
+    .then((response) =>
+      notifyFetchProgress(
+        response,
+        () => {},
+        () => {},
+      ),
+    )
+    .then((stream) => new Response(stream))
     .then((r) => r.json())
     .then((j) => {
       data.value = parseBaktaData(j)
+      loadingProgress.value.enabled = false
     })
-    .catch((err) => console.warn(err))
+    .catch((err) => {
+      console.warn(err)
+      loadingProgress.value.enabled = false
+    })
 }
 </script>
 <style scoped></style>

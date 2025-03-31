@@ -9,15 +9,31 @@
       ref="fastaSequenceInput"
       @update:sequences="(evt) => updateParsedSequence('text', evt)"
     />
-    <button
-      v-if="seqSource === 'none'"
-      class="btn btn-sm btn-outline-secondary border-0 py-0 mb-2"
-      @click="loadExampleData"
-    >
-      Click here to use an example sequence
-    </button>
+    <div v-if="seqSource === 'none' && loadingExample == undefined" class="mb-2">
+      <span class="ms-1 text-sm text-secondary">Use example sequence: </span>
+      <button
+        v-if="seqSource === 'none'"
+        class="btn btn-sm border-0 py-0 text-sm btn-outline-secondary"
+        @click="(e) => loadExampleData(e, 'plasmid')"
+      >
+        Plasmid
+      </button>
+      <button
+        v-if="seqSource === 'none'"
+        class="btn btn-sm border-0 py-0 text-sm btn-outline-secondary"
+        @click="(e) => loadExampleData(e, 'complete')"
+      >
+        Genome
+      </button>
+    </div>
+    <ProgressBar
+      v-if="loadingExample"
+      class="mt-2"
+      :progress="loadingExample"
+      :show-label="false"
+    />
     <FastaFileChooser
-      v-if="seqSource == 'none' || seqSource == 'file'"
+      v-if="(seqSource == 'none' && loadingExample == undefined) || seqSource == 'file'"
       ref="fastaFileInput"
       :class="seqSource == 'none' ? 'mt-1' : ''"
       @update:sequences="(evt) => updateParsedSequence('file', evt)"
@@ -142,7 +158,7 @@ import { parseFasta, type Seq, type SequenceInput } from '@/fasta/parse-fasta'
 import { validateDna } from '@/fasta/validate-fasta'
 import { createBaktaJobRequest, type BaktaJobRequest, type Replicon } from '@/model/bakta-service'
 import type { JobConfig } from '@/model/submit'
-import { computed, ref, useTemplateRef } from 'vue'
+import { computed, ref, useTemplateRef, watch } from 'vue'
 import AutocompleteInput from './AutocompleteInput.vue'
 import EditRepliconTable from './EditRepliconTable.vue'
 import FastaFileChooser from './FastaFileChooser.vue'
@@ -151,6 +167,9 @@ import LocusInput from './LocusInput.vue'
 import LocusTagInput from './LocusTagInput.vue'
 import SelectDermType from './SelectDermType.vue'
 import SelectTranslationTable from './SelectTranslationTable.vue'
+import ProgressBar from '@/components/ProgressBar.vue'
+import { useProgress, type Progress } from '@/components/progress'
+import notifyFetchProgress from '@/notify-fetch-progress'
 
 const props = defineProps<{
   modelValue: BaktaJobRequest
@@ -346,14 +365,53 @@ function reset() {
   emit('update:modelValue', createBaktaJobRequest())
 }
 
-function loadExampleData(evt: Event) {
+const examples = {
+  plasmid: '/NC_002127.1.fna.gz',
+  complete: '/GCF_000008865.2.fna.gz',
+}
+const loadingExample = ref<Progress>()
+function loadExampleData(evt: Event, type: 'plasmid' | 'complete') {
   evt.preventDefault()
-  fetch('/NC_002127.1.fna')
+  const { progress } = useProgress({
+    min: 0,
+    max: 1,
+    value: 1,
+    type: 'indeterminate',
+    title: 'Loading example data',
+  })
+  loadingExample.value = progress
+  fetch(examples[type])
+    .then((response) =>
+      notifyFetchProgress(
+        response,
+        () => {},
+        () => {
+          if (loadingExample.value) {
+            loadingExample.value.title = 'Processing data. This may take a while.'
+            loadingExample.value.type = 'indeterminate'
+          }
+        },
+      ),
+    )
+    .then((stream) => new Response(stream))
     .then((r) => r.text())
     .then((t) => {
       fastaSequenceInput.value?.set(t)
-      updateParsedSequence('text', { name: 'NC_002127.1.fna', parsed: parseFasta(t), sequence: t })
+      updateParsedSequence('text', {
+        name: examples[type].substring(1),
+        parsed: parseFasta(t),
+        sequence: t,
+      })
+      loadingExample.value = undefined
     })
-    .catch((err) => console.warn(err))
+    .catch((err) => {
+      console.warn(err)
+      loadingExample.value = undefined
+    })
 }
 </script>
+<style>
+.text-sm {
+  font-size: 0.85rem;
+}
+</style>
