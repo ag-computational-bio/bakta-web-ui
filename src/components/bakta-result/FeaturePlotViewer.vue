@@ -1,8 +1,9 @@
 <template>
   <div class="w-100 h-100">
-    <div v-if="bakta.sequences.length > 1" class="d-flex">
+    <div v-if="bakta.sequences.length > 1" class="input-group">
       <button
-        class="btn btn-sm btn-outline-secondary border-0"
+        class="btn btn-light"
+        style="border-color: var(--bs-border-color)"
         @click="previousSeq"
         :disabled="currentPos === 0"
         title="Show previous sequence"
@@ -10,7 +11,7 @@
         <i class="bi bi-chevron-left"></i>
       </button>
       <div class="flex-grow-1 form-floating">
-        <select id="selectSequence" class="form-select" v-model="currentPos">
+        <select id="selectSequence" class="form-select rounded-0" v-model="currentPos">
           <option v-for="(s, idx) of bakta.sequences" :key="s.id" :value="idx">
             {{ s.id }}
           </option>
@@ -18,7 +19,8 @@
         <label for="selectSequence">Select sequence</label>
       </div>
       <button
-        class="btn btn-sm btn-outline-secondary border-0"
+        class="btn btn-light"
+        style="border-color: var(--bs-border-color)"
         @click="nextSeq"
         :disabled="currentPos >= sequencCount - 1"
         title="Show next sequence"
