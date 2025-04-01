@@ -106,7 +106,7 @@ function lookupCogFunctionalCategories(feature: Feature): string[] {
 
 function lookupCogColorForFeature(feature: Feature): string {
   const categories = lookupCogFunctionalCategories(feature)
-  return cog.lookupCogColor(categories, cog.cogMap)
+  return cog.lookupCogColor(categories)
 }
 
 function createSequence(init?: Partial<Sequence>): Sequence {
