@@ -1,6 +1,15 @@
 <template>
+  <div class="alert alert-primary mb-1">
+    <h1 class="fs-6 fw-bold mb-2">News</h1>
+    <article>
+      <i class="bi bi-newspaper me-2"></i><b>2025-04</b> Check out our latest publication on Bakta
+      Web:
+      <a href="https://doi.org/10.1093/nar/gkaf335" target="_blank">10.1093/nar/gkaf335</a>
+    </article>
+  </div>
   <div class="alert alert-secondary">
-    This service is open to everyone and can be used free of charge. For more details
+    <i class="bi bi-info-circle me-2"></i> This service is open to everyone and can be used free of
+    charge. For more details
     <RouterLink to="/about">click here</RouterLink>
   </div>
   <div class="mb-3">
