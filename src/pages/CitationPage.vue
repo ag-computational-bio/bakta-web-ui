@@ -4,8 +4,13 @@
       <div class="row">
         <div class="card no-border h-100">
           <div class="card-body">
-            <h4 class="card-title">Citation</h4>
+            <h4 class="card-title">Citations</h4>
             <ul class="card-text list-unstyled">
+              <pre>
+              Beyvers S., Jelonek L., Goesmann A., Schwengers O. (2025).
+              Bakta Web – rapid and standardized genome annotation on scalable infrastructures.
+              Nucleic Acids Research, gkaf335. <a href="https://doi.org/10.1093/nar/gkaf335" target="_blank">10.1093/nar/gkaf335</a>
+              </pre>
               <pre>
               Schwengers O., Jelonek L., Dieckmann M. A., Beyvers S., Blom J., Goesmann A. (2021).
               Bakta: rapid and standardized annotation of bacterial genomes via alignment-free sequence identification.
