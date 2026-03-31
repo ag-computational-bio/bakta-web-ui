@@ -1,4 +1,4 @@
-import { z, type SafeParseReturnType } from 'zod'
+import { z } from 'zod'
 import {
   BaktaResultSchema_1_10,
   type BaktaFeature_1_10,
@@ -58,6 +58,8 @@ const AllBaktaResultSchemas = z.union([
   BaktaResultSchema_1_10,
   BaktaResultSchema_1_9,
 ])
+
+type SafeParseResult<T> = { success: true; data: T } | { success: false; error: z.ZodError }
 
 /**
  * Translates bakta json coordinates to gff3 coordinates.
@@ -140,9 +142,9 @@ function toResult(input: BaktaResult | BaktaResult_1_9 | BaktaResult_1_10): Resu
   }
 }
 
-export function safeParseResult(o: unknown): SafeParseReturnType<unknown, Result> {
+export function safeParseResult(o: unknown): SafeParseResult<Result> {
   const r = AllBaktaResultSchemas.safeParse(o)
-  if (!r.success) return { ...r }
+  if (!r.success) return { success: false, error: r.error }
   const converted = toResult(r.data)
   return { success: true, data: converted }
 }
@@ -150,5 +152,5 @@ export function safeParseResult(o: unknown): SafeParseReturnType<unknown, Result
 export function parseBaktaData(o: unknown): Result {
   const d = safeParseResult(o)
   if (d.success) return d.data
-  throw d.error.errors
+  throw d.error.issues
 }

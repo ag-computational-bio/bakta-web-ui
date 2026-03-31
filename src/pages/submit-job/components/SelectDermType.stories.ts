@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/vue3'
 
-import { expect, fn, userEvent } from '@storybook/test'
+import { expect, fn, userEvent } from 'storybook/test'
 import SelectDermType from './SelectDermType.vue'
 const meta: Meta<typeof SelectDermType> = {
   component: SelectDermType,
@@ -14,7 +14,7 @@ export const Default: Story = {
     modelValue: 'MONODERM',
     'onUpdate:modelValue': fn(),
   },
-  play: async ({ canvas, step, args }) => {
+  play: async ({ canvas, args }) => {
     const combobox = canvas.getByRole('combobox')
     expect(combobox).toHaveValue('MONODERM')
     expect(combobox).toHaveTextContent(/Monoderm/)

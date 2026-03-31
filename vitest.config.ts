@@ -1,49 +1,27 @@
 import { fileURLToPath } from 'node:url'
 import { mergeConfig, defineConfig, configDefaults } from 'vitest/config'
+import { playwright } from '@vitest/browser-playwright'
 import viteConfig from './vite.config'
-import { storybookTest } from '@storybook/experimental-addon-test/vitest-plugin'
-import { storybookVuePlugin } from '@storybook/vue3-vite/vite-plugin'
-import vue from '@vitejs/plugin-vue'
-import vueDevTools from 'vite-plugin-vue-devtools'
+import { storybookTest } from '@storybook/addon-vitest/vitest-plugin'
 
 export default mergeConfig(
+  viteConfig,
   defineConfig({
     plugins: [
-      vue({
-        template: {
-          compilerOptions: {
-            isCustomElement: (t) => t === 'router-link' || t === 'RouterLink',
-          },
-        },
-      }),
-      vueDevTools(),
-    ],
-    resolve: {
-      alias: {
-        '@': fileURLToPath(new URL('./src', import.meta.url)),
-      },
-    },
-  }),
-  defineConfig({
-    plugins: [
-      // See options at: https://storybook.js.org/docs/writing-tests/vitest-plugin#storybooktest
-      storybookTest(),
-      storybookVuePlugin(),
+      storybookTest({ configDir: fileURLToPath(new URL('./.storybook', import.meta.url)) }),
     ],
     test: {
       browser: {
         enabled: true,
         headless: true,
-        instances: [{ browser: 'chromium', headless: true }],
-        provider: 'playwright',
+        instances: [{ browser: 'chromium' }],
+        provider: playwright(),
       },
-      // Make sure to adjust this pattern to match your stories files.
-      setupFiles: ['./.storybook/vitest.setup.ts'],
       exclude: [...configDefaults.exclude, 'e2e/**'],
       root: fileURLToPath(new URL('./', import.meta.url)),
     },
     optimizeDeps: {
-      include: ['@storybook/experimental-addon-test/internal/test-utils', '@vue/test-utils'],
+      include: ['@storybook/addon-vitest/internal/test-utils', '@vue/test-utils'],
     },
   }),
 )

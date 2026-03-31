@@ -20,7 +20,7 @@ function read_gzip_file(file: File, progressHandler: ProgressHandler): Promise<A
 
     const chunkSize = 1024 * 1000
     let offset = 0
-    let reader = new FileReader()
+    const reader = new FileReader()
 
     function getArrayBufferOrFail(b: FileReader, e: (message?: string) => void): ArrayBuffer {
       const r = b.result
@@ -93,7 +93,7 @@ function read_gzip_file(file: File, progressHandler: ProgressHandler): Promise<A
         }
       } else {
         // trigger read of next chunk
-        var slice = file.slice(offset, offset + chunkSize)
+        const slice = file.slice(offset, offset + chunkSize)
         reader.readAsArrayBuffer(slice)
       }
     }

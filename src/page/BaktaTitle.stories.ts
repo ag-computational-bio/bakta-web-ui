@@ -1,8 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/vue3'
 
 import BaktaTitle from './BaktaTitle.vue'
-import { fn } from '@storybook/test'
-import { ref } from 'vue'
+
 const meta: Meta<typeof BaktaTitle> = {
   component: BaktaTitle,
 }

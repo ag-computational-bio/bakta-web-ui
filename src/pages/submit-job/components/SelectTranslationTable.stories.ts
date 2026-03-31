@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/vue3'
 
 import SelectTranslationTable from './SelectTranslationTable.vue'
-import { expect, fn, userEvent } from '@storybook/test'
-import { ref } from 'vue'
+import { expect, fn, userEvent } from 'storybook/test'
+
 const meta: Meta<typeof SelectTranslationTable> = {
   component: SelectTranslationTable,
 }

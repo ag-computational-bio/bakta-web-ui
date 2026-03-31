@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/vue3'
 
 import SelectSequenceType from './SelectSequenceType.vue'
-import { expect, fn, userEvent } from '@storybook/test'
-import { ref } from 'vue'
+import { expect, fn, userEvent } from 'storybook/test'
+
 const meta: Meta<typeof SelectSequenceType> = {
   component: SelectSequenceType,
 }
@@ -15,7 +15,7 @@ export const Default: Story = {
     modelValue: 'contig',
     'onUpdate:modelValue': fn(),
   },
-  play: async ({ canvas, step, args }) => {
+  play: async ({ canvas, args }) => {
     const combobox = canvas.getByRole('combobox')
     expect(combobox).toHaveValue('contig')
     expect(combobox).toHaveTextContent(/Contig/)

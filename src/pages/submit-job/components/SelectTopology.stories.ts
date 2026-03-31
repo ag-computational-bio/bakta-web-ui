@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/vue3'
 
-import { expect, fn, userEvent } from '@storybook/test'
+import { expect, fn, userEvent } from 'storybook/test'
 import SelectTopology from './SelectTopology.vue'
 const meta: Meta<typeof SelectTopology> = {
   component: SelectTopology,

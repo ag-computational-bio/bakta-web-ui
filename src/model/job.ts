@@ -30,7 +30,7 @@ export const ResultFileKeys = [
   'SVGCircularPlot',
 ] as const
 
-export const ResultFilesSchema = z.record(z.enum(ResultFileKeys), z.string())
+export const ResultFilesSchema = z.partialRecord(z.enum(ResultFileKeys), z.string())
 
 export const JobResultSchema = z.object({
   jobID: z.string(),
