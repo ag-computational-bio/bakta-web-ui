@@ -6,6 +6,8 @@ import Submit from '@/pages/submit-job/SubmitJobPage.vue'
 import ShowOwnResultPage from '@/pages/show-own-result-file/ShowOwnResultPage.vue'
 import { createRouter, createWebHistory } from 'vue-router'
 import ListJobsPage from './pages/show-job-list/ListJobsPage.vue'
+import RedirectJobPage from './pages/show-results/RedirectJobPage.vue'
+import ShowBaktaProteinsResultPage from './pages/show-results/ShowBaktaProteinsResultPage.vue'
 import ShowResultPage from './pages/show-results/ShowResultPage.vue'
 
 const routes = [
@@ -37,7 +39,17 @@ const routes = [
   {
     path: '/job/:id',
     name: 'Job',
+    component: RedirectJobPage,
+  },
+  {
+    path: '/job/:id/bakta',
+    name: 'JobBakta',
     component: ShowResultPage,
+  },
+  {
+    path: '/job/:id/proteins',
+    name: 'JobProteins',
+    component: ShowBaktaProteinsResultPage,
   },
   {
     path: '/viewer',

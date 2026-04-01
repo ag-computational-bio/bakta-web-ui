@@ -21,7 +21,7 @@
         }"
       >
         <td>
-          <router-link :to="{ name: 'Job', params: { id: item.key } }">
+          <router-link :to="{ name: routeName(item.workflowKind), params: { id: item.key } }">
             {{ item.jobID }}
           </router-link>
         </td>
@@ -40,7 +40,7 @@
         <td>
           <router-link
             v-if="item.jobStatus === 'SUCCESSFULL' || item.jobStatus === 'SUCCESSFUL'"
-            :to="{ name: 'Job', params: { id: item.key } }"
+            :to="{ name: routeName(item.workflowKind), params: { id: item.key } }"
             class="btn btn-sm btn-outline-secondary me-1 mb-1"
           >
             <i class="bi bi-eye"></i>
@@ -68,7 +68,8 @@
 </template>
 <script setup lang="ts">
 import Shield from '@/components/Shield.vue'
-import { formatWorkflowKind, workflowShieldProps } from '@/model/job'
+import { workflowRouteName } from '@/model/bakta-service'
+import { formatWorkflowKind, workflowShieldProps, type WorkflowKind } from '@/model/job'
 import type { JobList } from '@/model/bakta-service'
 import type { FailedJobStatus, JobStatus } from '@/model/submit'
 
@@ -120,5 +121,10 @@ function stateIcon(state: JobStatus | FailedJobStatus): string {
     case 'ERROR':
       return 'bi bi-x-circle'
   }
+}
+
+function routeName(workflowKind: WorkflowKind | undefined): 'Job' | 'JobBakta' | 'JobProteins' {
+  if (!workflowKind) return 'Job'
+  return workflowRouteName(workflowKind)
 }
 </script>
