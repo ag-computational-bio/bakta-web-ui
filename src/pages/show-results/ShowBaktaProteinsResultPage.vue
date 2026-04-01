@@ -24,7 +24,6 @@
         <div>Current status: {{ job?.jobStatus ?? 'INIT' }}</div>
       </div>
     </div>
-
     <div v-if="job || result" class="row g-4">
       <div class="col-lg-4">
         <div class="border rounded-3 p-3 h-100">
@@ -53,10 +52,6 @@
           <h5 class="mb-3">Downloads</h5>
           <BaktaDownloads :job="result" />
         </div>
-        <div v-if="logs" class="border rounded-3 p-3">
-          <h5 class="mb-3">Logs</h5>
-          <WorkflowLogViewer :logs="logs" />
-        </div>
       </div>
     </div>
   </div>
@@ -66,10 +61,9 @@
 import DisplayTuple from '@/components/DisplayTuple.vue'
 import Notification from '@/components/Notification.vue'
 import Shield from '@/components/Shield.vue'
-import WorkflowLogViewer from '@/components/WorkflowLogViewer.vue'
 import BaktaDownloads from '@/components/bakta-result/BaktaDownloads.vue'
 import { JobSchema, formatWorkflowKind, workflowShieldProps, type JobResult } from '@/model/job'
-import type { JobInfo, WorkflowLogs } from '@/model/submit'
+import type { JobInfo } from '@/model/submit'
 import { useBaktaService } from '@/page/page'
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
@@ -87,7 +81,6 @@ const jobToken = computed(() => {
 
 const job = ref<JobInfo>()
 const result = ref<JobResult>()
-const logs = ref<WorkflowLogs>()
 const error = ref<string>()
 const jobNotFinished = ref(true)
 const reloadHandle = ref<number>()
@@ -96,16 +89,6 @@ function scheduleReload() {
   reloadHandle.value = window.setTimeout(() => {
     loadJobData()
   }, pollInterval)
-}
-
-function loadLogs() {
-  return bakta
-    .logs(jobToken.value.jobID)
-    .then((value) => {
-      logs.value = value
-      return value
-    })
-    .catch(() => undefined)
 }
 
 async function loadJobData() {
@@ -118,18 +101,15 @@ async function loadJobData() {
       jobNotFinished.value = false
       const jobResult = await bakta.result(jobToken.value)
       result.value = jobResult
-      await loadLogs()
       return
     }
 
     if (jobInfo.jobStatus === 'ERROR') {
       jobNotFinished.value = false
-      await loadLogs()
       return
     }
 
     jobNotFinished.value = true
-    await loadLogs()
     scheduleReload()
   } catch (err) {
     error.value = `${err}`

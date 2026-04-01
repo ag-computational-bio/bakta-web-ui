@@ -50,16 +50,8 @@
         </div>
       </div>
 
-      <div v-if="jobNotFinished && logs" class="mt-4">
-        <WorkflowLogViewer :logs="logs" />
-      </div>
-
       <div v-if="job?.jobStatus === 'ERROR'" class="mt-4">
-        <div class="alert alert-danger">
-          This workflow failed. Review the stage logs below for the last completed step and the
-          point of failure.
-        </div>
-        <WorkflowLogViewer v-if="logs" :logs="logs" />
+        <div class="alert alert-danger">This workflow failed.</div>
       </div>
 
       <ProgressBar v-if="loadingProgress" :progress="loadingProgress" />
@@ -105,6 +97,13 @@
           </div>
         </div>
       </div>
+
+      <div v-if="!loadingProgress && !error && !data && result" class="mt-3">
+        <div class="border rounded-3 p-3">
+          <h5 class="mb-3">Downloads</h5>
+          <BaktaDownloads :job="result" />
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -112,14 +111,14 @@
 <script setup lang="ts">
 import Notification from '@/components/Notification.vue'
 import Shield from '@/components/Shield.vue'
-import WorkflowLogViewer from '@/components/WorkflowLogViewer.vue'
 import BaktaResultVisualization from '@/components/bakta-result/BaktaResultVisualization.vue'
+import BaktaDownloads from '@/components/bakta-result/BaktaDownloads.vue'
 import { useProgress, type Progress } from '@/components/progress'
 import ProgressBar from '@/components/ProgressBar.vue'
 import { JobSchema, formatWorkflowKind, workflowShieldProps, type JobResult } from '@/model/job'
 import { workflowRouteName } from '@/model/bakta-service'
 import { parseBaktaData, type Result } from '@/model/result-data'
-import type { JobInfo, WorkflowLogs } from '@/model/submit'
+import type { JobInfo } from '@/model/submit'
 import notifyFetchProgress from '@/notify-fetch-progress'
 import { useBaktaService } from '@/page/page'
 import { Toast } from 'bootstrap'
@@ -144,7 +143,6 @@ const jobToken = computed(() => {
 const job = ref<JobInfo>()
 const result = ref<JobResult>()
 const data = ref<Result>()
-const logs = ref<WorkflowLogs>()
 const loadingProgress = ref<Progress>()
 const error = ref<string>()
 const jobNotFinished = ref(true)
@@ -219,16 +217,6 @@ function scheduleReload() {
   }, pollInterval)
 }
 
-function loadLogs() {
-  return bakta
-    .logs(jobToken.value.jobID)
-    .then((value) => {
-      logs.value = value
-      return value
-    })
-    .catch(() => undefined)
-}
-
 async function loadJobData() {
   hasJob.value = bakta.hasJob(jobToken.value)
   error.value = undefined
@@ -241,19 +229,18 @@ async function loadJobData() {
       jobNotFinished.value = false
       const jobResult = await bakta.result(jobToken.value)
       result.value = jobResult
-      if (jobResult.ResultFiles.JSON == undefined) throw 'No json result available'
-      await Promise.all([fetchResultFile(jobResult.ResultFiles.JSON), loadLogs()])
+      if (jobResult.ResultFiles.JSON != undefined) {
+        await fetchResultFile(jobResult.ResultFiles.JSON)
+      }
       return
     }
 
     if (status === 'ERROR') {
       jobNotFinished.value = false
-      await loadLogs()
       return
     }
 
     jobNotFinished.value = true
-    await loadLogs()
     scheduleReload()
   } catch (err) {
     handleError(`${err}`)
@@ -264,11 +251,11 @@ function handleError(err: string) {
   error.value = err
 }
 
-function fetchResultFile(url: string): Promise<Result> {
+async function fetchResultFile(url: string): Promise<void> {
   const { progress, updateProgress } = useProgress({ min: 0, max: 1 })
   loadingProgress.value = progress
-  return fetch(url)
-    .then((response) =>
+  try {
+    const stream = await fetch(url).then((response) =>
       notifyFetchProgress(response, updateProgress, () => {
         if (loadingProgress.value) {
           loadingProgress.value.title = 'Processing data. This may take a while for larger genomes.'
@@ -276,20 +263,17 @@ function fetchResultFile(url: string): Promise<Result> {
         }
       }),
     )
-    .then((stream) => new Response(stream))
-    .then((response) => response.text())
-    .then((text) => {
-      try {
-        return parseBaktaData(JSON.parse(text))
-      } catch {
-        return parseBaktaData(JSON.parse(text.replace(/:\s?NaN/g, ': null')))
-      }
-    })
-    .then((value) => {
-      loadingProgress.value = undefined
-      data.value = value
-      return value
-    })
+    const text = await new Response(stream).text()
+    try {
+      data.value = parseBaktaData(JSON.parse(text))
+    } catch {
+      data.value = parseBaktaData(JSON.parse(text.replace(/:\s?NaN/g, ': null')))
+    }
+  } catch (err) {
+    console.error('Failed to parse result JSON:', err)
+  } finally {
+    loadingProgress.value = undefined
+  }
 }
 
 onMounted(() => {

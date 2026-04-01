@@ -85,6 +85,7 @@ const downloads = computed(() => {
   const l: { key: string; label: string; description?: string; position: number; url: string }[] =
     []
   for (const k of Object.keys(resultFiles)) {
+    if (k === 'TXTLogs') continue
     if (k in order) {
       const _k = k as ResultFileKey
       l.push({ key: k, url: resultFiles[_k], ...order[_k] })
