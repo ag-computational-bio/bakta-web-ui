@@ -83,13 +83,13 @@ export function workflowShieldProps(workflowKind: WorkflowKind | undefined): {
 } {
   switch (workflowKind) {
     case 'bakta_baktfold':
-      return { icon: 'bi-layers', leftClass: 'bg-dark', rightClass: 'bg-primary' }
+      return { icon: 'bi-layers', leftClass: 'bg-secondary', rightClass: 'bg-primary-subtle text-primary-emphasis' }
     case 'bakta_proteins':
-      return { icon: 'bi-bezier2', leftClass: 'bg-dark', rightClass: 'bg-info text-dark' }
+      return { icon: 'bi-bezier2', leftClass: 'bg-secondary', rightClass: 'bg-info-subtle text-info-emphasis' }
     case 'baktfold':
-      return { icon: 'bi-stars', leftClass: 'bg-dark', rightClass: 'bg-warning text-dark' }
+      return { icon: 'bi-stars', leftClass: 'bg-secondary', rightClass: 'bg-warning-subtle text-warning-emphasis' }
     case 'bakta':
-      return { icon: 'bi-globe', leftClass: 'bg-secondary', rightClass: 'bg-success' }
+      return { icon: 'bi-globe', leftClass: 'bg-secondary', rightClass: 'bg-success-subtle text-success-emphasis' }
     default:
       return { icon: 'bi-question-circle', leftClass: 'bg-secondary', rightClass: 'bg-secondary' }
   }

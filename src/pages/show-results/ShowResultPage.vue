@@ -149,7 +149,7 @@ import type { JobInfo, StageLog, StageStatus } from '@/model/submit'
 import notifyFetchProgress from '@/notify-fetch-progress'
 import { useBaktaService } from '@/page/page'
 import { Toast } from 'bootstrap'
-import { computed, onMounted, onUnmounted, ref, useTemplateRef } from 'vue'
+import { computed, onMounted, onUnmounted, ref, useTemplateRef, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 const pollInterval = 2000
@@ -334,9 +334,27 @@ async function fetchResultFile(url: string): Promise<void> {
   }
 }
 
+function resetState() {
+  if (reloadHandle.value) window.clearTimeout(reloadHandle.value)
+  job.value = undefined
+  result.value = undefined
+  data.value = undefined
+  loadingProgress.value = undefined
+  error.value = undefined
+  jobNotFinished.value = true
+  workflowStages.value = []
+  submittingBaktfold.value = false
+  baktfoldError.value = undefined
+}
+
 onMounted(() => {
   loadJobData()
   checkBaktfoldAvailability()
+})
+
+watch(() => route.params.id, () => {
+  resetState()
+  loadJobData()
 })
 
 onUnmounted(() => {
