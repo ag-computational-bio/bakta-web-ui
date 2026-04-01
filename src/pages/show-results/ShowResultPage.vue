@@ -17,36 +17,63 @@
         </Shield>
       </div>
 
-      <div
-        v-if="jobNotFinished"
-        class="d-flex align-self-stretch w-100 justify-content-center align-items-center text-secondary py-5"
-      >
-        <div
-          class="spinner-grow me-4"
-          :class="`text-${jobStatusClass}`"
-          style="
-            --bs-spinner-animation-speed: 2s;
-            --bs-spinner-border-width: 0.7rem;
-            --bs-spinner-height: 9rem;
-            --bs-spinner-width: 9rem;
-          "
-        ></div>
-        <div class="fs-1 fw-semibold d-flex flex-column align-items-end">
-          <div class="mb-2">
-            Your job is not finished yet.
-            <br />
-            Current status:
-            <span class="px-3 py-1 rounded-2" :class="`text-bg-${jobStatusClass}`">{{
-              job?.jobStatus ?? 'INIT'
-            }}</span>
+      <div v-if="jobNotFinished" class="py-4">
+        <div class="border rounded-3 p-4">
+          <div class="d-flex align-items-center gap-3 mb-3">
+            <div
+              class="spinner-border"
+              :class="`text-${jobStatusClass}`"
+              role="status"
+              style="width: 1.5rem; height: 1.5rem"
+            >
+              <span class="visually-hidden">Running...</span>
+            </div>
+            <div class="flex-grow-1">
+              <div class="fw-semibold">Your job is not finished yet.</div>
+              <div class="text-secondary small">
+                Status:
+                <span class="badge" :class="`text-bg-${jobStatusClass}`">{{
+                  job?.jobStatus ?? 'INIT'
+                }}</span>
+              </div>
+            </div>
+            <button
+              class="btn btn-outline-secondary btn-sm border-0"
+              @click="putLinkToClipboard"
+              title="Copy link to clipboard"
+            >
+              <i class="bi bi-share"></i>
+            </button>
           </div>
-          <button
-            class="btn btn-outline-secondary fw-6 border-0"
-            @click="putLinkToClipboard"
-            title="Copy link to clipboard"
-          >
-            Copy link to clipboard <i class="bi bi-share"></i>
-          </button>
+
+          <div v-if="workflowStages.length > 0">
+            <div class="text-secondary small fw-semibold mb-2">Workflow steps</div>
+            <div class="d-flex flex-column gap-0">
+              <div
+                v-for="(stage, idx) in workflowStages"
+                :key="stage.stage"
+                class="d-flex align-items-center gap-2 py-2"
+                :class="{ 'border-top': idx > 0 }"
+              >
+                <div class="stage-icon d-flex align-items-center justify-content-center">
+                  <i v-if="stage.status === 'succeeded'" class="bi bi-check-circle-fill text-success"></i>
+                  <i v-else-if="stage.status === 'failed' || stage.status === 'error'" class="bi bi-x-circle-fill text-danger"></i>
+                  <div
+                    v-else-if="stage.status === 'running'"
+                    class="spinner-border spinner-border-sm text-success"
+                    role="status"
+                  >
+                    <span class="visually-hidden">Running...</span>
+                  </div>
+                  <i v-else class="bi bi-circle text-secondary"></i>
+                </div>
+                <span class="flex-grow-1 text-capitalize">{{ formatStage(stage.stage) }}</span>
+                <span class="badge text-uppercase" :class="stageStatusClass(stage.status)">{{
+                  stage.status
+                }}</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -118,7 +145,7 @@ import ProgressBar from '@/components/ProgressBar.vue'
 import { JobSchema, formatWorkflowKind, workflowShieldProps, type JobResult } from '@/model/job'
 import { workflowRouteName } from '@/model/bakta-service'
 import { parseBaktaData, type Result } from '@/model/result-data'
-import type { JobInfo } from '@/model/submit'
+import type { JobInfo, StageLog, StageStatus } from '@/model/submit'
 import notifyFetchProgress from '@/notify-fetch-progress'
 import { useBaktaService } from '@/page/page'
 import { Toast } from 'bootstrap'
@@ -147,6 +174,7 @@ const loadingProgress = ref<Progress>()
 const error = ref<string>()
 const jobNotFinished = ref(true)
 const reloadHandle = ref<number>()
+const workflowStages = ref<StageLog[]>([])
 
 const jobStatusClass = computed(() => {
   if (job.value) {
@@ -211,6 +239,35 @@ async function runBaktfold() {
   }
 }
 
+function formatStage(stage: string): string {
+  return stage.replace(/_/g, ' ')
+}
+
+function stageStatusClass(status: StageStatus): string {
+  switch (status) {
+    case 'running':
+      return 'text-bg-success'
+    case 'succeeded':
+      return 'text-bg-success'
+    case 'failed':
+    case 'error':
+      return 'text-bg-danger'
+    case 'pending':
+      return 'text-bg-secondary'
+    case 'unknown':
+      return 'text-bg-dark'
+  }
+}
+
+async function fetchLogs() {
+  try {
+    const logs = await bakta.logsForJob(jobToken.value)
+    workflowStages.value = logs.stages
+  } catch {
+    // Logs may not be available yet
+  }
+}
+
 function scheduleReload() {
   reloadHandle.value = window.setTimeout(() => {
     loadJobData()
@@ -241,6 +298,7 @@ async function loadJobData() {
     }
 
     jobNotFinished.value = true
+    await fetchLogs()
     scheduleReload()
   } catch (err) {
     handleError(`${err}`)
@@ -295,3 +353,10 @@ function putLinkToClipboard() {
   }
 }
 </script>
+
+<style scoped>
+.stage-icon {
+  width: 1.25rem;
+  flex-shrink: 0;
+}
+</style>

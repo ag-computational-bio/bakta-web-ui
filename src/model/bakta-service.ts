@@ -135,6 +135,7 @@ export interface BaktaService {
   result(job: Job): Promise<JobResult>
   removeJob(jobID: string): Promise<void>
   logs(jobID: string): Promise<WorkflowLogs>
+  logsForJob(job: Job): Promise<WorkflowLogs>
   /**
    * Checks if the provided job is in the joblist of this machine.
    * @param job
@@ -169,6 +170,10 @@ class BaktaServiceImpl implements BaktaService {
     const idx = jobs.findIndex((x) => x.jobID === jobID)
     if (idx < 0) return Promise.reject('Job not found')
     return this.#api.jobLogs(jobs[idx])
+  }
+
+  logsForJob(job: Job): Promise<WorkflowLogs> {
+    return this.#api.jobLogs(job)
   }
 
   removeOutdatedJobs(): Promise<void> {
