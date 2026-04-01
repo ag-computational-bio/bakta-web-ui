@@ -16,7 +16,9 @@
           stage.status
         }}</span>
       </header>
-      <pre class="mb-0 p-3 log-block">{{ stage.content || 'No log output yet.' }}</pre>
+      <pre v-if="!statusOnly" class="mb-0 p-3 log-block">{{
+        stage.content || 'No log output yet.'
+      }}</pre>
     </section>
   </div>
 </template>
@@ -24,9 +26,15 @@
 <script setup lang="ts">
 import type { StageStatus, WorkflowLogs } from '@/model/submit'
 
-defineProps<{
-  logs: WorkflowLogs
-}>()
+withDefaults(
+  defineProps<{
+    logs: WorkflowLogs
+    statusOnly?: boolean
+  }>(),
+  {
+    statusOnly: false,
+  },
+)
 
 function formatStage(stage: string): string {
   return stage.replace(/_/g, ' ')
