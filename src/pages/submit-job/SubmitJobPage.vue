@@ -136,6 +136,8 @@ const activeValid = computed(() => {
     case 'bakta_baktfold':
       return baktaValid.value
   }
+
+  return false
 })
 
 const hasActiveInput = computed(() => {
@@ -149,6 +151,8 @@ const hasActiveInput = computed(() => {
     case 'bakta_baktfold':
       return baktaRequest.value.replicons.length > 0
   }
+
+  return false
 })
 
 function currentRequest(): SubmitJobRequest {

@@ -9,8 +9,8 @@
 function notifyReadProgress(
   response: Response,
   handleProgress: (progress: number) => void = function () {},
-  handleDone = function () {},
-): ReadableStream<any> {
+  handleDone: () => void = function () {},
+): ReadableStream<Uint8Array> {
   let pos = 0
   const contentLength = response.headers.get('Content-Length')
   if (contentLength == null) throw 'No content'

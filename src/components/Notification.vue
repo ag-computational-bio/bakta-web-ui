@@ -6,6 +6,10 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
+defineOptions({
+  name: 'AppNotification',
+})
+
 const props = withDefaults(
   defineProps<{
     message: string | string[] | undefined

@@ -11,6 +11,10 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
+defineOptions({
+  name: 'AppShield',
+})
+
 const props = withDefaults(
   defineProps<{
     icon?: string
