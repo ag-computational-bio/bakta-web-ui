@@ -82,7 +82,15 @@ const jobToken = computed(() => {
 const job = ref<JobInfo>()
 const result = ref<JobResult>()
 const error = ref<string>()
-const jobNotFinished = ref(true)
+const jobNotFinished = computed(() => {
+  const status = job.value?.jobStatus
+  return (
+    status !== undefined &&
+    status !== 'SUCCESSFULL' &&
+    status !== 'SUCCESSFUL' &&
+    status !== 'ERROR'
+  )
+})
 const reloadHandle = ref<number>()
 
 function scheduleReload() {
@@ -98,18 +106,15 @@ async function loadJobData() {
     job.value = jobInfo
 
     if (jobInfo.jobStatus === 'SUCCESSFULL' || jobInfo.jobStatus === 'SUCCESSFUL') {
-      jobNotFinished.value = false
       const jobResult = await bakta.result(jobToken.value)
       result.value = jobResult
       return
     }
 
     if (jobInfo.jobStatus === 'ERROR') {
-      jobNotFinished.value = false
       return
     }
 
-    jobNotFinished.value = true
     scheduleReload()
   } catch (err) {
     error.value = `${err}`

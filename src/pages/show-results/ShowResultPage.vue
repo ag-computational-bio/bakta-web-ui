@@ -56,8 +56,14 @@
                 :class="{ 'border-top': idx > 0 }"
               >
                 <div class="stage-icon d-flex align-items-center justify-content-center">
-                  <i v-if="stage.status === 'succeeded'" class="bi bi-check-circle-fill text-success"></i>
-                  <i v-else-if="stage.status === 'failed' || stage.status === 'error'" class="bi bi-x-circle-fill text-danger"></i>
+                  <i
+                    v-if="stage.status === 'succeeded'"
+                    class="bi bi-check-circle-fill text-success"
+                  ></i>
+                  <i
+                    v-else-if="stage.status === 'failed' || stage.status === 'error'"
+                    class="bi bi-x-circle-fill text-danger"
+                  ></i>
                   <div
                     v-else-if="stage.status === 'running'"
                     class="spinner-border spinner-border-sm text-success"
@@ -172,7 +178,15 @@ const result = ref<JobResult>()
 const data = ref<Result>()
 const loadingProgress = ref<Progress>()
 const error = ref<string>()
-const jobNotFinished = ref(true)
+const jobNotFinished = computed(() => {
+  const status = job.value?.jobStatus
+  return (
+    status !== undefined &&
+    status !== 'SUCCESSFULL' &&
+    status !== 'SUCCESSFUL' &&
+    status !== 'ERROR'
+  )
+})
 const reloadHandle = ref<number>()
 const workflowStages = ref<StageLog[]>([])
 
@@ -181,7 +195,7 @@ const jobStatusClass = computed(() => {
     if (job.value.jobStatus === 'RUNNING') return 'success'
     return 'warning'
   }
-  return 'danger'
+  return 'secondary'
 })
 
 const currentWorkflowKind = computed(() => job.value?.workflowKind ?? result.value?.workflowKind)
@@ -283,7 +297,6 @@ async function loadJobData() {
     const status = jobInfo.jobStatus
 
     if (status === 'SUCCESSFULL' || status === 'SUCCESSFUL') {
-      jobNotFinished.value = false
       const jobResult = await bakta.result(jobToken.value)
       result.value = jobResult
       if (jobResult.ResultFiles.JSON != undefined) {
@@ -293,11 +306,9 @@ async function loadJobData() {
     }
 
     if (status === 'ERROR') {
-      jobNotFinished.value = false
       return
     }
 
-    jobNotFinished.value = true
     await fetchLogs()
     scheduleReload()
   } catch (err) {
@@ -341,7 +352,6 @@ function resetState() {
   data.value = undefined
   loadingProgress.value = undefined
   error.value = undefined
-  jobNotFinished.value = true
   workflowStages.value = []
   submittingBaktfold.value = false
   baktfoldError.value = undefined
@@ -352,10 +362,13 @@ onMounted(() => {
   checkBaktfoldAvailability()
 })
 
-watch(() => route.params.id, () => {
-  resetState()
-  loadJobData()
-})
+watch(
+  () => route.params.id,
+  () => {
+    resetState()
+    loadJobData()
+  },
+)
 
 onUnmounted(() => {
   if (reloadHandle.value) window.clearTimeout(reloadHandle.value)
