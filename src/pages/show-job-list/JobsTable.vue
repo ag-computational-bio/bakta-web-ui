@@ -4,6 +4,7 @@
       <tr>
         <th>Id</th>
         <th>Jobname</th>
+        <th>Type</th>
         <th>Submission</th>
         <th>Last updated</th>
         <th>Status</th>
@@ -25,6 +26,11 @@
           </router-link>
         </td>
         <td>{{ 'name' in item ? item.name : '' }}</td>
+        <td>
+          <Shield v-if="item.workflowKind" v-bind="workflowShieldProps(item.workflowKind)">
+            {{ formatWorkflowKind(item.workflowKind) }}
+          </Shield>
+        </td>
         <td>{{ 'started' in item ? formatDateTime(item.started) : 'unknown' }}</td>
         <td>{{ 'updated' in item ? formatDateTime(item.updated) : 'unknown' }}</td>
         <td>
@@ -61,6 +67,8 @@
   </table>
 </template>
 <script setup lang="ts">
+import Shield from '@/components/Shield.vue'
+import { formatWorkflowKind, workflowShieldProps } from '@/model/job'
 import type { JobList } from '@/model/bakta-service'
 import type { FailedJobStatus, JobStatus } from '@/model/submit'
 
