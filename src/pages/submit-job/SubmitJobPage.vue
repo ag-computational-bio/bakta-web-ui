@@ -42,15 +42,15 @@
         :show-baktfold-after="supportsBaktaBaktfold"
         @update:valid="(evt) => (baktaValid = evt)"
       />
-      <SubmitBaktaProteinsForm
-        v-if="activeWorkflow === 'bakta_proteins'"
-        v-model="baktaProteinsRequest"
-        @update:valid="(evt) => (baktaProteinsValid = evt)"
-      />
       <SubmitBaktfoldForm
         v-if="activeWorkflow === 'baktfold'"
         v-model="baktfoldRequest"
         @update:valid="(evt) => (baktfoldValid = evt)"
+      />
+      <SubmitBaktaProteinsForm
+        v-if="activeWorkflow === 'bakta_proteins'"
+        v-model="baktaProteinsRequest"
+        @update:valid="(evt) => (baktaProteinsValid = evt)"
       />
 
       <div class="d-flex justify-content-end mb-5 mt-4">
@@ -101,8 +101,10 @@ const baktaValid = ref(false)
 const baktaProteinsValid = ref(false)
 const baktfoldValid = ref(false)
 
+const workflowTabOrder: WorkflowKind[] = ['bakta', 'baktfold', 'bakta_proteins']
+
 const activeWorkflow = ref<WorkflowKind>('bakta')
-const availableWorkflows = ref<WorkflowKind[]>(['bakta', 'bakta_proteins', 'baktfold'])
+const availableWorkflows = ref<WorkflowKind[]>(workflowTabOrder)
 const supportsCombinedWorkflow = ref(true)
 
 const error = ref<string>()
@@ -183,12 +185,9 @@ onMounted(() => {
       supportsCombinedWorkflow.value = workflows.some(
         (workflow) => workflow.workflowKind === 'bakta_baktfold',
       )
-      const available = workflows
-        .map((workflow) => workflow.workflowKind)
-        .filter(
-          (workflow): workflow is 'bakta' | 'bakta_proteins' | 'baktfold' =>
-            workflow !== 'bakta_baktfold',
-        )
+      const available = workflowTabOrder.filter((workflowKind) =>
+        workflows.some((workflow) => workflow.workflowKind === workflowKind),
+      )
       if (available.length > 0) availableWorkflows.value = available
       if (!availableWorkflows.value.includes(activeWorkflow.value)) {
         activeWorkflow.value = availableWorkflows.value[0]

@@ -18,11 +18,6 @@
         {{ modelValue.baktaJson.name }}
       </div>
     </div>
-    <div class="border rounded-3 p-4 mt-3 bg-body-tertiary">
-      <p class="text-secondary mb-0">
-        Annotation of hypothetical protein sequences using protein structural information.
-      </p>
-    </div>
   </div>
 </template>
 

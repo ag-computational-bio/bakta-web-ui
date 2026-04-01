@@ -18,11 +18,6 @@
         {{ modelValue.proteinFasta.name }}
       </div>
     </div>
-    <div class="border rounded-3 p-4 mt-3 bg-body-tertiary">
-      <p class="text-secondary mb-0">
-        Standalone protein annotation for provided protein sequences.
-      </p>
-    </div>
   </div>
 </template>
 
