@@ -1,3 +1,4 @@
+import { z } from 'zod'
 import { JobResultSchema, type Job, type JobResult } from './job'
 import {
   InitResponseSchema,
@@ -8,6 +9,14 @@ import {
   type StartRequest,
 } from './submit'
 import { VersionSchema, type Version } from './Version'
+
+const ApiVersionSchema = z.object({
+  backend_version: z.string(),
+  bakta_version: z.string(),
+  bakta_db_version: z.string(),
+  baktfold_version: z.string(),
+  baktfold_db_version: z.string(),
+})
 
 export interface BaktaApi {
   delete(j: Job): Promise<void>
@@ -79,7 +88,16 @@ class BaktaApiImpl implements BaktaApi {
   getVersions(): Promise<Version> {
     return fetch(this.baseUrl + '/version', {})
       .then((r) => r.json())
-      .then(VersionSchema.parse)
+      .then((payload) => ApiVersionSchema.parse(payload))
+      .then((payload) =>
+        VersionSchema.parse({
+          backendVersion: payload.backend_version,
+          baktaVersion: payload.bakta_version,
+          baktaDbVersion: payload.bakta_db_version,
+          baktfoldVersion: payload.baktfold_version,
+          baktfoldDbVersion: payload.baktfold_db_version,
+        }),
+      )
   }
 
   delete(j: Job): Promise<void> {

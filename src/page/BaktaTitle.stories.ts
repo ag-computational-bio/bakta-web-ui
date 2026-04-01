@@ -11,6 +11,12 @@ type Story = StoryObj<typeof BaktaTitle>
 
 export const Default: Story = {
   args: {
-    version: { dbVersion: '123', toolVersion: 'xy' },
+    version: {
+      backendVersion: '1.0.0',
+      baktaVersion: 'xy',
+      baktaDbVersion: '123',
+      baktfoldVersion: '0.9.0',
+      baktfoldDbVersion: '456',
+    },
   },
 }

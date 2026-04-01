@@ -20,7 +20,13 @@ const routeName = computed<string>(() => {
   return 'unknown'
 })
 
-const version = ref<Version>({ toolVersion: 'unknown', dbVersion: 'unknown' })
+const version = ref<Version>({
+  backendVersion: 'unknown',
+  baktaVersion: 'unknown',
+  baktaDbVersion: 'unknown',
+  baktfoldVersion: 'unknown',
+  baktfoldDbVersion: 'unknown',
+})
 const bakta = useBaktaApi()
 onMounted(() => {
   bakta
