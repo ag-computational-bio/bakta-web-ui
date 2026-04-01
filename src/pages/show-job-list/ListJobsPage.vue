@@ -1,7 +1,7 @@
 <template>
   <div class="container flex-grow-1">
     <Notification v-if="error" class="mb-2" type="warning" :message="error" />
-    <template v-if="log == undefined">
+    <template v-if="logs == undefined">
       <div class="alert alert-secondary mb-2" v-if="polling">
         Automatically updating job list
         <div v-if="loading" class="spinner-border spinner-border-sm text-secondary" role="status">
@@ -26,17 +26,19 @@
     <div v-else>
       <div class="w-100 d-flex justify-content-between my-2">
         <h5>Job logs</h5>
-        <button class="btn btn-sm btn-secondary" @click="log = undefined">
+        <button class="btn btn-sm btn-secondary" @click="logs = undefined">
           <i class="bi bi-x"></i>
         </button>
       </div>
-      <pre class="border p-2 rounded-2">{{ log }}</pre>
+      <WorkflowLogViewer :logs="logs" />
     </div>
   </div>
 </template>
 <script setup lang="ts">
+import WorkflowLogViewer from '@/components/WorkflowLogViewer.vue'
 import Notification from '@/components/Notification.vue'
 import { type JobList } from '@/model/bakta-service'
+import type { WorkflowLogs } from '@/model/submit'
 import { useBaktaService } from '@/page/page'
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import JobsTable from './JobsTable.vue'
@@ -101,12 +103,12 @@ function showLogs(jobID: string) {
   error.value = undefined
   bakta
     .logs(jobID)
-    .then(showLog)
+    .then(showLogsPanel)
     .catch((err) => (error.value = err))
 }
-const log = ref<string>()
-function showLog(l: string) {
-  log.value = l
+const logs = ref<WorkflowLogs>()
+function showLogsPanel(value: WorkflowLogs) {
+  logs.value = value
 }
 onMounted(() => {
   start()

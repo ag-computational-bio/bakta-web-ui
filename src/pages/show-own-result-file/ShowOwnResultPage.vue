@@ -61,6 +61,8 @@ const data = ref<Result>()
 const job = computed<JobResult>(() => {
   return {
     jobID: '',
+    workflowKind: 'bakta',
+    resultKind: 'bakta',
     name: '',
     ResultFiles: {},
     started: new Date().toISOString(),

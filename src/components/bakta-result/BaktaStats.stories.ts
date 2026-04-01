@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/vue3'
 
+import type { JobResult } from '@/model/job'
 import BaktaStats from './BaktaStats.vue'
 import { fixtures } from '@/test-data/bakta-results'
 
@@ -9,8 +10,10 @@ const meta: Meta<typeof BaktaStats> = {
 export default meta
 type Story = StoryObj<typeof BaktaStats>
 
-const job = {
+const job: JobResult = {
   jobID: '',
+  workflowKind: 'bakta',
+  resultKind: 'bakta',
   name: '',
   ResultFiles: {
     FNA: '#',

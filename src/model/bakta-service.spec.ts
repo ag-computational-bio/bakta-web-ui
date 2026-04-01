@@ -31,6 +31,8 @@ function job(id: string, status: JobStatus = 'ERROR'): JobInfo {
     name: id,
     started: new Date().toISOString(),
     updated: new Date().toISOString(),
+    workflowKind: 'bakta',
+    resultKind: 'bakta',
   }
 }
 
@@ -156,6 +158,8 @@ describe('bakta service', () => {
       const api: BaktaApi = createBaktaApi('')
       const res: JobResult = {
         jobID: 'A',
+        workflowKind: 'bakta',
+        resultKind: 'bakta',
         name: 'A',
         ResultFiles: {},
         started: new Date().toISOString(),

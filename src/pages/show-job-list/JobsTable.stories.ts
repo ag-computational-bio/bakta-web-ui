@@ -18,6 +18,8 @@ export const Default: Story = {
       {
         jobID: 'a',
         jobStatus: 'INIT',
+        workflowKind: 'bakta',
+        resultKind: 'bakta',
         key: 'A',
         name: 'My first job',
         started: '2002-02-02T02:02:02Z',
@@ -26,6 +28,8 @@ export const Default: Story = {
       {
         jobID: 'b',
         jobStatus: 'ERROR',
+        workflowKind: 'bakta_baktfold',
+        resultKind: 'bakta',
         key: 'B',
         name: 'xxx',
         started: '2001-01-01T02:02:02Z',
@@ -34,6 +38,8 @@ export const Default: Story = {
       {
         jobID: 'c',
         jobStatus: 'RUNNING',
+        workflowKind: 'baktfold',
+        resultKind: 'baktfold',
         key: 'C',
         name: 'yyy',
         started: '2006-06-06T02:02:02Z',
@@ -42,6 +48,8 @@ export const Default: Story = {
       {
         jobID: 'd',
         jobStatus: 'SUCCESSFUL',
+        workflowKind: 'bakta_proteins',
+        resultKind: 'bakta_proteins',
         key: 'D',
         name: 'good genome',
         started: '2006-06-06T02:02:02Z',
@@ -50,11 +58,13 @@ export const Default: Story = {
       {
         jobID: 'e',
         jobStatus: 'UNAUTHORIZED',
+        workflowKind: 'bakta_proteins',
         key: 'E',
       },
       {
         jobID: 'F',
         jobStatus: 'NOT_FOUND',
+        workflowKind: 'baktfold',
         key: 'F',
       },
     ],
