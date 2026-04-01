@@ -96,7 +96,7 @@ function toFeature(f: BaktaFeature | BaktaFeature_1_10, seqLen: number): Feature
     gene: f.gene,
     locus: f.locus,
     product: f.product,
-    sequence: 'contig' in f ? f.contig : f.sequence,
+    sequence: f.contig ?? f.sequence ?? '',
     start: coords[0],
     stop: coords[1],
     strand: f.strand,
@@ -109,7 +109,7 @@ function toSequence(f: BaktaSequence | BaktaSequence_1_10): Sequence {
     id: f.id,
     complete: f.complete,
     length: f.length,
-    nt: 'sequence' in f ? f.sequence : f.nt,
+    nt: f.sequence ?? f.nt ?? '',
     type: f.type,
   }
   return v
@@ -120,7 +120,7 @@ function toResult(input: BaktaResult | BaktaResult_1_9 | BaktaResult_1_10): Resu
   const seqIdx: Record<string, number> = {}
   for (const s of sequences) seqIdx[s.id] = s.length
   const features = input.features.map((f) =>
-    toFeature(f, seqIdx['contig' in f ? f.contig : f.sequence]),
+    toFeature(f, seqIdx[f.contig ?? f.sequence ?? '']),
   )
 
   return {
