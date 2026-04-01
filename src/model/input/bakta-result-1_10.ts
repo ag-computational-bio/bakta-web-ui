@@ -13,13 +13,14 @@ export const BaktaStatsSchema_1_10 = z.object({
   gc: z.number(),
   n_ratio: z.number(),
   n50: z.number(),
-  n90: z.number(),
+  n90: z.number().optional(),
   coding_ratio: z.number(),
 })
 
 const BaktaFeatureSchema_1_10 = z.object({
   type: z.string(),
-  sequence: z.string(),
+  sequence: z.string().optional(),
+  contig: z.string().optional(),
   start: z.number(),
   stop: z.number(),
   strand: z.string(),
@@ -39,12 +40,13 @@ const BaktaFeatureSchema_1_10 = z.object({
 })
 const BaktaSequenceSchema_1_10 = z.object({
   id: z.string(),
-  description: z.string(),
-  nt: z.string(),
+  description: z.string().optional(),
+  nt: z.string().optional(),
+  sequence: z.string().optional(),
   length: z.number(),
   complete: z.boolean(),
   type: z.string(),
-  topology: z.string(),
+  topology: z.string().optional(),
   orig_description: z.string().optional(),
   orig_id: z.string().optional(),
 })
@@ -54,8 +56,8 @@ export const BaktaResultSchema_1_10 = z.object({
   stats: BaktaStatsSchema_1_10,
   features: z.array(BaktaFeatureSchema_1_10),
   sequences: z.array(BaktaSequenceSchema_1_10),
-  run: BaktaRunSchema,
-  version: BaktaVersionSchema_1_10,
+  run: BaktaRunSchema.optional(),
+  version: BaktaVersionSchema_1_10.optional(),
 })
 
 export type BaktaSequence_1_10 = z.infer<typeof BaktaSequenceSchema_1_10>
