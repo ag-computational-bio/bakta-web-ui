@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/playwright:v1.58.2-noble as builder
+FROM mcr.microsoft.com/playwright:v1.58.2-noble AS builder
 
 COPY . /src
 WORKDIR /src
