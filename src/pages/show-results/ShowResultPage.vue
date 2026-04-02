@@ -299,7 +299,7 @@ async function loadJobData() {
     if (status === 'SUCCESSFULL' || status === 'SUCCESSFUL') {
       const jobResult = await bakta.result(jobToken.value)
       result.value = jobResult
-      if (jobResult.ResultFiles.JSON != undefined) {
+      if (jobResult.ResultFiles.JSON) {
         await fetchResultFile(jobResult.ResultFiles.JSON)
       }
       return

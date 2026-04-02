@@ -61,6 +61,27 @@ export type ResultFiles = z.infer<typeof ResultFilesSchema>
 export type JobResult = z.infer<typeof JobResultSchema>
 export type ResultFileKey = (typeof ResultFileKeys)[number]
 
+export function normalizeResultFileUrl(value: unknown): string | undefined {
+  if (typeof value !== 'string') return undefined
+  const url = value.trim()
+  return url.length > 0 ? url : undefined
+}
+
+export function listDownloadResultFiles(
+  resultFiles: ResultFiles | undefined,
+): { key: ResultFileKey; url: string }[] {
+  const files: { key: ResultFileKey; url: string }[] = []
+  if (!resultFiles) return files
+
+  for (const key of ResultFileKeys) {
+    if (key === 'TXTLogs') continue
+    const url = normalizeResultFileUrl(resultFiles[key])
+    if (url) files.push({ key, url })
+  }
+
+  return files
+}
+
 export function formatWorkflowKind(workflowKind: WorkflowKind | undefined): string {
   switch (workflowKind) {
     case 'bakta':
@@ -83,13 +104,29 @@ export function workflowShieldProps(workflowKind: WorkflowKind | undefined): {
 } {
   switch (workflowKind) {
     case 'bakta_baktfold':
-      return { icon: 'bi-layers', leftClass: 'bg-secondary', rightClass: 'bg-primary-subtle text-primary-emphasis' }
+      return {
+        icon: 'bi-layers',
+        leftClass: 'bg-secondary',
+        rightClass: 'bg-primary-subtle text-primary-emphasis',
+      }
     case 'bakta_proteins':
-      return { icon: 'bi-bezier2', leftClass: 'bg-secondary', rightClass: 'bg-info-subtle text-info-emphasis' }
+      return {
+        icon: 'bi-bezier2',
+        leftClass: 'bg-secondary',
+        rightClass: 'bg-info-subtle text-info-emphasis',
+      }
     case 'baktfold':
-      return { icon: 'bi-stars', leftClass: 'bg-secondary', rightClass: 'bg-warning-subtle text-warning-emphasis' }
+      return {
+        icon: 'bi-stars',
+        leftClass: 'bg-secondary',
+        rightClass: 'bg-warning-subtle text-warning-emphasis',
+      }
     case 'bakta':
-      return { icon: 'bi-globe', leftClass: 'bg-secondary', rightClass: 'bg-success-subtle text-success-emphasis' }
+      return {
+        icon: 'bi-globe',
+        leftClass: 'bg-secondary',
+        rightClass: 'bg-success-subtle text-success-emphasis',
+      }
     default:
       return { icon: 'bi-question-circle', leftClass: 'bg-secondary', rightClass: 'bg-secondary' }
   }

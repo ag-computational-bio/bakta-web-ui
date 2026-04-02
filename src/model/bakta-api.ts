@@ -1,5 +1,11 @@
 import { z } from 'zod'
-import { JobResultSchema, type Job, type JobResult, type ResultFiles } from './job'
+import {
+  JobResultSchema,
+  normalizeResultFileUrl,
+  type Job,
+  type JobResult,
+  type ResultFiles,
+} from './job'
 import {
   InitResponseSchema,
   ListResponseSchema,
@@ -71,44 +77,55 @@ const ApiListResponseSchema = z.object({
   ),
 })
 
+const ApiRequiredResultFileUrlSchema = z.preprocess(normalizeResultFileUrl, z.string())
+const ApiOptionalResultFileUrlSchema = z.preprocess(normalizeResultFileUrl, z.string().optional())
+
 const ApiBaktaResultFilesSchema = z.object({
-  embl: z.string(),
-  faa: z.string(),
-  hypotheticals_faa: z.string(),
-  ffn: z.string(),
-  fna: z.string(),
-  gbff: z.string(),
-  gff3: z.string(),
-  json: z.string(),
-  tsv: z.string(),
-  hypotheticals_tsv: z.string(),
-  logs_txt: z.string(),
-  inference_tsv: z.string(),
-  circular_plot_png: z.string(),
-  circular_plot_svg: z.string(),
+  embl: ApiOptionalResultFileUrlSchema,
+  faa: ApiOptionalResultFileUrlSchema,
+  hypotheticals_faa: ApiOptionalResultFileUrlSchema,
+  ffn: ApiOptionalResultFileUrlSchema,
+  fna: ApiOptionalResultFileUrlSchema,
+  gbff: ApiOptionalResultFileUrlSchema,
+  gff3: ApiOptionalResultFileUrlSchema,
+  json: ApiRequiredResultFileUrlSchema,
+  tsv: ApiOptionalResultFileUrlSchema,
+  hypotheticals_tsv: ApiOptionalResultFileUrlSchema,
+  logs_txt: ApiOptionalResultFileUrlSchema,
+  inference_tsv: ApiOptionalResultFileUrlSchema,
+  circular_plot_png: ApiOptionalResultFileUrlSchema,
+  circular_plot_svg: ApiOptionalResultFileUrlSchema,
 })
 
 const ApiBaktaProteinsResultFilesSchema = z.object({
-  tsv: z.string(),
-  faa: z.string(),
-  hypotheticals_tsv: z.string(),
-  json: z.string(),
+  tsv: ApiOptionalResultFileUrlSchema,
+  faa: ApiOptionalResultFileUrlSchema,
+  hypotheticals_tsv: ApiOptionalResultFileUrlSchema,
+  json: ApiRequiredResultFileUrlSchema,
 })
 
 const ApiBaktfoldResultFilesSchema = z.object({
-  embl: z.string(),
-  faa: z.string(),
-  hypotheticals_faa: z.string(),
-  ffn: z.string(),
-  fna: z.string(),
-  gbff: z.string(),
-  gff3: z.string(),
-  json: z.string(),
-  tsv: z.string(),
-  hypotheticals_tsv: z.string(),
-  logs_txt: z.string(),
-  inference_tsv: z.string(),
+  embl: ApiOptionalResultFileUrlSchema,
+  faa: ApiOptionalResultFileUrlSchema,
+  hypotheticals_faa: ApiOptionalResultFileUrlSchema,
+  ffn: ApiOptionalResultFileUrlSchema,
+  fna: ApiOptionalResultFileUrlSchema,
+  gbff: ApiOptionalResultFileUrlSchema,
+  gff3: ApiOptionalResultFileUrlSchema,
+  json: ApiRequiredResultFileUrlSchema,
+  tsv: ApiOptionalResultFileUrlSchema,
+  hypotheticals_tsv: ApiOptionalResultFileUrlSchema,
+  logs_txt: ApiOptionalResultFileUrlSchema,
+  inference_tsv: ApiOptionalResultFileUrlSchema,
 })
+
+function appendResultFile(
+  resultFiles: ResultFiles,
+  key: keyof ResultFiles,
+  url: string | undefined,
+): void {
+  if (url) resultFiles[key] = url
+}
 
 const ApiResultResponseSchema = z.object({
   job_id: z.string(),
@@ -317,45 +334,45 @@ class BaktaApiImpl implements BaktaApi {
 
   #resultFiles(result: z.infer<typeof ApiResultResponseSchema>['result']): ResultFiles {
     switch (result.result_kind) {
-      case 'bakta':
-        return {
-          EMBL: result.files.embl,
-          FAA: result.files.faa,
-          FAAHypothetical: result.files.hypotheticals_faa,
-          FFN: result.files.ffn,
-          FNA: result.files.fna,
-          GBFF: result.files.gbff,
-          GFF3: result.files.gff3,
-          JSON: result.files.json,
-          TSV: result.files.tsv,
-          TSVHypothetical: result.files.hypotheticals_tsv,
-          TSVInference: result.files.inference_tsv,
-          TXTLogs: result.files.logs_txt,
-          PNGCircularPlot: result.files.circular_plot_png,
-          SVGCircularPlot: result.files.circular_plot_svg,
-        }
-      case 'bakta_proteins':
-        return {
-          TSV: result.files.tsv,
-          FAA: result.files.faa,
-          TSVHypothetical: result.files.hypotheticals_tsv,
-          JSON: result.files.json,
-        }
-      case 'baktfold':
-        return {
-          EMBL: result.files.embl,
-          FAA: result.files.faa,
-          FAAHypothetical: result.files.hypotheticals_faa,
-          FFN: result.files.ffn,
-          FNA: result.files.fna,
-          GBFF: result.files.gbff,
-          GFF3: result.files.gff3,
-          JSON: result.files.json,
-          TSV: result.files.tsv,
-          TSVHypothetical: result.files.hypotheticals_tsv,
-          TSVInference: result.files.inference_tsv,
-          TXTLogs: result.files.logs_txt,
-        }
+      case 'bakta': {
+        const files: ResultFiles = { JSON: result.files.json }
+        appendResultFile(files, 'EMBL', result.files.embl)
+        appendResultFile(files, 'FAA', result.files.faa)
+        appendResultFile(files, 'FAAHypothetical', result.files.hypotheticals_faa)
+        appendResultFile(files, 'FFN', result.files.ffn)
+        appendResultFile(files, 'FNA', result.files.fna)
+        appendResultFile(files, 'GBFF', result.files.gbff)
+        appendResultFile(files, 'GFF3', result.files.gff3)
+        appendResultFile(files, 'TSV', result.files.tsv)
+        appendResultFile(files, 'TSVHypothetical', result.files.hypotheticals_tsv)
+        appendResultFile(files, 'TSVInference', result.files.inference_tsv)
+        appendResultFile(files, 'TXTLogs', result.files.logs_txt)
+        appendResultFile(files, 'PNGCircularPlot', result.files.circular_plot_png)
+        appendResultFile(files, 'SVGCircularPlot', result.files.circular_plot_svg)
+        return files
+      }
+      case 'bakta_proteins': {
+        const files: ResultFiles = { JSON: result.files.json }
+        appendResultFile(files, 'TSV', result.files.tsv)
+        appendResultFile(files, 'FAA', result.files.faa)
+        appendResultFile(files, 'TSVHypothetical', result.files.hypotheticals_tsv)
+        return files
+      }
+      case 'baktfold': {
+        const files: ResultFiles = { JSON: result.files.json }
+        appendResultFile(files, 'EMBL', result.files.embl)
+        appendResultFile(files, 'FAA', result.files.faa)
+        appendResultFile(files, 'FAAHypothetical', result.files.hypotheticals_faa)
+        appendResultFile(files, 'FFN', result.files.ffn)
+        appendResultFile(files, 'FNA', result.files.fna)
+        appendResultFile(files, 'GBFF', result.files.gbff)
+        appendResultFile(files, 'GFF3', result.files.gff3)
+        appendResultFile(files, 'TSV', result.files.tsv)
+        appendResultFile(files, 'TSVHypothetical', result.files.hypotheticals_tsv)
+        appendResultFile(files, 'TSVInference', result.files.inference_tsv)
+        appendResultFile(files, 'TXTLogs', result.files.logs_txt)
+        return files
+      }
     }
   }
 

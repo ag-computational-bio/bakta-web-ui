@@ -12,7 +12,7 @@
   </table>
 </template>
 <script setup lang="ts">
-import type { JobResult, ResultFileKey } from '@/model/job'
+import { listDownloadResultFiles, type JobResult, type ResultFileKey } from '@/model/job'
 import { computed } from 'vue'
 
 const props = defineProps<{
@@ -79,19 +79,10 @@ const downloads = computed(() => {
       position: 90,
     },
   }
-  const resultFiles: Record<string, string> =
-    props.job && props.job.ResultFiles ? props.job.ResultFiles : {}
-
   const l: { key: string; label: string; description?: string; position: number; url: string }[] =
     []
-  for (const k of Object.keys(resultFiles)) {
-    if (k === 'TXTLogs') continue
-    if (k in order) {
-      const _k = k as ResultFileKey
-      l.push({ key: k, url: resultFiles[_k], ...order[_k] })
-    } else {
-      l.push({ key: k, label: k, position: 1000, url: resultFiles[k] })
-    }
+  for (const { key, url } of listDownloadResultFiles(props.job.ResultFiles)) {
+    l.push({ key, url, ...order[key] })
   }
   return l.sort((a, b) => a.position - b.position)
 })

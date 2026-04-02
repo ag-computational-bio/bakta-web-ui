@@ -52,7 +52,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import type { JobResult } from '@/model/job'
+import { listDownloadResultFiles, type JobResult } from '@/model/job'
 import type { Result } from '@/model/result-data'
 import BaktaGenomeViewer from './BaktaGenomeViewer.vue'
 import BaktaAnnotationTable from './BaktaAnnotationTable.vue'
@@ -98,7 +98,7 @@ const tabs = computed<TabDefinition[]>(() => {
     },
   ]
 
-  if (Object.keys(props.job.ResultFiles).length > 1)
+  if (listDownloadResultFiles(props.job.ResultFiles).length > 0)
     tabs.push({
       key: 'download',
       label: 'Downloads',
