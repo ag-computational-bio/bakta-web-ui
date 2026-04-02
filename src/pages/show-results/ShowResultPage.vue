@@ -17,71 +17,13 @@
         </Shield>
       </div>
 
-      <div v-if="jobNotFinished" class="py-4">
-        <div class="border rounded-3 p-4">
-          <div class="d-flex align-items-center gap-3 mb-3">
-            <div
-              class="spinner-border"
-              :class="`text-${jobStatusClass}`"
-              role="status"
-              style="width: 1.5rem; height: 1.5rem"
-            >
-              <span class="visually-hidden">Running...</span>
-            </div>
-            <div class="flex-grow-1">
-              <div class="fw-semibold">Your job is not finished yet.</div>
-              <div class="text-secondary small">
-                Status:
-                <span class="badge" :class="`text-bg-${jobStatusClass}`">{{
-                  job?.jobStatus ?? 'INIT'
-                }}</span>
-              </div>
-            </div>
-            <button
-              class="btn btn-outline-secondary btn-sm border-0"
-              @click="putLinkToClipboard"
-              title="Copy link to clipboard"
-            >
-              <i class="bi bi-share"></i>
-            </button>
-          </div>
-
-          <div v-if="workflowStages.length > 0">
-            <div class="text-secondary small fw-semibold mb-2">Workflow steps</div>
-            <div class="d-flex flex-column gap-0">
-              <div
-                v-for="(stage, idx) in workflowStages"
-                :key="stage.stage"
-                class="d-flex align-items-center gap-2 py-2"
-                :class="{ 'border-top': idx > 0 }"
-              >
-                <div class="stage-icon d-flex align-items-center justify-content-center">
-                  <i
-                    v-if="stage.status === 'succeeded'"
-                    class="bi bi-check-circle-fill text-success"
-                  ></i>
-                  <i
-                    v-else-if="stage.status === 'failed' || stage.status === 'error'"
-                    class="bi bi-x-circle-fill text-danger"
-                  ></i>
-                  <div
-                    v-else-if="stage.status === 'running'"
-                    class="spinner-border spinner-border-sm text-success"
-                    role="status"
-                  >
-                    <span class="visually-hidden">Running...</span>
-                  </div>
-                  <i v-else class="bi bi-circle text-secondary"></i>
-                </div>
-                <span class="flex-grow-1 text-capitalize">{{ formatStage(stage.stage) }}</span>
-                <span class="badge text-uppercase" :class="stageStatusClass(stage.status)">{{
-                  stage.status
-                }}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <JobPendingCard
+        v-if="jobNotFinished"
+        :job-status="job?.jobStatus"
+        :stages="pendingStages"
+        :show-share-button="true"
+        @share="putLinkToClipboard"
+      />
 
       <div v-if="job?.jobStatus === 'ERROR'" class="mt-4">
         <div class="alert alert-danger">This workflow failed.</div>
@@ -146,17 +88,19 @@ import Notification from '@/components/Notification.vue'
 import Shield from '@/components/Shield.vue'
 import BaktaResultVisualization from '@/components/bakta-result/BaktaResultVisualization.vue'
 import BaktaDownloads from '@/components/bakta-result/BaktaDownloads.vue'
+import JobPendingCard from '@/components/JobPendingCard.vue'
 import { useProgress, type Progress } from '@/components/progress'
 import ProgressBar from '@/components/ProgressBar.vue'
 import { JobSchema, formatWorkflowKind, workflowShieldProps, type JobResult } from '@/model/job'
 import { workflowRouteName } from '@/model/bakta-service'
 import { parseBaktaData, type Result } from '@/model/result-data'
-import type { JobInfo, StageLog, StageStatus } from '@/model/submit'
+import type { JobInfo, StageLog, WorkflowDescriptor } from '@/model/submit'
 import notifyFetchProgress from '@/notify-fetch-progress'
 import { useBaktaService } from '@/page/page'
 import { Toast } from 'bootstrap'
 import { computed, onMounted, onUnmounted, ref, useTemplateRef, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { buildPendingWorkflowStages } from './pending-job-stages'
 
 const pollInterval = 2000
 
@@ -189,16 +133,17 @@ const jobNotFinished = computed(() => {
 })
 const reloadHandle = ref<number>()
 const workflowStages = ref<StageLog[]>([])
-
-const jobStatusClass = computed(() => {
-  if (job.value) {
-    if (job.value.jobStatus === 'RUNNING') return 'success'
-    return 'warning'
-  }
-  return 'secondary'
-})
+const workflowDescriptors = ref<WorkflowDescriptor[]>([])
 
 const currentWorkflowKind = computed(() => job.value?.workflowKind ?? result.value?.workflowKind)
+const pendingStages = computed(() =>
+  buildPendingWorkflowStages(
+    currentWorkflowKind.value,
+    workflowDescriptors.value,
+    workflowStages.value,
+    job.value?.jobStatus,
+  ),
+)
 
 const hasJob = ref<boolean>(false)
 const baktfoldAvailable = ref(false)
@@ -220,13 +165,15 @@ function addJobToJoblist() {
   hasJob.value = true
 }
 
-function checkBaktfoldAvailability() {
+function loadWorkflowMetadata() {
   bakta
     .workflows()
     .then((workflows) => {
+      workflowDescriptors.value = workflows
       baktfoldAvailable.value = workflows.some((w) => w.workflowKind === 'baktfold')
     })
     .catch(() => {
+      workflowDescriptors.value = []
       baktfoldAvailable.value = false
     })
 }
@@ -250,26 +197,6 @@ async function runBaktfold() {
   } catch (err) {
     baktfoldError.value = `${err}`
     submittingBaktfold.value = false
-  }
-}
-
-function formatStage(stage: string): string {
-  return stage.replace(/_/g, ' ')
-}
-
-function stageStatusClass(status: StageStatus): string {
-  switch (status) {
-    case 'running':
-      return 'text-bg-success'
-    case 'succeeded':
-      return 'text-bg-success'
-    case 'failed':
-    case 'error':
-      return 'text-bg-danger'
-    case 'pending':
-      return 'text-bg-secondary'
-    case 'unknown':
-      return 'text-bg-dark'
   }
 }
 
@@ -359,7 +286,7 @@ function resetState() {
 
 onMounted(() => {
   loadJobData()
-  checkBaktfoldAvailability()
+  loadWorkflowMetadata()
 })
 
 watch(
@@ -384,10 +311,3 @@ function putLinkToClipboard() {
   }
 }
 </script>
-
-<style scoped>
-.stage-icon {
-  width: 1.25rem;
-  flex-shrink: 0;
-}
-</style>
