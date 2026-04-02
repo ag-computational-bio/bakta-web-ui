@@ -213,39 +213,6 @@
               </div>
               <div class="row g-3">
                 <div class="col-md-6 col-xl-3">
-                  <label class="form-label" for="prodigal-training-file"
-                    >Prodigal training file</label
-                  >
-                  <input
-                    id="prodigal-training-file"
-                    class="form-control"
-                    type="file"
-                    accept=".tf"
-                    @change="(evt) => updateFile('prodigalTrainingFile', evt)"
-                  />
-                  <div
-                    v-if="modelValue.prodigalTrainingFile"
-                    class="small text-secondary mt-1 text-truncate"
-                  >
-                    {{ modelValue.prodigalTrainingFile.name }}
-                  </div>
-                </div>
-                <div class="col-md-6 col-xl-3">
-                  <label class="form-label" for="regions-file">Regions file</label>
-                  <input
-                    id="regions-file"
-                    class="form-control"
-                    type="file"
-                    @change="(evt) => updateFile('regionsFile', evt)"
-                  />
-                  <div
-                    v-if="modelValue.regionsFile"
-                    class="small text-secondary mt-1 text-truncate"
-                  >
-                    {{ modelValue.regionsFile.name }}
-                  </div>
-                </div>
-                <div class="col-md-6 col-xl-3">
                   <label class="form-label" for="trusted-proteins-file">Trusted proteins</label>
                   <input
                     id="trusted-proteins-file"
@@ -272,6 +239,39 @@
                   />
                   <div v-if="modelValue.hmmsFile" class="small text-secondary mt-1 text-truncate">
                     {{ modelValue.hmmsFile.name }}
+                  </div>
+                </div>
+                <div class="col-md-6 col-xl-3">
+                  <label class="form-label" for="regions-file">Regions file</label>
+                  <input
+                    id="regions-file"
+                    class="form-control"
+                    type="file"
+                    @change="(evt) => updateFile('regionsFile', evt)"
+                  />
+                  <div
+                    v-if="modelValue.regionsFile"
+                    class="small text-secondary mt-1 text-truncate"
+                  >
+                    {{ modelValue.regionsFile.name }}
+                  </div>
+                </div>
+                <div class="col-md-6 col-xl-3">
+                  <label class="form-label" for="prodigal-training-file"
+                    >Prodigal training file</label
+                  >
+                  <input
+                    id="prodigal-training-file"
+                    class="form-control"
+                    type="file"
+                    accept=".tf"
+                    @change="(evt) => updateFile('prodigalTrainingFile', evt)"
+                  />
+                  <div
+                    v-if="modelValue.prodigalTrainingFile"
+                    class="small text-secondary mt-1 text-truncate"
+                  >
+                    {{ modelValue.prodigalTrainingFile.name }}
                   </div>
                 </div>
               </div>
