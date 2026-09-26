@@ -56,7 +56,7 @@ const fixtures = {
 }
 
 describe('bakta service', () => {
-  it('uploads string inputs as bytes without a content type', async () => {
+  it('uploads inputs as bytes without a content type', async () => {
     const storage = new SimpleJobStorage()
     const api: BaktaApi = createBaktaApi('')
     api.initJob = vi.fn().mockResolvedValue({
@@ -79,6 +79,9 @@ describe('bakta service', () => {
     await service.submitJob(
       createBaktaJobRequest({
         sequence: '>sequence\nACGT',
+        prodigalTrainingFile: new File(['training'], 'prodigal.tf', {
+          type: 'application/octet-stream',
+        }),
         replicons: [
           {
             id: 'sequence',
@@ -94,11 +97,15 @@ describe('bakta service', () => {
 
     expect(uploads[0].headers.get('Content-Type')).toBeNull()
     expect(uploads[1].headers.get('Content-Type')).toBeNull()
+    expect(uploads[2].headers.get('Content-Type')).toBeNull()
     expect(new Uint8Array(await uploads[0].arrayBuffer())).toEqual(
       new TextEncoder().encode('>sequence\nACGT'),
     )
     expect(new Uint8Array(await uploads[1].arrayBuffer())).toEqual(
       new TextEncoder().encode('sequence\tnew\tchromosome\tcircular\tname'),
+    )
+    expect(new Uint8Array(await uploads[2].arrayBuffer())).toEqual(
+      new TextEncoder().encode('training'),
     )
   })
 

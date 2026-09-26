@@ -121,7 +121,8 @@ class BaktaServiceImpl implements BaktaService {
       uploads.push(
         fetch(job.uploadLinkProdigal, {
           method: 'PUT',
-          body: request.prodigalTrainingFile,
+          body:
+            request.prodigalTrainingFile === null ? null : new Blob([request.prodigalTrainingFile]),
         }),
       )
 
