@@ -108,10 +108,13 @@ class BaktaServiceImpl implements BaktaService {
   submitJob(request: BaktaJobRequest): Promise<Job & { key: string }> {
     return this.#api.initJob({ name: request.jobName, repliconTableType: 'TSV' }).then((job) => {
       const uploads = [
-        fetch(job.uploadLinkFasta, { method: 'PUT', body: request.sequence }),
+        fetch(job.uploadLinkFasta, {
+          method: 'PUT',
+          body: new TextEncoder().encode(request.sequence),
+        }),
         fetch(job.uploadLinkReplicons, {
           method: 'PUT',
-          body: generateRepliconTable(request.replicons),
+          body: new TextEncoder().encode(generateRepliconTable(request.replicons)),
         }),
       ]
       // if (request.prodigalTrainingFile)
