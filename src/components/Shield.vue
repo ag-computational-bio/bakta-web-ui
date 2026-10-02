@@ -33,6 +33,10 @@ const _rightClass = computed(() => 'badge right ' + props.rightClass)
 const _iconClass = computed(() => 'bi ' + props.icon)
 </script>
 <style scoped>
+.shield {
+  display: inline-flex;
+  white-space: nowrap;
+}
 .shield .left {
   border-radius: 0.25rem 0rem 0rem 0.25rem;
 }
