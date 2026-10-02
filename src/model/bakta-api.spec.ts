@@ -39,6 +39,21 @@ afterEach(() => {
   vi.restoreAllMocks()
 })
 
+describe('initJob', () => {
+  it.each([undefined, { 'Content-Type': 'application/octet-stream' }])(
+    'preserves returned upload headers %j',
+    async (headers) => {
+      mockFetchJson({
+        job: { job_id: job.jobID, secret: job.secret },
+        workflow_kind: 'bakta',
+        uploads: [{ upload_kind: 'genome_fasta', required: true, url: '/upload', headers }],
+      })
+      const response = await createBaktaApi('/api').initJob({ name: 'test', workflowKind: 'bakta' })
+      expect(response.uploads[0].headers).toEqual(headers)
+    },
+  )
+})
+
 describe('jobResult', () => {
   it('accepts bakta results with only json and available optional files', async () => {
     mockFetchJson(

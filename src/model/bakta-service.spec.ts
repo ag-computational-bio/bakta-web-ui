@@ -58,19 +58,26 @@ const fixtures = {
 }
 
 describe('bakta service', () => {
-  it('uploads inputs as bytes without a content type', async () => {
+  const uploadHeaders = [undefined, { 'Content-Type': 'application/octet-stream' }]
+  it.each(uploadHeaders)('preserves upload bytes and headers', async (headers) => {
     const storage = new SimpleJobStorage()
     const api: BaktaApi = createBaktaApi('')
     api.initJob = vi.fn().mockResolvedValue({
       job: fixtures.A,
       workflowKind: 'bakta',
       uploads: [
-        { uploadKind: 'genome_fasta', required: true, url: 'https://example.com/fasta' },
-        { uploadKind: 'replicons_table', required: false, url: 'https://example.com/replicons' },
+        { uploadKind: 'genome_fasta', required: true, url: 'https://example.com/fasta', headers },
+        {
+          uploadKind: 'replicons_table',
+          required: false,
+          url: 'https://example.com/replicons',
+          headers,
+        },
         {
           uploadKind: 'prodigal_training_file',
           required: false,
           url: 'https://example.com/prodigal',
+          headers,
         },
       ],
     })
@@ -104,9 +111,9 @@ describe('bakta service', () => {
       }),
     )
 
-    expect(uploads[0].headers.get('Content-Type')).toBeNull()
-    expect(uploads[1].headers.get('Content-Type')).toBeNull()
-    expect(uploads[2].headers.get('Content-Type')).toBeNull()
+    expect(uploads[0].headers.get('Content-Type')).toBe(headers?.['Content-Type'] ?? null)
+    expect(uploads[1].headers.get('Content-Type')).toBe(headers?.['Content-Type'] ?? null)
+    expect(uploads[2].headers.get('Content-Type')).toBe(headers?.['Content-Type'] ?? null)
     expect(new Uint8Array(await uploads[0].arrayBuffer())).toEqual(
       new TextEncoder().encode('>sequence\nACGT'),
     )

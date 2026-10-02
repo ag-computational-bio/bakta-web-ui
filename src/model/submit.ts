@@ -30,12 +30,14 @@ export const UploadDescriptorSchema: ZodType<UploadDescriptor> = z.object({
 
 export type UploadLink = UploadDescriptor & {
   url: string
+  headers?: Record<string, string>
 }
 
 export const UploadLinkSchema: ZodType<UploadLink> = z.object({
   uploadKind: UploadKindSchema,
   required: z.boolean(),
   url: z.string(),
+  headers: z.record(z.string(), z.string()).optional(),
 })
 
 export type InitResponse = {

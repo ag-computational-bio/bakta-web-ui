@@ -50,6 +50,7 @@ const ApiInitResponseSchema = z.object({
       upload_kind: UploadKindSchema,
       required: z.boolean(),
       url: z.string(),
+      headers: z.record(z.string(), z.string()).optional(),
     }),
   ),
 })
@@ -395,6 +396,7 @@ class BaktaApiImpl implements BaktaApi {
         uploadKind: upload.upload_kind,
         required: upload.required,
         url: upload.url,
+        headers: upload.headers,
       })),
     })
   }
