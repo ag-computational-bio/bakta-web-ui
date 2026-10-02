@@ -5,10 +5,12 @@
       <p class="text-secondary mb-3">
         Upload a Bakta JSON result file to run Baktfold as a standalone workflow.
       </p>
-      <label class="form-label me-1" for="bakta-json">Bakta JSON</label>
-      <HelpTip
-        text="The JSON file from the results of a Bakta job. You can download it on the result page."
-      />
+      <div class="d-flex align-items-center mb-2">
+        <label class="form-label mb-0 me-1" for="bakta-json">Bakta JSON</label>
+        <HelpTip
+          text="The JSON file from the results of a Bakta job. You can download it on the result page."
+        />
+      </div>
       <input
         id="bakta-json"
         class="form-control"
