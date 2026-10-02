@@ -6,6 +6,7 @@
         <button
           v-if="seqSource !== 'none'"
           class="btn btn-outline-secondary btn-sm"
+          type="button"
           @click="reset"
         >
           <i class="bi bi-arrow-counterclockwise me-1"></i>Reset
