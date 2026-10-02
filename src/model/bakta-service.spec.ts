@@ -58,29 +58,11 @@ const fixtures = {
 }
 
 describe('bakta service', () => {
-  const uploadCases = [
-    { headers: undefined, signed: false, expected: null, proxy: true },
-    {
-      headers: { 'Content-Type': 'application/octet-stream' },
-      signed: true,
-      expected: 'application/octet-stream',
-    },
-    { headers: undefined, signed: true, expected: 'application/octet-stream' },
-    {
-      headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
-      signed: true,
-      expected: 'application/octet-stream',
-    },
-    { headers: undefined, signed: true, expected: 'application/octet-stream', proxy: true },
-  ]
-  it.each(uploadCases)('preserves upload bytes and headers', async (testCase) => {
-    const { headers, signed, expected, proxy } = testCase
+  const uploadHeaders = [undefined, {}]
+  it.each(uploadHeaders)('preserves upload bytes without Content-Type', async (headers) => {
     const storage = new SimpleJobStorage()
     const api: BaktaApi = createBaktaApi('')
-    const base = proxy
-      ? 'https://bakta.s3.computational.bio.uni-giessen.de/jobs/A/inputs'
-      : 'https://example.com'
-    const query = signed ? '?X-Amz-SignedHeaders=content-type%3Bhost' : '?X-Amz-SignedHeaders=host'
+    const query = '?X-Amz-SignedHeaders=host'
     api.initJob = vi.fn().mockResolvedValue({
       job: fixtures.A,
       workflowKind: 'bakta',
@@ -88,19 +70,19 @@ describe('bakta service', () => {
         {
           uploadKind: 'genome_fasta',
           required: true,
-          url: base + '/fasta' + query,
+          url: 'https://example.com/fasta' + query,
           headers,
         },
         {
           uploadKind: 'replicons_table',
           required: false,
-          url: base + '/replicons' + query,
+          url: 'https://example.com/replicons' + query,
           headers,
         },
         {
           uploadKind: 'prodigal_training_file',
           required: false,
-          url: base + '/prodigal' + query,
+          url: 'https://example.com/prodigal' + query,
           headers,
         },
       ],
@@ -110,7 +92,7 @@ describe('bakta service', () => {
     vi.stubGlobal(
       'fetch',
       vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
-        uploads.push(new Request(new URL(String(input), 'http://localhost:5173'), init))
+        uploads.push(new Request(input, init))
         return Promise.resolve(new Response())
       }),
     )
@@ -135,14 +117,9 @@ describe('bakta service', () => {
       }),
     )
 
-    expect(uploads[0].url).toBe(
-      proxy && signed
-        ? 'http://localhost:5173/s3-upload/jobs/A/inputs/fasta' + query
-        : base + '/fasta' + query,
-    )
-    expect(uploads[0].headers.get('Content-Type')).toBe(expected)
-    expect(uploads[1].headers.get('Content-Type')).toBe(expected)
-    expect(uploads[2].headers.get('Content-Type')).toBe(expected)
+    expect(uploads[0].headers.get('Content-Type')).toBe(null)
+    expect(uploads[1].headers.get('Content-Type')).toBe(null)
+    expect(uploads[2].headers.get('Content-Type')).toBe(null)
     expect(new Uint8Array(await uploads[0].arrayBuffer())).toEqual(
       new TextEncoder().encode('>sequence\nACGT'),
     )

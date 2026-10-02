@@ -11,15 +11,6 @@ const viteConfig = defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
-  server: {
-    proxy: {
-      '/s3-upload/jobs/': {
-        target: 'https://bakta.s3.computational.bio.uni-giessen.de',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/s3-upload/, ''),
-      },
-    },
-  },
 })
 
 export default viteConfig
