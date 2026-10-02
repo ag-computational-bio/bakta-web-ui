@@ -1,42 +1,38 @@
 <template>
-  <div class="d-flex justify-content-end">
-    <nav class="navbar navbar-expand-lg navbar-light bg-white">
-      <div class="container-fluid">
-        <button
-          class="navbar-toggler"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarNav"
-          aria-controls="navbarNav"
-          aria-expanded="false"
-          aria-label="Toggle navigation"
-        >
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-          <div class="d-flex justify-content-end">
-            <ul class="navbar-nav">
-              <template v-for="item in nav" :key="item.label">
-                <li class="nav-item">
-                  <template v-if="item.local">
-                    <router-link v-if="item.active" :to="item.href" class="nav-link active">
-                      {{ item.label }}
-                    </router-link>
-                    <router-link v-else :to="item.href" class="nav-link">
-                      {{ item.label }}
-                    </router-link>
-                  </template>
-                  <template v-else>
-                    <a class="nav-link" target="_blank" :href="item.href">{{ item.label }}</a>
-                  </template>
-                </li>
-              </template>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </nav>
-  </div>
+  <nav class="navbar navbar-expand-md px-0">
+    <router-link to="/" class="navbar-brand d-flex align-items-center gap-2 me-4">
+      <img src="/bakta.svg" alt="" width="34" height="34" />
+      <span class="brand-name">Bakta <span class="brand-suffix">Web</span></span>
+    </router-link>
+    <button
+      class="navbar-toggler border-0"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#navbarNav"
+      aria-controls="navbarNav"
+      aria-expanded="false"
+      aria-label="Toggle navigation"
+    >
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ms-auto gap-md-1">
+        <li v-for="item in nav" :key="item.label" class="nav-item">
+          <router-link
+            v-if="item.local"
+            :to="item.href"
+            class="nav-link"
+            :class="{ active: item.active }"
+          >
+            {{ item.label }}
+          </router-link>
+          <a v-else class="nav-link" target="_blank" rel="noopener" :href="item.href">
+            {{ item.label }}<i class="bi bi-box-arrow-up-right external" aria-hidden="true"></i>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </nav>
 </template>
 <script setup lang="ts">
 import { computed, ref } from 'vue'
@@ -71,8 +67,35 @@ const nav = computed(() => {
   return nav
 })
 </script>
-<style>
+<style scoped>
+.brand-name {
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+.brand-suffix {
+  font-weight: 400;
+  color: var(--bs-secondary-color);
+}
+.nav-link {
+  padding: 0.4rem 0.75rem;
+  border-radius: var(--bs-border-radius);
+  color: var(--bs-body-color);
+  transition:
+    background-color 0.15s,
+    color 0.15s;
+}
+.nav-link:hover {
+  background-color: var(--bakta-surface);
+}
 .nav-link.active {
   font-weight: 600;
+  color: var(--bs-primary-text-emphasis);
+  background-color: var(--bs-primary-bg-subtle);
+}
+.external {
+  margin-left: 0.3rem;
+  font-size: 0.65em;
+  opacity: 0.55;
 }
 </style>

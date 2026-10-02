@@ -1,14 +1,18 @@
 <template>
-  <div>
-    <h1>
-      Bakta Web
-      <span class="float-end version">
-        Bakta {{ version?.baktaVersion ?? 'unknown' }} | DB
-        {{ version?.baktaDbVersion ?? 'unknown' }} | Baktfold
-        {{ version?.baktfoldVersion ?? 'unknown' }}
-      </span>
+  <div
+    class="d-flex flex-wrap justify-content-between align-items-baseline column-gap-4 row-gap-1 pt-3"
+  >
+    <h1 class="tagline mb-0">
+      <span class="visually-hidden">Bakta Web: </span>Rapid &amp; standardized annotation of
+      bacterial genomes, MAGs &amp; plasmids
     </h1>
-    <h3>Rapid &amp; standardized annotation of bacterial genomes, MAGs &amp; plasmids</h3>
+    <p class="version mb-0">
+      Bakta {{ version?.baktaVersion ?? 'unknown' }}
+      <span class="sep" aria-hidden="true">·</span>
+      DB {{ version?.baktaDbVersion ?? 'unknown' }}
+      <span class="sep" aria-hidden="true">·</span>
+      Baktfold {{ version?.baktfoldVersion ?? 'unknown' }}
+    </p>
   </div>
 </template>
 <script setup lang="ts">
@@ -22,17 +26,18 @@ withDefaults(
 )
 </script>
 <style scoped>
-h1 {
-  text-align: left;
-  font-weight: bold;
-}
-h3 {
-  text-align: left;
-  color: gray;
+.tagline {
+  font-size: 1rem;
+  font-weight: 400;
+  letter-spacing: 0;
+  color: var(--bs-secondary-color);
 }
 .version {
-  font-size: 0.3em;
-  color: gray;
-  padding-right: 1.5em;
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--bs-secondary-color);
+}
+.sep {
+  margin-inline: 0.25rem;
 }
 </style>

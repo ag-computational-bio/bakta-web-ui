@@ -1,8 +1,14 @@
 <template>
-  <div class="container">
-    <nav-bar :active="page" />
-    <bakta-title :version="version" />
-  </div>
+  <header>
+    <div class="nav-band border-bottom">
+      <div class="container">
+        <nav-bar :active="page" />
+      </div>
+    </div>
+    <div class="container">
+      <bakta-title :version="version" />
+    </div>
+  </header>
 </template>
 <script setup lang="ts">
 import BaktaTitle from '@/page/BaktaTitle.vue'
@@ -17,3 +23,8 @@ withDefaults(
   {},
 )
 </script>
+<style scoped>
+.nav-band {
+  background-color: #fff;
+}
+</style>

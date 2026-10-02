@@ -18,8 +18,11 @@ import { useBaktaApi } from '@/model/bakta-api'
 
 const route = useRoute()
 const routeName = computed<string>(() => {
-  if (typeof route.name === 'string') return route.name
-  return 'unknown'
+  if (typeof route.name !== 'string') return 'unknown'
+  // The start page is the submit page. All job pages belong to the job list.
+  if (route.name === 'Home') return 'Submit'
+  if (route.name.startsWith('Job')) return 'Jobs'
+  return route.name
 })
 
 const version = ref<Version>({
