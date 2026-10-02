@@ -1,34 +1,29 @@
 <template>
-  <footer>
-    <div class="container">
-      <div class="row">
-        <hr />
-      </div>
-      <div class="d-flex justify-content-between align-items-center">
-        <div>
-          <a href="http://www.computational.bio/" target="_blank"
-            ><img
-              src="@/assets/logo-cb.svg"
-              alt="Computational Biology"
-              style="width: 120px; height: 120px"
-          /></a>
-        </div>
-        <div>
-          <a href="http://www.denbi.de/" target="_blank"
-            ><img src="@/assets/logo-denbi.svg" alt="deNBI" style="height: 80px"
-          /></a>
-        </div>
-        <div style="width: 120px; height: 120px"></div>
-      </div>
+  <footer class="border-top">
+    <div class="container d-flex flex-wrap align-items-center justify-content-between gap-3 py-4">
+      <a href="http://www.computational.bio/" target="_blank" rel="noopener">
+        <img src="@/assets/logo-cb.svg" alt="Computational Biology" class="logo-cb" />
+      </a>
+      <a href="http://www.denbi.de/" target="_blank" rel="noopener">
+        <img src="@/assets/logo-denbi.svg" alt="deNBI" class="logo-denbi" />
+      </a>
     </div>
   </footer>
 </template>
 <script setup lang="ts"></script>
 <style scoped>
-hr {
-  margin-bottom: 0em;
-}
 img {
-  height: 8em;
+  display: block;
+  opacity: 0.85;
+  transition: opacity 0.15s;
+}
+a:hover img {
+  opacity: 1;
+}
+.logo-cb {
+  height: 72px;
+}
+.logo-denbi {
+  height: 40px;
 }
 </style>
