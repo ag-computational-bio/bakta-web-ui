@@ -1,70 +1,68 @@
 <template>
-  <table class="table table-striped">
-    <thead>
-      <tr>
-        <th>Id</th>
-        <th>Jobname</th>
-        <th>Type</th>
-        <th>Submission</th>
-        <th>Last updated</th>
-        <th>Status</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr
-        v-for="item in jobs"
-        :key="item.jobID"
-        :class="{
-          'table-danger': item.jobStatus === 'ERROR',
-          'table-info': item.jobStatus === 'RUNNING',
-        }"
-      >
-        <td>
-          <router-link :to="{ name: routeName(item.workflowKind), params: { id: item.key } }">
-            {{ item.jobID }}
-          </router-link>
-        </td>
-        <td>{{ 'name' in item ? item.name : '' }}</td>
-        <td>
-          <Shield v-if="item.workflowKind" v-bind="workflowShieldProps(item.workflowKind)">
-            {{ formatWorkflowKind(item.workflowKind) }}
-          </Shield>
-        </td>
-        <td>{{ 'started' in item ? formatDateTime(item.started) : 'unknown' }}</td>
-        <td>{{ 'updated' in item ? formatDateTime(item.updated) : 'unknown' }}</td>
-        <td>
-          <i class="me-2" :class="stateIcon(item.jobStatus)"></i>{{ formatState(item.jobStatus) }}
-        </td>
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead>
+        <tr>
+          <th>Id</th>
+          <th>Jobname</th>
+          <th>Type</th>
+          <th>Submission</th>
+          <th>Last updated</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="item in jobs" :key="item.jobID">
+          <td class="font-monospace">
+            <router-link :to="{ name: routeName(item.workflowKind), params: { id: item.key } }">
+              {{ item.jobID }}
+            </router-link>
+          </td>
+          <td>{{ 'name' in item ? item.name : '' }}</td>
+          <td>
+            <Shield v-if="item.workflowKind" v-bind="workflowShieldProps(item.workflowKind)">
+              {{ formatWorkflowKind(item.workflowKind) }}
+            </Shield>
+          </td>
+          <td>{{ 'started' in item ? formatDateTime(item.started) : 'unknown' }}</td>
+          <td>{{ 'updated' in item ? formatDateTime(item.updated) : 'unknown' }}</td>
+          <td>
+            <span class="badge rounded-pill fw-medium" :class="stateClass(item.jobStatus)">
+              <i class="me-1" :class="stateIcon(item.jobStatus)"></i
+              >{{ formatState(item.jobStatus) }}
+            </span>
+          </td>
 
-        <td>
-          <router-link
-            v-if="item.jobStatus === 'SUCCESSFULL' || item.jobStatus === 'SUCCESSFUL'"
-            :to="{ name: routeName(item.workflowKind), params: { id: item.key } }"
-            class="btn btn-sm btn-outline-secondary me-1 mb-1"
-          >
-            <i class="bi bi-eye"></i>
-          </router-link>
-          <button
-            v-if="showJobLog"
-            class="btn btn-sm btn-outline-secondary me-1 mb-1"
-            title="Show job logs"
-            @click="emit('show:logs', item.jobID)"
-          >
-            <span class="bi bi-file-earmark-text"></span>
-          </button>
-          <button
-            v-if="showDelete"
-            class="btn btn-sm btn-outline-danger me-1 mb-1"
-            title="Delete job"
-            @click="emit('delete:job', item.jobID)"
-          >
-            <span class="bi bi-trash"></span>
-          </button>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+          <td class="text-nowrap">
+            <router-link
+              v-if="item.jobStatus === 'SUCCESSFULL' || item.jobStatus === 'SUCCESSFUL'"
+              :to="{ name: routeName(item.workflowKind), params: { id: item.key } }"
+              class="btn btn-sm btn-outline-secondary me-1 mb-1"
+            >
+              <i class="bi bi-eye"></i>
+            </router-link>
+            <button
+              v-if="showJobLog"
+              class="btn btn-sm btn-outline-secondary me-1 mb-1"
+              title="Show job logs"
+              @click="emit('show:logs', item.jobID)"
+            >
+              <span class="bi bi-file-earmark-text"></span>
+            </button>
+            <button
+              v-if="showDelete"
+              class="btn btn-sm btn-outline-danger me-1 mb-1"
+              title="Delete job"
+              @click="emit('delete:job', item.jobID)"
+            >
+              <span class="bi bi-trash"></span>
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 </template>
 <script setup lang="ts">
 import Shield from '@/components/Shield.vue'
@@ -86,9 +84,9 @@ const emit = defineEmits<{
 function formatState(state: JobStatus | FailedJobStatus): string {
   switch (state) {
     case 'NOT_FOUND':
-      return 'OUTDATED'
+      return 'Outdated'
   }
-  return state
+  return state.charAt(0) + state.slice(1).toLowerCase()
 }
 
 function formatDateTime(datestring: string): string {
@@ -104,6 +102,21 @@ function formatDateTime(datestring: string): string {
     }
   } else {
     return ''
+  }
+}
+
+function stateClass(state: JobStatus | FailedJobStatus): string {
+  switch (state) {
+    case 'RUNNING':
+      return 'bg-info-subtle text-info-emphasis'
+    case 'SUCCESSFUL':
+    case 'SUCCESSFULL':
+      return 'bg-success-subtle text-success-emphasis'
+    case 'ERROR':
+    case 'UNAUTHORIZED':
+      return 'bg-danger-subtle text-danger-emphasis'
+    default:
+      return 'bg-secondary-subtle text-secondary-emphasis'
   }
 }
 
