@@ -196,13 +196,19 @@ class BaktaServiceImpl implements BaktaService {
     // Send raw bytes so fetch does not synthesize headers absent from older upload links.
     const bytes = typeof body === 'string' ? new TextEncoder().encode(body) : new Blob([body])
     const headers = new Headers(url.headers)
-    const signedHeaders = new URL(url.url, window.location?.href).searchParams.get(
-      'X-Amz-SignedHeaders',
-    )
+    const uploadUrl = new URL(url.url, window.location?.href)
+    const signedHeaders = uploadUrl.searchParams.get('X-Amz-SignedHeaders')
+    let target = url.url
     if (signedHeaders?.split(';').includes('content-type')) {
       headers.set('Content-Type', 'application/octet-stream')
+      if (
+        uploadUrl.origin === 'https://bakta.s3.computational.bio.uni-giessen.de' &&
+        uploadUrl.pathname.startsWith('/jobs/')
+      ) {
+        target = '/s3-upload' + uploadUrl.pathname + uploadUrl.search
+      }
     }
-    const response = await fetch(url.url, { method: 'PUT', body: bytes, headers })
+    const response = await fetch(target, { method: 'PUT', body: bytes, headers })
     if (!response.ok) throw 'Uploading input files failed'
   }
 
