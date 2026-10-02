@@ -24,7 +24,7 @@
       </button>
     </li>
   </ul>
-  <div class="p-3 pb-5 pt-3 border border-top-0 my-0 py-0 mb-4">
+  <div class="pt-4 pb-4 mb-4">
     <BaktaStats v-if="currentTab === 'job'" :data="bakta" :job="job" />
     <BaktaGenomeViewer v-if="currentTab === 'browser'" :data="bakta" />
     <BaktaAnnotationTable v-if="currentTab === 'table'" :data="bakta" />
