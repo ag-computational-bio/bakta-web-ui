@@ -1,5 +1,5 @@
 <template>
-  <div ref="igvref"></div>
+  <div ref="igvref" class="genome-viewer"></div>
 </template>
 
 <script setup lang="ts">
@@ -151,3 +151,10 @@ watch(() => props.data, refresh)
 onMounted(setupIgv)
 onBeforeUnmount(destroyIgv)
 </script>
+
+<style scoped>
+.genome-viewer {
+  max-width: 100%;
+  overflow-x: auto;
+}
+</style>
