@@ -1,14 +1,14 @@
 <template>
   <div class="mt-4">
-    <div class="border rounded-3 p-4">
-      <h4 class="mb-2">Protein input</h4>
+    <div class="card p-4">
+      <h2 class="section-title">Protein input</h2>
       <p class="text-secondary mb-3">
         Upload a protein FASTA file to run standalone protein annotation.
       </p>
       <label class="form-label" for="protein-fasta">Protein FASTA</label>
       <input
         id="protein-fasta"
-        class="form-control form-control-lg"
+        class="form-control"
         type="file"
         accept=".faa,.fa,.fasta,.fsa"
         @change="updateProteinFasta"

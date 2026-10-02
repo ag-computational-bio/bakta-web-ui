@@ -217,3 +217,9 @@ a {
   --bs-progress-bar-bg: var(--bakta-green);
   --bs-progress-border-radius: 999px;
 }
+
+/* Section titles inside form cards and panels */
+.section-title {
+  margin-bottom: 0.75rem;
+  font-size: 1.15rem;
+}

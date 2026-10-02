@@ -1,14 +1,14 @@
 <template>
   <div class="mt-4">
-    <div class="border rounded-3 p-4">
-      <h4 class="mb-2">Bakta JSON input</h4>
+    <div class="card p-4">
+      <h2 class="section-title">Bakta JSON input</h2>
       <p class="text-secondary mb-3">
         Upload a Bakta JSON result file to run Baktfold as a standalone workflow.
       </p>
       <label class="form-label" for="bakta-json">Bakta JSON</label>
       <input
         id="bakta-json"
-        class="form-control form-control-lg"
+        class="form-control"
         type="file"
         accept=".json"
         @change="updateBaktaJson"

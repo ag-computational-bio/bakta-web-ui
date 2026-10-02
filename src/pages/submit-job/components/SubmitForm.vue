@@ -1,7 +1,16 @@
 <template>
   <div class="mt-4">
-    <div class="border rounded-3 p-4">
-      <h4 class="mb-2">Genome input</h4>
+    <div class="card p-4">
+      <div class="d-flex justify-content-between align-items-start">
+        <h2 class="section-title">Genome input</h2>
+        <button
+          v-if="seqSource !== 'none'"
+          class="btn btn-outline-secondary btn-sm"
+          @click="reset"
+        >
+          <i class="bi bi-arrow-counterclockwise me-1"></i>Reset
+        </button>
+      </div>
       <p class="text-secondary mb-3">
         Paste a FASTA sequence, load an example, or upload a FASTA file.
       </p>
@@ -51,14 +60,10 @@
       />
     </div>
   </div>
-  <div v-if="seqSource !== 'none'" class="d-flex justify-content-end mt-3">
-    <button class="btn btn-secondary" @click="reset">Reset</button>
-  </div>
 
   <div v-if="sequenceSelected">
-    <hr />
-    <div class="mt-4">
-      <h4 class="mb-2">Organism</h4>
+    <div class="card p-4 mt-4">
+      <h2 class="section-title">Organism</h2>
       <div class="row g-3">
         <div class="col-md-6">
           <AutocompleteInput
@@ -85,8 +90,8 @@
       </div>
     </div>
 
-    <div class="mt-4">
-      <h4 class="mb-2">Annotation</h4>
+    <div class="card p-4 mt-4">
+      <h2 class="section-title">Annotation</h2>
       <div class="row g-3 align-items-start">
         <div class="col-lg-4">
           <div class="form-check mt-1">
@@ -168,7 +173,7 @@
         </summary>
         <div class="row g-3 mt-2">
           <div class="col-md-6 col-xl-4">
-            <div class="border rounded-3 p-3 h-100">
+            <div class="rounded-3 p-3 bg-body-tertiary h-100">
               <div class="form-check mb-0">
                 <input id="meta" v-model="meta" class="form-check-input" type="checkbox" />
                 <label class="form-check-label" for="meta">Metagenome mode</label>
@@ -179,7 +184,7 @@
             </div>
           </div>
           <div class="col-md-6 col-xl-4">
-            <div class="border rounded-3 p-3 h-100">
+            <div class="rounded-3 p-3 bg-body-tertiary h-100">
               <label class="form-label mb-1" for="plasmid">Plasmid</label>
               <input
                 id="plasmid"
@@ -191,7 +196,7 @@
             </div>
           </div>
           <div class="col-md-6 col-xl-4">
-            <div class="border rounded-3 p-3 h-100">
+            <div class="rounded-3 p-3 bg-body-tertiary h-100">
               <label class="form-label mb-1" for="locus-tag-increment">Locus tag increment</label>
               <select
                 id="locus-tag-increment"
@@ -206,7 +211,7 @@
           </div>
 
           <div class="col-12">
-            <div class="border rounded-3 p-3">
+            <div class="rounded-3 p-3 bg-body-tertiary">
               <div class="mb-3">
                 <h5 class="mb-0">Additional evidence files</h5>
                 <div class="small text-secondary">Only applied when a file is provided.</div>
@@ -279,7 +284,7 @@
           </div>
 
           <div class="col-12">
-            <div class="border rounded-3 p-3">
+            <div class="rounded-3 p-3 bg-body-tertiary">
               <h5 class="mb-0">Skip features</h5>
               <div class="small text-secondary mb-3">
                 Select annotations you want Bakta to skip.
@@ -302,17 +307,15 @@
           </div>
         </div>
       </details>
+    </div>
 
-      <div class="mt-4">
-        <h4 class="mb-2">Replicons</h4>
-        <div class="row scroll">
-          <EditRepliconTable v-model="replicons" :completeGenome="completeGenome" />
-        </div>
+    <div class="card p-4 mt-4">
+      <h2 class="section-title">Replicons</h2>
+      <div class="table-responsive">
+        <EditRepliconTable v-model="replicons" :completeGenome="completeGenome" />
       </div>
-      <div v-if="!valid && !idsAreINSDCCompliant" class="row mt-3">
-        <div class="col">
-          <div class="alert alert-danger mb-0">The contig ids are not INSDC compliant.</div>
-        </div>
+      <div v-if="!valid && !idsAreINSDCCompliant" class="alert alert-danger mb-0 mt-3">
+        The contig ids are not INSDC compliant.
       </div>
     </div>
   </div>

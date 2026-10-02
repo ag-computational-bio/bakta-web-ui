@@ -99,25 +99,30 @@ const inputField = ref<HTMLInputElement>()
   width: 100%;
   padding: 0;
 
+  &:focus-within {
+    border-color: var(--bakta-green);
+    box-shadow: 0 0 0 0.2rem var(--bs-focus-ring-color);
+  }
   input:focus {
-    border-bottom: none;
+    border: none;
+    box-shadow: none;
   }
   .autocomplete-input-list {
     position: absolute;
     max-height: 10rem;
     overflow-y: auto;
     z-index: 9;
-    border-color: lightgray;
-    border-style: solid;
-    border-width: 1px;
+    margin-top: 0.25rem;
+    border: 1px solid var(--bs-border-color);
     border-radius: var(--bs-border-radius);
+    box-shadow: var(--bakta-shadow);
     width: 100%;
     div {
       padding-left: 0.75rem;
       background-color: white;
     }
     .active {
-      background-color: aliceblue;
+      background-color: var(--bs-primary-bg-subtle);
     }
   }
 }
