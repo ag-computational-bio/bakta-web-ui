@@ -39,8 +39,8 @@
 
         <div class="row g-4">
           <div class="col-lg-4">
-            <div class="border rounded-3 p-3 h-100">
-              <h5 class="mb-3">Job summary</h5>
+            <div class="card p-3 h-100">
+              <h2 class="section-title">Job summary</h2>
               <DisplayTuple
                 v-if="job?.name || result?.name"
                 label="Name"
@@ -61,8 +61,8 @@
           </div>
 
           <div class="col-lg-8 d-flex flex-column gap-4">
-            <div v-if="result" class="border rounded-3 p-3">
-              <h5 class="mb-3">Downloads</h5>
+            <div v-if="result" class="card p-3">
+              <h2 class="section-title">Downloads</h2>
               <BaktaDownloads :job="result" />
             </div>
           </div>

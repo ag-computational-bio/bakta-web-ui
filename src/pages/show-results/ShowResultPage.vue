@@ -41,7 +41,7 @@
         />
 
         <div v-if="showRunBaktfold" class="mt-4 mb-5">
-          <div class="border rounded-3 p-4 bg-body-tertiary">
+          <div class="rounded-3 p-4 bg-body-tertiary">
             <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
               <div>
                 <h5 class="mb-1"><i class="bi bi-stars me-2"></i>Run Baktfold</h5>
@@ -74,8 +74,8 @@
       </div>
 
       <div v-if="!loadingProgress && !error && !data && result" class="mt-3">
-        <div class="border rounded-3 p-3">
-          <h5 class="mb-3">Downloads</h5>
+        <div class="card p-3">
+          <h2 class="section-title">Downloads</h2>
           <BaktaDownloads :job="result" />
         </div>
       </div>
