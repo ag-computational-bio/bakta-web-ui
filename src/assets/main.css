@@ -234,3 +234,14 @@ a {
 .nav-link:focus-visible {
   box-shadow: 0 0 0 0.2rem var(--bs-focus-ring-color);
 }
+
+/* Pagination (used by the annotation table) */
+.pagination {
+  --bs-pagination-color: var(--bs-link-color);
+  --bs-pagination-hover-color: var(--bs-link-hover-color);
+  --bs-pagination-focus-color: var(--bs-link-hover-color);
+  --bs-pagination-focus-box-shadow: 0 0 0 0.2rem var(--bs-focus-ring-color);
+  --bs-pagination-active-bg: var(--bs-primary);
+  --bs-pagination-active-border-color: var(--bs-primary);
+  --bs-pagination-border-color: var(--bs-border-color);
+}

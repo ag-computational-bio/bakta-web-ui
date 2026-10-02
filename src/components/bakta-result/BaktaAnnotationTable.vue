@@ -1,9 +1,9 @@
 <template>
   <DataTable
-    class="table table-striped"
+    class="table table-hover"
     :columns="columns"
     :data="table"
-    :configuration="dataTableConfig"
+    :options="dataTableConfig"
     tableId="bakta-annotation"
   />
 </template>
@@ -11,6 +11,7 @@
 <script setup lang="ts">
 import type { Result } from '@/model/result-data'
 import DataTablesCore from 'datatables.net-bs5'
+import 'datatables.net-bs5/css/dataTables.bootstrap5.css'
 import DataTable from 'datatables.net-vue3'
 
 import { computed } from 'vue'
@@ -76,15 +77,28 @@ const table = computed(() => {
           // url is hard coded for the moment. Should be moved to rest-api module
           .map(
             (x) =>
-              '<a target="_" href=https://psos-staging.computational.bio/api/v1/dbxref/redirect/' +
+              '<a class="dbxref" target="_blank" rel="noopener" href="https://psos-staging.computational.bio/api/v1/dbxref/redirect/' +
               x +
-              '>' +
+              '">' +
               x +
               '</a>',
           )
-          .join('<br> ')
+          .join(' ')
       : '',
   }))
 })
 </script>
-<style scoped></style>
+<style>
+.dbxref {
+  display: inline-block;
+  margin: 0 0.25rem 0.25rem 0;
+  padding: 0 0.4rem;
+  border-radius: var(--bs-border-radius-sm);
+  background-color: var(--bakta-surface);
+  font-size: 0.8rem;
+  text-decoration: none;
+}
+.dbxref:hover {
+  background-color: var(--bs-primary-bg-subtle);
+}
+</style>
