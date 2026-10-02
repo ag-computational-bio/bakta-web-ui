@@ -104,6 +104,7 @@ function setupIgv() {
       wholeGenomeView: false,
     },
     loadDefaultGenomes: false,
+    search: false,
   }
   igv.createBrowser(igvref.value, config).then((x) => {
     igvObj.value = x
