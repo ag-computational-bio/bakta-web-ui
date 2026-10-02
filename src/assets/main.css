@@ -1,35 +1,32 @@
 /*
  * Bakta theme. Loaded after Bootstrap, so it only overrides what differs.
- * Brand colors come from the Bakta logo (green #719049, brown #8a401d).
- * The green used for text and buttons is a bit darker to keep enough contrast.
+ * The page stays white like the original design. The blue is a calmer
+ * version of the Bootstrap blue, and the grays have a slight cool tint.
  */
 :root {
-  --bakta-green: #719049;
-  --bakta-brown: #8a401d;
+  --bs-primary: #35629b;
+  --bs-primary-rgb: 53, 98, 155;
+  --bs-primary-text-emphasis: #1f3d66;
+  --bs-primary-bg-subtle: #dbe7f5;
+  --bs-primary-border-subtle: #b3cbe8;
 
-  --bs-primary: #5b7a37;
-  --bs-primary-rgb: 91, 122, 55;
-  --bs-primary-text-emphasis: #2f4219;
-  --bs-primary-bg-subtle: #eef3e6;
-  --bs-primary-border-subtle: #d3e0c0;
+  --bs-link-color: #2f5f96;
+  --bs-link-color-rgb: 47, 95, 150;
+  --bs-link-hover-color: #234a76;
+  --bs-link-hover-color-rgb: 35, 74, 118;
 
-  --bs-link-color: #4f6c2f;
-  --bs-link-color-rgb: 79, 108, 47;
-  --bs-link-hover-color: #38501f;
-  --bs-link-hover-color-rgb: 56, 80, 31;
+  --bs-body-color: #1f2933;
+  --bs-body-color-rgb: 31, 41, 51;
+  --bs-secondary-color: #5f6b7a;
+  --bs-border-color: #e1e6ee;
+  --bs-focus-ring-color: rgba(53, 98, 155, 0.25);
 
-  --bs-body-color: #23271f;
-  --bs-body-color-rgb: 35, 39, 31;
-  --bs-secondary-color: rgba(35, 39, 31, 0.65);
-  --bs-tertiary-bg: #f6f7f3;
-  --bs-border-color: #e2e5da;
   --bs-border-radius: 0.5rem;
   --bs-border-radius-sm: 0.375rem;
-  --bs-border-radius-lg: 0.75rem;
-  --bs-focus-ring-color: rgba(91, 122, 55, 0.25);
+  --bs-border-radius-lg: 0.875rem;
 
-  --bakta-surface: #f6f7f3;
-  --bakta-shadow: 0 1px 2px rgba(35, 39, 31, 0.05), 0 2px 8px rgba(35, 39, 31, 0.04);
+  --bakta-surface: #f5f7fa;
+  --bakta-shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
 }
 
 html,
@@ -44,23 +41,17 @@ body {
 
 h1,
 h2,
-h3 {
-  letter-spacing: -0.015em;
-}
-h1,
-h2,
 h3,
 h4,
 h5,
 h6 {
   font-weight: 600;
-}
-
-/* Section headings inside cards and panels */
-h4,
-h5,
-h6 {
   color: var(--bs-body-color);
+}
+h1,
+h2,
+h3 {
+  letter-spacing: -0.015em;
 }
 h5 {
   font-size: 1.05rem;
@@ -75,7 +66,7 @@ a {
   min-height: 100%;
 }
 .page-main {
-  padding-block: 1.5rem 3rem;
+  padding-block: 2.5rem 3rem;
 }
 
 /* Cards and panels */
@@ -101,90 +92,90 @@ a {
 .btn-primary {
   --bs-btn-bg: var(--bs-primary);
   --bs-btn-border-color: var(--bs-primary);
-  --bs-btn-hover-bg: #4d6a2d;
-  --bs-btn-hover-border-color: #4d6a2d;
-  --bs-btn-active-bg: #435c27;
-  --bs-btn-active-border-color: #435c27;
+  --bs-btn-hover-bg: #2c5384;
+  --bs-btn-hover-border-color: #2c5384;
+  --bs-btn-active-bg: #264873;
+  --bs-btn-active-border-color: #264873;
   --bs-btn-disabled-bg: var(--bs-primary);
   --bs-btn-disabled-border-color: var(--bs-primary);
-  --bs-btn-focus-shadow-rgb: 91, 122, 55;
+  --bs-btn-focus-shadow-rgb: 53, 98, 155;
 }
 .btn-outline-primary {
   --bs-btn-color: var(--bs-primary);
   --bs-btn-border-color: var(--bs-primary);
   --bs-btn-hover-bg: var(--bs-primary);
   --bs-btn-hover-border-color: var(--bs-primary);
-  --bs-btn-active-bg: #4d6a2d;
-  --bs-btn-active-border-color: #4d6a2d;
+  --bs-btn-active-bg: #264873;
+  --bs-btn-active-border-color: #264873;
   --bs-btn-disabled-color: var(--bs-primary);
   --bs-btn-disabled-border-color: var(--bs-primary);
-  --bs-btn-focus-shadow-rgb: 91, 122, 55;
+  --bs-btn-focus-shadow-rgb: 53, 98, 155;
 }
-.btn-outline-secondary {
-  --bs-btn-color: #5b6155;
-  --bs-btn-border-color: var(--bs-border-color);
-  --bs-btn-hover-color: var(--bs-body-color);
-  --bs-btn-hover-bg: var(--bakta-surface);
-  --bs-btn-hover-border-color: #cfd3c5;
-  --bs-btn-active-color: var(--bs-body-color);
-  --bs-btn-active-bg: #eceee5;
-  --bs-btn-active-border-color: #cfd3c5;
+.btn-link {
+  --bs-btn-color: var(--bs-link-color);
+  --bs-btn-hover-color: var(--bs-link-hover-color);
+  --bs-btn-active-color: var(--bs-link-hover-color);
+  --bs-btn-focus-shadow-rgb: 53, 98, 155;
 }
 
 /* Form controls */
-.form-control,
-.form-select {
-  border-color: #d3d7c9;
+.form-label {
+  font-weight: 500;
 }
 .form-control:focus,
-.form-select:focus {
-  border-color: var(--bakta-green);
+.form-select:focus,
+.form-check-input:focus {
+  border-color: #7fa2cc;
   box-shadow: 0 0 0 0.2rem var(--bs-focus-ring-color);
-}
-.form-control::file-selector-button {
-  background-color: var(--bakta-surface);
-  border-right-color: var(--bs-border-color);
 }
 .form-check-input:checked {
   background-color: var(--bs-primary);
   border-color: var(--bs-primary);
 }
-.form-check-input:focus {
-  border-color: var(--bakta-green);
-  box-shadow: 0 0 0 0.2rem var(--bs-focus-ring-color);
-}
-.form-label {
-  font-weight: 500;
-}
 
-/* Tabs. Shared by the submit page and the result views. */
+/*
+ * Tabs with an underline. Shared by the submit page and the result views.
+ * On small screens the tabs scroll sideways instead of wrapping.
+ */
 .nav-tabs {
-  --bs-nav-tabs-border-color: var(--bs-border-color);
-  --bs-nav-tabs-border-radius: 0;
-  --bs-nav-tabs-link-hover-border-color: transparent;
-  --bs-nav-tabs-link-active-color: var(--bs-body-color);
-  --bs-nav-tabs-link-active-bg: transparent;
-  --bs-nav-tabs-link-active-border-color: transparent;
-  --bs-nav-link-color: var(--bs-secondary-color);
-  --bs-nav-link-hover-color: var(--bs-body-color);
-  gap: 0.25rem;
+  --bs-nav-tabs-border-width: 0;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  border-bottom: 0;
+  box-shadow: inset 0 -1px 0 var(--bs-border-color);
+  scrollbar-width: none;
+}
+.nav-tabs::-webkit-scrollbar {
+  display: none;
 }
 .nav-tabs .nav-link {
+  flex: none;
+  margin-bottom: 0;
+  padding: 0.75rem 1rem;
   border: 0;
-  border-bottom: 2px solid transparent;
-  margin-bottom: -1px;
-  padding: 0.65rem 1rem;
+  border-radius: 0;
+  background-color: transparent;
+  box-shadow: inset 0 -2px 0 transparent;
   font-weight: 500;
+  white-space: nowrap;
+  color: var(--bs-secondary-color);
   transition:
     color 0.15s,
-    border-color 0.15s;
+    box-shadow 0.15s;
 }
 .nav-tabs .nav-link:hover:not(.active) {
-  border-bottom-color: var(--bs-border-color);
+  box-shadow: inset 0 -2px 0 var(--bs-border-color);
+  color: var(--bs-body-color);
 }
 .nav-tabs .nav-link.active {
+  box-shadow: inset 0 -2px 0 var(--bs-primary);
   font-weight: 600;
-  border-bottom-color: var(--bakta-green);
+  color: var(--bs-primary);
+}
+.nav-tabs .nav-link:focus-visible {
+  outline: 2px solid rgba(var(--bs-primary-rgb), 0.5);
+  outline-offset: -3px;
+  box-shadow: none;
 }
 
 /* Alerts */
@@ -192,17 +183,9 @@ a {
   --bs-alert-border-radius: var(--bs-border-radius-lg);
   --bs-alert-padding-y: 0.75rem;
 }
-.alert-secondary {
-  --bs-alert-color: #4a4f44;
-  --bs-alert-bg: var(--bakta-surface);
-  --bs-alert-border-color: var(--bs-border-color);
-  --bs-alert-link-color: var(--bs-link-color);
-}
 
 /* Tables */
 .table {
-  --bs-table-striped-bg: #f9faf6;
-  --bs-table-hover-bg: #f1f4ea;
   --bs-table-border-color: var(--bs-border-color);
 }
 .table > thead > tr > th {
@@ -214,9 +197,19 @@ a {
   border-bottom-width: 1px;
 }
 
+/* Pagination (used by the annotation table) */
+.pagination {
+  --bs-pagination-color: var(--bs-link-color);
+  --bs-pagination-hover-color: var(--bs-link-hover-color);
+  --bs-pagination-focus-color: var(--bs-link-hover-color);
+  --bs-pagination-focus-box-shadow: 0 0 0 0.2rem var(--bs-focus-ring-color);
+  --bs-pagination-active-bg: var(--bs-primary);
+  --bs-pagination-active-border-color: var(--bs-primary);
+}
+
 /* Progress */
 .progress {
-  --bs-progress-bar-bg: var(--bakta-green);
+  --bs-progress-bar-bg: var(--bs-primary);
   --bs-progress-border-radius: 999px;
 }
 
@@ -226,24 +219,14 @@ a {
   font-size: 1.15rem;
 }
 
-/* Keyboard focus in the theme color instead of Bootstrap blue */
-.btn-link {
-  --bs-btn-color: var(--bs-link-color);
-  --bs-btn-hover-color: var(--bs-link-hover-color);
-  --bs-btn-active-color: var(--bs-link-hover-color);
-  --bs-btn-focus-shadow-rgb: 91, 122, 55;
+/* Tooltips behind the help icons */
+.tooltip {
+  --bs-tooltip-max-width: 18rem;
+  --bs-tooltip-padding-x: 0.75rem;
+  --bs-tooltip-padding-y: 0.5rem;
+  --bs-tooltip-font-size: 0.8125rem;
+  --bs-tooltip-bg: #2b3544;
 }
-.nav-link:focus-visible {
-  box-shadow: 0 0 0 0.2rem var(--bs-focus-ring-color);
-}
-
-/* Pagination (used by the annotation table) */
-.pagination {
-  --bs-pagination-color: var(--bs-link-color);
-  --bs-pagination-hover-color: var(--bs-link-hover-color);
-  --bs-pagination-focus-color: var(--bs-link-hover-color);
-  --bs-pagination-focus-box-shadow: 0 0 0 0.2rem var(--bs-focus-ring-color);
-  --bs-pagination-active-bg: var(--bs-primary);
-  --bs-pagination-active-border-color: var(--bs-primary);
-  --bs-pagination-border-color: var(--bs-border-color);
+.tooltip-inner {
+  text-align: left;
 }

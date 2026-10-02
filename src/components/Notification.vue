@@ -13,7 +13,7 @@ defineOptions({
 const props = withDefaults(
   defineProps<{
     message: string | string[] | undefined
-    type?: 'danger' | 'warning' | 'info' | 'secondary'
+    type?: 'danger' | 'warning' | 'info' | 'primary' | 'secondary'
   }>(),
   {},
 )

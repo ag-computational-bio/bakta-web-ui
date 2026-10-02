@@ -2,6 +2,7 @@
   <div class="container flex-grow-1">
     <notification
       message="You can visualize bakta json files with this viewer. The data is visualized inside your browser. None of your data is sent to the server."
+      type="primary"
       class="mb-3"
     />
     <div class="mb-3">
