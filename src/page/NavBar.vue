@@ -1,11 +1,11 @@
 <template>
-  <nav class="navbar navbar-expand-md px-0">
-    <router-link to="/" class="navbar-brand d-flex align-items-center gap-2 me-4">
-      <img src="/bakta.svg" alt="" width="34" height="34" />
-      <span class="brand-name">Bakta <span class="brand-suffix">Web</span></span>
+  <nav class="navbar navbar-expand-lg px-0 py-3">
+    <router-link to="/" class="navbar-brand d-flex align-items-center gap-3 py-0">
+      <img class="brand-logo" src="/bakta.svg" alt="" width="52" height="52" />
+      <BaktaTitle />
     </router-link>
     <button
-      class="navbar-toggler border-0"
+      class="navbar-toggler"
       type="button"
       data-bs-toggle="collapse"
       data-bs-target="#navbarNav"
@@ -16,7 +16,7 @@
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarNav">
-      <ul class="navbar-nav ms-auto gap-md-1">
+      <ul class="navbar-nav ms-auto">
         <li v-for="item in nav" :key="item.label" class="nav-item">
           <router-link
             v-if="item.local"
@@ -36,6 +36,7 @@
 </template>
 <script setup lang="ts">
 import { computed, ref } from 'vue'
+import BaktaTitle from './BaktaTitle.vue'
 
 const props = withDefaults(
   defineProps<{
@@ -68,34 +69,65 @@ const nav = computed(() => {
 })
 </script>
 <style scoped>
-.brand-name {
-  font-size: 1.35rem;
-  font-weight: 700;
-  letter-spacing: -0.02em;
+.navbar-brand {
+  min-width: 0;
+  margin-right: 0;
+  white-space: normal;
 }
-.brand-suffix {
-  font-weight: 400;
-  color: var(--bs-secondary-color);
+.navbar-toggler {
+  flex: none;
+  border-color: var(--bs-border-color);
 }
 .nav-link {
-  padding: 0.4rem 0.75rem;
-  border-radius: var(--bs-border-radius);
-  color: var(--bs-body-color);
-  transition:
-    background-color 0.15s,
-    color 0.15s;
+  position: relative;
+  padding: 0.5rem 0;
+  font-weight: 500;
+  color: var(--bs-secondary-color);
+  transition: color 0.15s;
 }
 .nav-link:hover {
-  background-color: var(--bakta-surface);
+  color: var(--bs-body-color);
 }
 .nav-link.active {
   font-weight: 600;
-  color: var(--bs-primary-text-emphasis);
-  background-color: var(--bs-primary-bg-subtle);
+  color: var(--bs-primary);
 }
 .external {
   margin-left: 0.3rem;
   font-size: 0.65em;
-  opacity: 0.55;
+  opacity: 0.6;
+}
+@media (max-width: 991.98px) {
+  .navbar-brand {
+    flex: 1 1 0;
+  }
+  .navbar-collapse {
+    margin-top: 0.75rem;
+    border-top: 1px solid var(--bs-border-color);
+  }
+  .nav-item + .nav-item {
+    border-top: 1px solid var(--bs-border-color);
+  }
+  .nav-link {
+    padding: 0.75rem 0;
+  }
+}
+@media (min-width: 992px) {
+  .navbar-nav {
+    gap: 0.25rem;
+  }
+  .nav-link {
+    padding: 0.5rem 0.75rem;
+  }
+  .nav-link.active::after {
+    content: '';
+    position: absolute;
+    right: 0.75rem;
+    bottom: 0;
+    left: 0.75rem;
+    height: 2px;
+    border-radius: 2px;
+    background-color: currentColor;
+  }
 }
 </style>

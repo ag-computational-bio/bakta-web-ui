@@ -60,7 +60,7 @@
           >
         </li>
         <li>
-          <a href="/citation">Citation</a>
+          <RouterLink to="/citation">Citation</RouterLink>
         </li>
       </ul>
     </div>
@@ -70,5 +70,15 @@
 <style scoped>
 .shield {
   font-size: 1.3em;
+}
+.container > * {
+  max-width: 52rem;
+}
+h2 {
+  margin-top: 1.5rem;
+  font-size: 1.35rem;
+}
+a {
+  overflow-wrap: anywhere;
 }
 </style>

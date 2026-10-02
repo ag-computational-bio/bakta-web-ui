@@ -2,26 +2,19 @@
   <div class="container flex-grow-1">
     <notification :message="error" />
 
-    <section class="card mb-4">
-      <div class="card-body">
-        <h2 class="fs-6 fw-semibold mb-2"><i class="bi bi-megaphone text-primary me-2"></i>News</h2>
-        <ul class="list-unstyled d-flex flex-column gap-1 mb-0">
-          <li>
-            <b class="news-date">2026-03</b> Added protein structural annotation support using:
-            <a href="https://github.com/gbouras13/baktfold" target="_blank">Baktfold</a>
-          </li>
-          <li>
-            <b class="news-date">2025-04</b> Check out our latest publication on Bakta Web:
-            <a href="https://doi.org/10.1093/nar/gkaf335" target="_blank">10.1093/nar/gkaf335</a>
-          </li>
-        </ul>
-      </div>
-      <div class="card-footer small text-secondary">
-        <i class="bi bi-info-circle me-2"></i>This service is open to everyone and can be used free
-        of charge. For more details <RouterLink to="/about">click here</RouterLink>
-      </div>
-    </section>
-
+    <div class="alert alert-primary mb-4">
+      <h2 class="fs-6 fw-bold mb-2">News</h2>
+      <article>
+        <i class="bi bi-newspaper me-2"></i><b>2026-10</b> Added protein structural annotation
+        support using:
+        <a href="https://github.com/gbouras13/baktfold" target="_blank">Baktfold</a>
+      </article>
+      <article class="mt-1">
+        <i class="bi bi-newspaper me-2"></i><b>2025-04</b> Check out our latest publication on Bakta
+        Web:
+        <a href="https://doi.org/10.1093/nar/gkaf335" target="_blank">10.1093/nar/gkaf335</a>
+      </article>
+    </div>
     <form>
       <ul class="nav nav-tabs mb-4">
         <li v-for="tab in tabs" :key="tab.workflowKind" class="nav-item">
@@ -58,14 +51,14 @@
         <button
           v-if="hasActiveInput && !submitting"
           id="submit-button"
-          class="btn btn-primary px-4"
+          class="btn btn-primary btn-lg px-5"
           type="button"
           :disabled="!activeValid"
           @click="submitJob()"
         >
           Submit
         </button>
-        <button v-if="submitting" class="btn btn-primary px-4" type="button" disabled>
+        <button v-if="submitting" class="btn btn-primary btn-lg px-5" type="button" disabled>
           <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span
           >Submitting...
         </button>
@@ -204,11 +197,3 @@ onMounted(() => {
     })
 })
 </script>
-
-<style scoped>
-.news-date {
-  font-variant-numeric: tabular-nums;
-  color: var(--bs-secondary-color);
-  margin-right: 0.25rem;
-}
-</style>

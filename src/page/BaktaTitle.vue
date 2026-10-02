@@ -1,43 +1,26 @@
 <template>
-  <div
-    class="d-flex flex-wrap justify-content-between align-items-baseline column-gap-4 row-gap-1 pt-3"
-  >
-    <h1 class="tagline mb-0">
-      <span class="visually-hidden">Bakta Web: </span>Rapid &amp; standardized annotation of
-      bacterial genomes, MAGs &amp; plasmids
-    </h1>
-    <p class="version mb-0">
-      Bakta {{ version?.baktaVersion ?? 'unknown' }}
-      <span class="sep" aria-hidden="true">·</span>
-      DB {{ version?.baktaDbVersion ?? 'unknown' }}
-      <span class="sep" aria-hidden="true">·</span>
-      Baktfold {{ version?.baktfoldVersion ?? 'unknown' }}
+  <div class="brand-text">
+    <h1 class="brand-name">Bakta Web</h1>
+    <p class="tagline">
+      Rapid &amp; standardized annotation of bacterial genomes, MAGs &amp; plasmids
     </p>
   </div>
 </template>
-<script setup lang="ts">
-import type { Version } from '@/model/Version'
-
-withDefaults(
-  defineProps<{
-    version: Version
-  }>(),
-  {},
-)
-</script>
 <style scoped>
+.brand-text {
+  min-width: 0;
+}
+.brand-name {
+  margin: 0;
+  font-size: 1.65rem;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
 .tagline {
-  font-size: 1rem;
-  font-weight: 400;
-  letter-spacing: 0;
+  margin: 0.25rem 0 0;
+  font-size: 0.875rem;
+  line-height: 1.3;
   color: var(--bs-secondary-color);
-}
-.version {
-  font-size: 0.8rem;
-  font-variant-numeric: tabular-nums;
-  color: var(--bs-secondary-color);
-}
-.sep {
-  margin-inline: 0.25rem;
 }
 </style>
