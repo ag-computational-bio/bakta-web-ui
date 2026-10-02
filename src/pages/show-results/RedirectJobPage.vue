@@ -1,5 +1,5 @@
 <template>
-  <div class="container flex-grow-1 page-body d-flex align-items-center justify-content-center">
+  <div class="container flex-grow-1 d-flex align-items-center justify-content-center">
     <Notification :message="error" />
     <div v-if="!error" class="text-secondary d-flex align-items-center gap-3">
       <div class="spinner-border" role="status">

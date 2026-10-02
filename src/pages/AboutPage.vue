@@ -1,5 +1,5 @@
 <template>
-  <div class="page-body flex-grow-1">
+  <div class="flex-grow-1">
     <div class="container">
       <h2>General</h2>
       <p>

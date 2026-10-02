@@ -1,6 +1,7 @@
 import type { Preview } from '@storybook/vue3'
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-icons/font/bootstrap-icons.css'
+import '../src/assets/main.css'
 const preview: Preview = {
   parameters: {
     controls: {

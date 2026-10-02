@@ -1,5 +1,5 @@
 <template>
-  <div class="container flex-grow-1 d-flex page-body">
+  <div class="container flex-grow-1 d-flex">
     <div
       ref="copyToast"
       class="text-bg-secondary toast position-absolute px-2 py-1 bottom-0 end-0"

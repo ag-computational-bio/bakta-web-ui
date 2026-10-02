@@ -1,5 +1,5 @@
 <template>
-  <div class="container flex-grow-1 page-body">
+  <div class="container flex-grow-1">
     <notification :message="error" />
 
     <div class="alert alert-primary mb-1">
