@@ -187,10 +187,13 @@ class BaktaServiceImpl implements BaktaService {
     })
   }
 
-  async #upload(url: string | undefined, body: BodyInit | null | undefined): Promise<void> {
+  async #upload(url: string | undefined, body: string | Blob | null | undefined): Promise<void> {
     if (body == undefined || body == null) return
     if (url == undefined) throw 'Missing upload URL'
-    const response = await fetch(url, { method: 'PUT', body })
+    // Send raw bytes so fetch does not add a Content-Type header. A presigned URL
+    // is signed without one, so an extra header makes the upload fail.
+    const bytes = typeof body === 'string' ? new TextEncoder().encode(body) : new Blob([body])
+    const response = await fetch(url, { method: 'PUT', body: bytes })
     if (!response.ok) throw 'Uploading input files failed'
   }
 

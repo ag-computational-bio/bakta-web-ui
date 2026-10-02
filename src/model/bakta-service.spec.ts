@@ -3,7 +3,7 @@ import type { BaktaJobStorage } from './storage/local-job-storage'
 import type { Job, JobResult } from './job'
 import { createBaktaApi, type BaktaApi } from './bakta-api'
 import type { FailedJobInfo, JobInfo, JobStatus, ListResponse } from './submit'
-import { createBaktaService } from './bakta-service'
+import { createBaktaJobRequest, createBaktaService } from './bakta-service'
 
 class SimpleJobStorage implements BaktaJobStorage {
   jobs: Job[] = []
@@ -58,6 +58,66 @@ const fixtures = {
 }
 
 describe('bakta service', () => {
+  it('uploads inputs as bytes without a content type', async () => {
+    const storage = new SimpleJobStorage()
+    const api: BaktaApi = createBaktaApi('')
+    api.initJob = vi.fn().mockResolvedValue({
+      job: fixtures.A,
+      workflowKind: 'bakta',
+      uploads: [
+        { uploadKind: 'genome_fasta', required: true, url: 'https://example.com/fasta' },
+        { uploadKind: 'replicons_table', required: false, url: 'https://example.com/replicons' },
+        {
+          uploadKind: 'prodigal_training_file',
+          required: false,
+          url: 'https://example.com/prodigal',
+        },
+      ],
+    })
+    api.startJob = vi.fn().mockResolvedValue(undefined)
+    const uploads: Request[] = []
+    vi.stubGlobal(
+      'fetch',
+      vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
+        uploads.push(new Request(input, init))
+        return Promise.resolve(new Response())
+      }),
+    )
+
+    const service = createBaktaService(api, storage)
+    await service.submitJob(
+      createBaktaJobRequest({
+        sequence: '>sequence\nACGT',
+        prodigalTrainingFile: new File(['training'], 'prodigal.tf', {
+          type: 'application/octet-stream',
+        }),
+        replicons: [
+          {
+            id: 'sequence',
+            length: 4,
+            new: 'new',
+            name: 'name',
+            type: 'chromosome',
+            topology: 'circular',
+          },
+        ],
+      }),
+    )
+
+    expect(uploads[0].headers.get('Content-Type')).toBeNull()
+    expect(uploads[1].headers.get('Content-Type')).toBeNull()
+    expect(uploads[2].headers.get('Content-Type')).toBeNull()
+    expect(new Uint8Array(await uploads[0].arrayBuffer())).toEqual(
+      new TextEncoder().encode('>sequence\nACGT'),
+    )
+    expect(new Uint8Array(await uploads[1].arrayBuffer())).toEqual(
+      new TextEncoder().encode('sequence\tnew\tchromosome\tcircular\tname'),
+    )
+    expect(new Uint8Array(await uploads[2].arrayBuffer())).toEqual(
+      new TextEncoder().encode('training'),
+    )
+  })
+
   describe('list jobs', async () => {
     it('should retrieve data with key for stored job ids', async () => {
       const storage = new SimpleJobStorage()
