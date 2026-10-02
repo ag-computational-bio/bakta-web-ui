@@ -21,17 +21,17 @@
         @update:sequences="(evt) => updateParsedSequence('text', evt)"
       />
       <div v-if="seqSource === 'none' && loadingExample == undefined" class="mb-2 mt-2">
-        <span class="text-sm text-secondary">Use example sequence: </span>
+        <span class="small text-secondary">Use example sequence: </span>
         <button
           v-if="seqSource === 'none'"
-          class="btn btn-sm border-0 py-0 text-sm btn-outline-secondary"
+          class="btn btn-link btn-sm py-0 px-1"
           @click="(e) => loadExampleData(e, 'plasmid')"
         >
           Plasmid
         </button>
         <button
           v-if="seqSource === 'none'"
-          class="btn btn-sm border-0 py-0 text-sm btn-outline-secondary"
+          class="btn btn-link btn-sm py-0 px-1"
           @click="(e) => loadExampleData(e, 'complete')"
         >
           Genome

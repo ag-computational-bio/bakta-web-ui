@@ -223,3 +223,14 @@ a {
   margin-bottom: 0.75rem;
   font-size: 1.15rem;
 }
+
+/* Keyboard focus in the theme color instead of Bootstrap blue */
+.btn-link {
+  --bs-btn-color: var(--bs-link-color);
+  --bs-btn-hover-color: var(--bs-link-hover-color);
+  --bs-btn-active-color: var(--bs-link-hover-color);
+  --bs-btn-focus-shadow-rgb: 91, 122, 55;
+}
+.nav-link:focus-visible {
+  box-shadow: 0 0 0 0.2rem var(--bs-focus-ring-color);
+}

@@ -1,8 +1,8 @@
 <template>
   <div class="container flex-grow-1">
     <notification
-      message="You can visualize bakta json files with this viewer. The data is visualized inside your browser. None of your data is send to the server."
-      type="warning"
+      message="You can visualize bakta json files with this viewer. The data is visualized inside your browser. None of your data is sent to the server."
+      class="mb-3"
     />
     <div class="mb-3">
       <div class="input-group">
@@ -15,17 +15,11 @@
         />
       </div>
       <div>
-        <span class="ms-1 text-sm text-secondary">Use example result: </span>
-        <button
-          class="btn btn-sm border-0 py-0 text-sm btn-outline-secondary"
-          @click="loadExampleData('plasmid')"
-        >
+        <span class="small text-secondary">Use example result: </span>
+        <button class="btn btn-link btn-sm py-0 px-1" @click="loadExampleData('plasmid')">
           Plasmid
         </button>
-        <button
-          class="btn btn-sm border-0 py-0 text-sm btn-outline-secondary"
-          @click="loadExampleData('genome')"
-        >
+        <button class="btn btn-link btn-sm py-0 px-1" @click="loadExampleData('genome')">
           Genome
         </button>
       </div>
