@@ -64,34 +64,6 @@
 
   <div v-if="sequenceSelected">
     <div class="card p-4 mt-4">
-      <h2 class="section-title">Organism</h2>
-      <div class="row g-3">
-        <div class="col-md-6">
-          <AutocompleteInput
-            v-model="genusSpecies"
-            :lookupFn="lookupGenusSpecies"
-            placeholder="Genus and species (optional)"
-          />
-        </div>
-        <div class="col-md-6">
-          <input
-            id="strain"
-            v-model="strain"
-            class="form-control"
-            type="text"
-            placeholder="Strain (optional)"
-          />
-        </div>
-        <div class="col-md-6">
-          <LocusInput v-model="locus" />
-        </div>
-        <div class="col-md-6">
-          <LocusTagInput v-model="locusTag" :compliant="compliant" />
-        </div>
-      </div>
-    </div>
-
-    <div class="card p-4 mt-4">
       <h2 class="section-title">Annotation</h2>
       <div class="row g-3 align-items-start">
         <div class="col-lg-4">
@@ -103,6 +75,10 @@
               type="checkbox"
             />
             <label class="form-check-label" for="complete-genome">Complete genome</label>
+            <HelpTip
+              class="ms-1"
+              text="All sequences are complete replicons. Each sequence then needs a type and topology."
+            />
           </div>
           <div class="form-check">
             <input
@@ -112,27 +88,34 @@
               type="checkbox"
             />
             <label class="form-check-label" for="keep-headers">Keep contig headers</label>
+            <HelpTip
+              class="ms-1"
+              text="Keep the original sequence headers instead of renaming them."
+            />
           </div>
           <div class="form-check">
             <input id="compliant" v-model="compliant" class="form-check-input" type="checkbox" />
             <label class="form-check-label" for="compliant">INSDC compliant output</label>
+            <HelpTip
+              class="ms-1"
+              text="Force GenBank/ENA/DDBJ compliance. Sequence IDs must then be valid INSDC IDs."
+            />
           </div>
-          <div v-if="showBaktfoldAfter" class="form-check">
+          <div v-if="showBaktfoldAfter" class="form-check baktfold-option">
             <input
               id="run-baktfold-after"
               v-model="runBaktfoldAfter"
               class="form-check-input"
               type="checkbox"
             />
-            <label class="form-check-label" for="run-baktfold-after">
+            <label class="form-check-label fw-semibold" for="run-baktfold-after">
               Run Baktfold
-              <i
-                class="bi bi-question-circle text-secondary ms-1"
-                role="img"
-                aria-label="Info"
-                title="Annotate remaining hypothetical genes using protein structural annotation"
-              ></i>
             </label>
+            <span class="badge rounded-pill text-bg-primary ms-1 align-text-top">New</span>
+            <HelpTip
+              class="ms-1"
+              text="Annotate remaining hypothetical genes using protein structural annotation."
+            />
           </div>
         </div>
         <div class="col-md-4 col-lg-3">
@@ -145,24 +128,82 @@
           />
         </div>
         <div class="col-md-4 col-lg-3">
-          <label class="form-label" for="translation-table">Translation table</label>
+          <label class="form-label me-1" for="translation-table">Translation table</label>
+          <HelpTip
+            text="Genetic code used for translation. Table 11 fits most bacteria and archaea."
+          />
           <SelectTranslationTable id="translation-table" v-model="translationTable" />
         </div>
         <div class="col-md-4 col-lg-2">
-          <label class="form-label" for="mono-diderm">
-            Mono-/Diderm
-            <i
-              class="bi bi-question-circle text-secondary ms-1"
-              role="img"
-              aria-label="Info"
-              title="Maps to Bakta --gram parameter"
-            ></i>
-          </label>
+          <label class="form-label me-1" for="mono-diderm">Mono-/Diderm</label>
+          <HelpTip
+            text="Gram type for signal peptide prediction: monoderm is Gram-positive, diderm is Gram-negative."
+          />
           <SelectDermType id="mono-diderm" v-model="dermType" />
         </div>
       </div>
+    </div>
 
-      <details class="mt-4 advanced-options">
+    <div class="card p-4 mt-4">
+      <h2 class="section-title">
+        Replicons
+        <HelpTip
+          class="fs-6 align-middle"
+          text="Optionally give a sequence a new ID or name and set its type and topology. Empty fields keep the original values."
+        />
+      </h2>
+      <div class="table-responsive">
+        <EditRepliconTable v-model="replicons" :completeGenome="completeGenome" />
+      </div>
+      <div v-if="!valid && !idsAreINSDCCompliant" class="alert alert-danger mb-0 mt-3">
+        The contig ids are not INSDC compliant.
+      </div>
+    </div>
+
+    <div class="card p-4 mt-4">
+      <h2 class="section-title">
+        Organism <small class="fs-6 fw-normal text-secondary">optional</small>
+      </h2>
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label me-1" for="genus-species">Genus and species</label>
+          <HelpTip text="Suggestions come from the ENA taxonomy." />
+          <AutocompleteInput
+            v-model="genusSpecies"
+            input-id="genus-species"
+            :lookupFn="lookupGenusSpecies"
+            placeholder="e.g. Escherichia coli"
+          />
+        </div>
+        <div class="col-md-6">
+          <label class="form-label" for="strain">Strain</label>
+          <input
+            id="strain"
+            v-model="strain"
+            class="form-control"
+            type="text"
+            placeholder="e.g. Sakai"
+          />
+        </div>
+        <div class="col-md-6">
+          <label class="form-label me-1" for="locus">Locus prefix</label>
+          <HelpTip
+            text="Prefix for sequence IDs (default: contig). Up to 20 characters: letters, digits and _ - * . #"
+          />
+          <LocusInput v-model="locus" />
+        </div>
+        <div class="col-md-6">
+          <label class="form-label me-1" for="locustag">Locus tag prefix</label>
+          <HelpTip
+            text="Prefix for feature IDs. Created automatically if empty. 3 to 12 characters: uppercase letters and digits, starting with a letter."
+          />
+          <LocusTagInput v-model="locusTag" :compliant="compliant" />
+        </div>
+      </div>
+    </div>
+
+    <div class="card px-4 py-3 mt-4">
+      <details class="advanced-options">
         <summary
           class="text-secondary fw-semibold d-flex align-items-center justify-content-between"
         >
@@ -178,9 +219,10 @@
               <div class="form-check mb-0">
                 <input id="meta" v-model="meta" class="form-check-input" type="checkbox" />
                 <label class="form-check-label" for="meta">Metagenome mode</label>
-              </div>
-              <div class="small text-secondary mt-2">
-                Relaxes assumptions for fragmented or mixed assemblies.
+                <HelpTip
+                  class="ms-1"
+                  text="Run in metagenome mode. This only affects CDS prediction."
+                />
               </div>
             </div>
           </div>
@@ -198,7 +240,10 @@
           </div>
           <div class="col-md-6 col-xl-4">
             <div class="rounded-3 p-3 bg-body-tertiary h-100">
-              <label class="form-label mb-1" for="locus-tag-increment">Locus tag increment</label>
+              <label class="form-label mb-1 me-1" for="locus-tag-increment"
+                >Locus tag increment</label
+              >
+              <HelpTip text="Step between consecutive locus tag numbers." />
               <select
                 id="locus-tag-increment"
                 v-model.number="locusTagIncrement"
@@ -219,7 +264,10 @@
               </div>
               <div class="row g-3">
                 <div class="col-md-6 col-xl-3">
-                  <label class="form-label" for="trusted-proteins-file">Trusted proteins</label>
+                  <label class="form-label me-1" for="trusted-proteins-file"
+                    >Trusted proteins</label
+                  >
+                  <HelpTip text="Protein FASTA of trusted sequences used for CDS annotation." />
                   <input
                     id="trusted-proteins-file"
                     class="form-control"
@@ -235,7 +283,10 @@
                   </div>
                 </div>
                 <div class="col-md-6 col-xl-3">
-                  <label class="form-label" for="hmms-file">HMMs file</label>
+                  <label class="form-label me-1" for="hmms-file">HMMs file</label>
+                  <HelpTip
+                    text="Trusted hidden Markov models in HMMER format used for CDS annotation."
+                  />
                   <input
                     id="hmms-file"
                     class="form-control"
@@ -248,7 +299,10 @@
                   </div>
                 </div>
                 <div class="col-md-6 col-xl-3">
-                  <label class="form-label" for="regions-file">Regions file</label>
+                  <label class="form-label me-1" for="regions-file">Regions file</label>
+                  <HelpTip
+                    text="Pre-annotated regions in GFF3 or GenBank format (regions only, no functional annotations)."
+                  />
                   <input
                     id="regions-file"
                     class="form-control"
@@ -263,9 +317,10 @@
                   </div>
                 </div>
                 <div class="col-md-6 col-xl-3">
-                  <label class="form-label" for="prodigal-training-file"
+                  <label class="form-label me-1" for="prodigal-training-file"
                     >Prodigal training file</label
                   >
+                  <HelpTip text="Existing Prodigal training file used for CDS prediction." />
                   <input
                     id="prodigal-training-file"
                     class="form-control"
@@ -292,16 +347,19 @@
               </div>
               <div class="row g-2">
                 <div class="col-sm-6 col-lg-4" v-for="option in skipOptions" :key="option.key">
-                  <label class="skip-option" :for="option.key">
-                    <input
-                      :id="option.key"
-                      :checked="skipOptionValue(option.key)"
-                      class="form-check-input mt-0"
-                      type="checkbox"
-                      @change="(evt) => updateSkipOption(option.key, evt)"
-                    />
-                    <span>{{ option.label }}</span>
-                  </label>
+                  <div class="skip-wrap">
+                    <label class="skip-option" :for="option.key">
+                      <input
+                        :id="option.key"
+                        :checked="skipOptionValue(option.key)"
+                        class="form-check-input mt-0"
+                        type="checkbox"
+                        @change="(evt) => updateSkipOption(option.key, evt)"
+                      />
+                      <span>{{ option.label }}</span>
+                    </label>
+                    <HelpTip v-if="option.hint" class="skip-help" :text="option.hint" />
+                  </div>
                 </div>
               </div>
             </div>
@@ -309,20 +367,11 @@
         </div>
       </details>
     </div>
-
-    <div class="card p-4 mt-4">
-      <h2 class="section-title">Replicons</h2>
-      <div class="table-responsive">
-        <EditRepliconTable v-model="replicons" :completeGenome="completeGenome" />
-      </div>
-      <div v-if="!valid && !idsAreINSDCCompliant" class="alert alert-danger mb-0 mt-3">
-        The contig ids are not INSDC compliant.
-      </div>
-    </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import HelpTip from '@/components/HelpTip.vue'
 import Notification from '@/components/Notification.vue'
 import { useProgress, type Progress } from '@/components/progress'
 import ProgressBar from '@/components/ProgressBar.vue'
@@ -623,20 +672,28 @@ function loadExampleData(evt: Event, type: 'plasmid' | 'complete') {
     })
 }
 
-const skipOptions: { key: SkipOptionKey; label: string }[] = [
+const skipOptions: { key: SkipOptionKey; label: string; hint?: string }[] = [
   { key: 'skipTrna', label: 'Skip tRNA' },
   { key: 'skipTmrna', label: 'Skip tmRNA' },
   { key: 'skipRrna', label: 'Skip rRNA' },
   { key: 'skipNcrna', label: 'Skip ncRNA' },
-  { key: 'skipNcrnaRegion', label: 'Skip ncRNA region' },
+  {
+    key: 'skipNcrnaRegion',
+    label: 'Skip ncRNA region',
+    hint: 'ncRNA cis-regulatory regions',
+  },
   { key: 'skipCrispr', label: 'Skip CRISPR' },
   { key: 'skipCds', label: 'Skip CDS' },
   { key: 'skipPseudo', label: 'Skip pseudogenes' },
   { key: 'skipSorf', label: 'Skip sORFs' },
   { key: 'skipGap', label: 'Skip gaps' },
-  { key: 'skipOri', label: 'Skip ori' },
-  { key: 'skipFilter', label: 'Skip filters' },
-  { key: 'skipPlot', label: 'Skip circular plot' },
+  {
+    key: 'skipOri',
+    label: 'Skip ori',
+    hint: 'Origins of replication and transfer (oriC, oriV, oriT)',
+  },
+  { key: 'skipFilter', label: 'Skip filters', hint: 'Feature overlap filters' },
+  { key: 'skipPlot', label: 'Skip circular plot', hint: 'Circular genome plots' },
 ]
 
 function skipOptionValue(key: SkipOptionKey): boolean {
@@ -676,6 +733,26 @@ function updateSkipOption(key: SkipOptionKey, evt: Event) {
   border: 1px solid var(--bs-border-color);
   border-radius: 0.5rem;
   background: var(--bs-body-bg);
+}
+
+.baktfold-option {
+  margin-top: 0.25rem;
+  margin-inline: -0.5rem;
+  padding: 0.3rem 0.5rem 0.3rem 2rem;
+  border-radius: var(--bs-border-radius);
+  background-color: rgba(var(--bs-primary-rgb), 0.09);
+}
+
+.skip-wrap {
+  position: relative;
+  height: 100%;
+}
+
+.skip-help {
+  position: absolute;
+  top: 50%;
+  right: 0.75rem;
+  transform: translateY(-50%);
 }
 
 .skip-option:hover {

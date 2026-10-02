@@ -30,26 +30,26 @@ export const Default: Story = {
   play: async ({ canvas, canvasElement, step }) => {
     const fastaTextInput = canvas.getByPlaceholderText(/Paste/)
     await step('Form is not visible by default', async () => {
-      await expect(canvas.queryByPlaceholderText(/Locus prefix/)).toBe(null)
+      await expect(canvas.queryByLabelText(/^Locus prefix$/)).toBe(null)
     })
     await step('Form is visible when valid fasta is provided as text', async () => {
       await userEvent.clear(fastaTextInput)
       await userEvent.type(fastaTextInput, '>123\nabc')
-      await expect(canvas.queryByPlaceholderText(/Locus prefix/)).not.toBe(null)
+      await expect(canvas.queryByLabelText(/^Locus prefix$/)).not.toBe(null)
     })
 
     await step('Form is hidden when fasta text is removed', async () => {
       await userEvent.clear(fastaTextInput)
       await userEvent.type(fastaTextInput, '>123\nabc')
-      await expect(canvas.queryByPlaceholderText(/Locus prefix/)).not.toBe(null)
+      await expect(canvas.queryByLabelText(/^Locus prefix$/)).not.toBe(null)
       await userEvent.clear(fastaTextInput)
-      await expect(canvas.queryByPlaceholderText(/Locus prefix/)).toBe(null)
+      await expect(canvas.queryByLabelText(/^Locus prefix$/)).toBe(null)
     })
 
     await step('Form is not visible when invalid fasta is provided as text', async () => {
       await userEvent.clear(fastaTextInput)
       await userEvent.type(fastaTextInput, '@@@')
-      await expect(canvas.queryByPlaceholderText(/Locus prefix/)).toBe(null)
+      await expect(canvas.queryByLabelText(/^Locus prefix$/)).toBe(null)
       await userEvent.clear(fastaTextInput)
     })
 
@@ -67,9 +67,9 @@ export const Default: Story = {
       await userEvent.clear(fastaTextInput)
       const file = new File(['>1\natgc'], '1.fas')
       await userEvent.upload(fileInput, file, { applyAccept: false, delay: 100 })
-      await expect(canvas.queryByPlaceholderText(/Locus prefix/)).not.toBe(null)
+      await expect(canvas.queryByLabelText(/^Locus prefix$/)).not.toBe(null)
       await userEvent.click(canvas.getByText('Reset'))
-      await expect(canvas.queryByPlaceholderText(/Locus prefix/)).toBe(null)
+      await expect(canvas.queryByLabelText(/^Locus prefix$/)).toBe(null)
     })
   },
 }

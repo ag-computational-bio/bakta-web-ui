@@ -5,7 +5,10 @@
       <p class="text-secondary mb-3">
         Upload a Bakta JSON result file to run Baktfold as a standalone workflow.
       </p>
-      <label class="form-label" for="bakta-json">Bakta JSON</label>
+      <label class="form-label me-1" for="bakta-json">Bakta JSON</label>
+      <HelpTip
+        text="The JSON file from the results of a Bakta job. You can download it on the result page."
+      />
       <input
         id="bakta-json"
         class="form-control"
@@ -13,6 +16,7 @@
         accept=".json"
         @change="updateBaktaJson"
       />
+
       <div v-if="modelValue.baktaJson" class="small text-secondary mt-2">
         <i class="bi bi-file-earmark-check me-1"></i>
         {{ modelValue.baktaJson.name }}
@@ -22,6 +26,7 @@
 </template>
 
 <script setup lang="ts">
+import HelpTip from '@/components/HelpTip.vue'
 import type { BaktfoldJobRequest } from '@/model/bakta-service'
 import { computed, watch } from 'vue'
 
