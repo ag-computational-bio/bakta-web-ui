@@ -58,25 +58,45 @@ const fixtures = {
 }
 
 describe('bakta service', () => {
-  const uploadHeaders = [undefined, { 'Content-Type': 'application/octet-stream' }]
-  it.each(uploadHeaders)('preserves upload bytes and headers', async (headers) => {
+  const uploadCases = [
+    { headers: undefined, signed: false, expected: null },
+    {
+      headers: { 'Content-Type': 'application/octet-stream' },
+      signed: true,
+      expected: 'application/octet-stream',
+    },
+    { headers: undefined, signed: true, expected: 'application/octet-stream' },
+    {
+      headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
+      signed: true,
+      expected: 'application/octet-stream',
+    },
+  ]
+  it.each(uploadCases)('preserves upload bytes and headers', async (testCase) => {
+    const { headers, signed, expected } = testCase
     const storage = new SimpleJobStorage()
     const api: BaktaApi = createBaktaApi('')
+    const query = signed ? '?X-Amz-SignedHeaders=content-type%3Bhost' : '?X-Amz-SignedHeaders=host'
     api.initJob = vi.fn().mockResolvedValue({
       job: fixtures.A,
       workflowKind: 'bakta',
       uploads: [
-        { uploadKind: 'genome_fasta', required: true, url: 'https://example.com/fasta', headers },
+        {
+          uploadKind: 'genome_fasta',
+          required: true,
+          url: 'https://example.com/fasta' + query,
+          headers,
+        },
         {
           uploadKind: 'replicons_table',
           required: false,
-          url: 'https://example.com/replicons',
+          url: 'https://example.com/replicons' + query,
           headers,
         },
         {
           uploadKind: 'prodigal_training_file',
           required: false,
-          url: 'https://example.com/prodigal',
+          url: 'https://example.com/prodigal' + query,
           headers,
         },
       ],
@@ -111,9 +131,9 @@ describe('bakta service', () => {
       }),
     )
 
-    expect(uploads[0].headers.get('Content-Type')).toBe(headers?.['Content-Type'] ?? null)
-    expect(uploads[1].headers.get('Content-Type')).toBe(headers?.['Content-Type'] ?? null)
-    expect(uploads[2].headers.get('Content-Type')).toBe(headers?.['Content-Type'] ?? null)
+    expect(uploads[0].headers.get('Content-Type')).toBe(expected)
+    expect(uploads[1].headers.get('Content-Type')).toBe(expected)
+    expect(uploads[2].headers.get('Content-Type')).toBe(expected)
     expect(new Uint8Array(await uploads[0].arrayBuffer())).toEqual(
       new TextEncoder().encode('>sequence\nACGT'),
     )

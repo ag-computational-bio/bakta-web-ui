@@ -195,7 +195,14 @@ class BaktaServiceImpl implements BaktaService {
     if (url == undefined) throw 'Missing upload URL'
     // Send raw bytes so fetch does not synthesize headers absent from older upload links.
     const bytes = typeof body === 'string' ? new TextEncoder().encode(body) : new Blob([body])
-    const response = await fetch(url.url, { method: 'PUT', body: bytes, headers: url.headers })
+    const headers = new Headers(url.headers)
+    const signedHeaders = new URL(url.url, window.location?.href).searchParams.get(
+      'X-Amz-SignedHeaders',
+    )
+    if (signedHeaders?.split(';').includes('content-type')) {
+      headers.set('Content-Type', 'application/octet-stream')
+    }
+    const response = await fetch(url.url, { method: 'PUT', body: bytes, headers })
     if (!response.ok) throw 'Uploading input files failed'
   }
 
