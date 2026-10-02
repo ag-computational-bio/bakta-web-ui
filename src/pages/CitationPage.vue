@@ -4,18 +4,24 @@
       <div class="row">
         <div class="card no-border h-100">
           <div class="card-body">
-            <h4 class="card-title">Citations</h4>
+            <h2 class="section-title">Citations</h2>
             <ul class="card-text list-unstyled">
-              <pre>
-              Beyvers S., Jelonek L., Goesmann A., Schwengers O. (2025).
-              Bakta Web – rapid and standardized genome annotation on scalable infrastructures.
-              Nucleic Acids Research, gkaf335. <a href="https://doi.org/10.1093/nar/gkaf335" target="_blank">10.1093/nar/gkaf335</a>
-              </pre>
-              <pre>
-              Schwengers O., Jelonek L., Dieckmann M. A., Beyvers S., Blom J., Goesmann A. (2021).
-              Bakta: rapid and standardized annotation of bacterial genomes via alignment-free sequence identification.
-              Microbial Genomics, 7(11). <a href="https://doi.org/10.1099/mgen.0.000685" target="_blank">10.1099/mgen.0.000685</a>
-              </pre>
+              <li class="mb-3">
+                Beyvers S., Jelonek L., Goesmann A., Schwengers O. (2025). Bakta Web – rapid and
+                standardized genome annotation on scalable infrastructures. Nucleic Acids Research,
+                gkaf335.
+                <a href="https://doi.org/10.1093/nar/gkaf335" target="_blank"
+                  >10.1093/nar/gkaf335</a
+                >
+              </li>
+              <li>
+                Schwengers O., Jelonek L., Dieckmann M. A., Beyvers S., Blom J., Goesmann A. (2021).
+                Bakta: rapid and standardized annotation of bacterial genomes via alignment-free
+                sequence identification. Microbial Genomics, 7(11).
+                <a href="https://doi.org/10.1099/mgen.0.000685" target="_blank"
+                  >10.1099/mgen.0.000685</a
+                >
+              </li>
             </ul>
           </div>
         </div>
@@ -37,7 +43,7 @@
         <div class="col-sm-6">
           <div class="card no-border h-100">
             <div class="card-body">
-              <h4 class="card-title">Tools</h4>
+              <h2 class="section-title">Tools</h2>
               <ul class="card-text list-unstyled">
                 <li>
                   tRNAscan-SE 2.0 (<a href="https://doi.org/10.1093/nar/gkab688" target="_blank"
@@ -98,7 +104,7 @@
         <div class="col-sm-6">
           <div class="card no-border h-100">
             <div class="card-body">
-              <h4 class="card-title">Databases</h4>
+              <h2 class="section-title">Databases</h2>
               <ul class="card-text list-unstyled">
                 <li>
                   Rfam (<a href="https://doi.org/10.1002/cpbi.51" target="_blank">10.1002/cpbi.51</a

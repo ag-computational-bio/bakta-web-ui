@@ -87,7 +87,9 @@ a {
   box-shadow: var(--bakta-shadow);
 }
 .no-border {
+  --bs-card-spacer-x: 0;
   border-color: transparent;
+  background: transparent;
   box-shadow: none;
 }
 

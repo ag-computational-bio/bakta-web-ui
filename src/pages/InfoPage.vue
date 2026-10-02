@@ -5,7 +5,7 @@
         <div class="col-sm-6">
           <div class="card no-border h-100">
             <div class="card-body">
-              <h4 class="card-title">Annotated feature types</h4>
+              <h2 class="section-title">Annotated feature types</h2>
               <ul class="card-text">
                 <li>tRNA</li>
                 <li>tmRNA</li>
@@ -23,7 +23,7 @@
         <div class="col-sm-6">
           <div class="card no-border h-100">
             <div class="card-body">
-              <h4 class="card-title">Included DBs</h4>
+              <h2 class="section-title">Included DBs</h2>
               <ul class="card-text">
                 <li>Rfam</li>
                 <li>UniProt UniRef100/UniRef90/UniRef50</li>
@@ -42,6 +42,5 @@
       </div>
     </div>
   </div>
-  <page-footer />
 </template>
 <script setup lang="ts"></script>
