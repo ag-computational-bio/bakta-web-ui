@@ -252,6 +252,10 @@ class BaktaServiceImpl implements BaktaService {
           job: init.job,
           workflowKind: request.workflowKind,
           config: this.#baktaConfig(request),
+          inputStats: {
+            sequenceCount: request.replicons.length,
+            totalLength: request.replicons.reduce((sum, r) => sum + r.length, 0),
+          },
         })
         return this.#persistJob({ ...init.job, workflowKind: request.workflowKind })
       }

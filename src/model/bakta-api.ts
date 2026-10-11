@@ -477,6 +477,10 @@ class BaktaApiImpl implements BaktaApi {
       job: this.#jobReference(req.job),
       workflow_kind: req.workflowKind,
       config,
+      input_stats: req.inputStats && {
+        sequence_count: req.inputStats.sequenceCount,
+        total_length: req.inputStats.totalLength,
+      },
     })
   }
 

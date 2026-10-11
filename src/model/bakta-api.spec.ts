@@ -54,6 +54,24 @@ describe('initJob', () => {
   )
 })
 
+describe('startJob', () => {
+  async function startBody(inputStats?: { sequenceCount: number; totalLength: number }) {
+    const fetch = vi.spyOn(window, 'fetch').mockResolvedValue(new Response(''))
+    await createBaktaApi('/api').startJob({ job, workflowKind: 'bakta_proteins', inputStats })
+    return JSON.parse(fetch.mock.calls[0][1]?.body as string)
+  }
+
+  it('sends the input statistics', async () => {
+    const body = await startBody({ sequenceCount: 3, totalLength: 5594605 })
+    expect(body.input_stats).toEqual({ sequence_count: 3, total_length: 5594605 })
+  })
+
+  it('leaves out missing input statistics', async () => {
+    const body = await startBody()
+    expect('input_stats' in body).toBe(false)
+  })
+})
+
 describe('jobResult', () => {
   it('accepts bakta results with only json and available optional files', async () => {
     mockFetchJson(

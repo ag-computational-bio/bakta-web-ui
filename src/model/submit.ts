@@ -87,10 +87,17 @@ export type JobConfig = {
   skipPlot: boolean
 }
 
+// sequence count and total length in bp of the genome input, for the job statistics
+export type InputStats = {
+  sequenceCount: number
+  totalLength: number
+}
+
 export type StartRequest = {
   config?: JobConfig
   job: Job
   workflowKind: WorkflowKind
+  inputStats?: InputStats
 }
 
 const FailedJobStatuses = ['NOT_FOUND', 'UNAUTHORIZED'] as const

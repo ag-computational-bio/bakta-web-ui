@@ -117,6 +117,9 @@ describe('bakta service', () => {
       }),
     )
 
+    expect(api.startJob).toHaveBeenCalledWith(
+      expect.objectContaining({ inputStats: { sequenceCount: 1, totalLength: 4 } }),
+    )
     expect(uploads[0].headers.get('Content-Type')).toBe(null)
     expect(uploads[1].headers.get('Content-Type')).toBe(null)
     expect(uploads[2].headers.get('Content-Type')).toBe(null)
