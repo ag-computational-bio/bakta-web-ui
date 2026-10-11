@@ -117,45 +117,6 @@ const table = computed(() => {
   }))
 })
 </script>
-<style scoped>
-.feature-filter {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.375rem;
-}
-.feature-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 0.375rem 0.5rem 0.375rem 0.875rem;
-  border: 1px solid var(--bs-border-color);
-  border-radius: var(--bs-border-radius-sm);
-  background-color: var(--bs-body-bg);
-  color: var(--bs-body-color);
-  font-size: var(--bakta-font-size-md);
-}
-.feature-chip:hover {
-  border-color: var(--bs-primary-border-subtle);
-  background-color: var(--bakta-surface);
-}
-.feature-chip .count {
-  padding: 0.0625rem 0.5rem;
-  border-radius: calc(var(--bs-border-radius-sm) - 0.125rem);
-  background-color: var(--bakta-surface);
-  color: var(--bs-secondary-color);
-  font-size: var(--bakta-font-size-xs);
-  font-variant-numeric: tabular-nums;
-}
-.feature-chip.active {
-  border-color: var(--bs-primary);
-  background-color: var(--bs-primary);
-  color: var(--bs-white);
-}
-.feature-chip.active .count {
-  background-color: rgba(var(--bs-white-rgb), 0.2);
-  color: var(--bs-white);
-}
-</style>
 <style>
 /* the table controls (page size, search, paging) use the same size as the table text */
 .annotation-table .dt-container {
