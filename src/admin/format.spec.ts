@@ -6,6 +6,7 @@ import {
   formatPercent,
   outcomeText,
   percentile,
+  runtimeOverall,
   periods,
   phaseStatus,
   secondsRange,
@@ -114,5 +115,38 @@ describe('outcomeText', () => {
     expect(outcomeText({ status: 'expired', outcome: 'succeeded' })).toBe('outcome: succeeded')
     expect(outcomeText({ status: 'failed', outcome: 'failed' })).toBe('')
     expect(outcomeText({ status: 'deleted', outcome: null })).toBe('')
+  })
+})
+
+describe('runtimeOverall', () => {
+  const kind = (workflow_kind: string, jobs: number, p50: number, avg: number) => ({
+    workflow_kind,
+    jobs,
+    p50,
+    p90: p50 * 2,
+    avg,
+  })
+  const stats = (kinds: ReturnType<typeof kind>[]) =>
+    ({ jobs: 0, by_workflow_kind: kinds }) as unknown as Parameters<typeof runtimeOverall>[0]
+
+  it('takes the values of a single workflow kind', () => {
+    expect(runtimeOverall(stats([kind('bakta', 4, 100, 120)]))).toMatchObject({
+      p50: 100,
+      p90: 200,
+      avg: 120,
+      combined: false,
+    })
+  })
+
+  it('combines only the average of several kinds', () => {
+    const overall = runtimeOverall(
+      stats([kind('bakta', 3, 100, 100), kind('baktfold', 1, 50, 500)]),
+    )
+    expect(overall).toEqual({ avg: 200, combined: true })
+  })
+
+  it('has no values without succeeded jobs, also not from other kinds', () => {
+    expect(runtimeOverall(stats([]))).toEqual({ combined: false })
+    expect(runtimeOverall(undefined)).toEqual({ combined: false })
   })
 })

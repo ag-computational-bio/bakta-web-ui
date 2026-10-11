@@ -5,7 +5,7 @@ import {
 import { formatWorkflowKind, WorkflowKinds, type WorkflowKind } from '@/model/job'
 import type { AnyStatus } from '@/model/status-style'
 import { StageStatuses, type StageStatus } from '@/model/submit'
-import type { Interval } from './admin-api'
+import type { Interval, RuntimeStats } from './admin-api'
 
 /*
  * Formatting and time helpers of the admin pages.
@@ -214,4 +214,24 @@ export function sequenceRange(min: number, max: number | null | undefined): Rang
   if (max == null) return { label: `${min} and more sequences`, tick: `≥ ${min}` }
   if (min === max) return { label: `${min} ${unit(min)}`, tick: String(min) }
   return { label: `${min} to ${max} sequences`, tick: `${min}-${max}` }
+}
+
+/**
+ * The runtime values of the tiles, from the succeeded jobs of the runtime
+ * statistics only. The percentiles exist per workflow kind, so with several
+ * kinds only the average can be combined exactly, the percentiles stay empty.
+ */
+export function runtimeOverall(stats: RuntimeStats | undefined): {
+  p50?: number | null
+  p90?: number | null
+  p99?: number | null
+  avg?: number | null
+  combined: boolean
+} {
+  const kinds = stats?.by_workflow_kind ?? []
+  if (kinds.length === 1) return { ...kinds[0], combined: false }
+  if (kinds.length === 0 || kinds.some((k) => k.avg == null)) return { combined: kinds.length > 1 }
+  const jobs = kinds.reduce((sum, k) => sum + k.jobs, 0)
+  const avg = jobs ? kinds.reduce((sum, k) => sum + k.avg! * k.jobs, 0) / jobs : null
+  return { avg, combined: true }
 }

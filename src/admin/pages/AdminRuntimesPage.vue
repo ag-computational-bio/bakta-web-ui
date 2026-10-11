@@ -153,7 +153,7 @@ import Shield from '@/components/Shield.vue'
 import { formatWorkflowKind, workflowShieldProps } from '@/model/job'
 import { computed, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import type { Interval, RuntimeStats, StatsSummary, Timeseries } from '../admin-api'
+import type { Interval, RuntimeStats, Timeseries } from '../admin-api'
 import {
   filters,
   firstBucket,
@@ -177,6 +177,7 @@ import {
   formatPeriod,
   isWorkflowKind,
   kindLabel,
+  runtimeOverall,
   secondsRange,
 } from '../format'
 
@@ -210,7 +211,6 @@ const router = useRouter()
 const kind = ref('')
 const interval = ref<Interval>('day')
 const stats = ref<RuntimeStats>()
-const summary = ref<StatsSummary>()
 const series = ref<Timeseries>()
 const error = ref<string>()
 const loading = ref(false)
@@ -234,15 +234,15 @@ function open(id: string) {
 
 const tiles = computed(() => {
   const s = stats.value
-  // the runtime endpoint has percentiles per workflow kind only, so all kinds use the summary
-  const one = s?.by_workflow_kind.length === 1 ? s.by_workflow_kind[0] : undefined
-  const overall = one ?? summary.value?.runtime_seconds
+  // only succeeded jobs, like the charts; percentiles of several kinds cannot be combined
+  const overall = runtimeOverall(s)
+  const hint = overall.combined ? 'select one workflow' : undefined
   return [
     { label: 'Jobs with runtime', value: formatCount(s?.jobs), hint: 'succeeded jobs' },
-    { label: 'Median runtime', value: formatDuration(overall?.p50) },
-    { label: 'p90 runtime', value: formatDuration(overall?.p90) },
-    { label: 'p99 runtime', value: formatDuration(overall?.p99) },
-    { label: 'Average runtime', value: formatDuration(overall?.avg) },
+    { label: 'Median runtime', value: formatDuration(overall.p50), hint },
+    { label: 'p90 runtime', value: formatDuration(overall.p90), hint },
+    { label: 'p99 runtime', value: formatDuration(overall.p99), hint },
+    { label: 'Average runtime', value: formatDuration(overall.avg) },
     { label: 'Longest runtime', value: formatDuration(s?.slowest[0]?.runtime_seconds) },
     {
       label: 'Runtime per Mbp',
@@ -290,9 +290,8 @@ async function load() {
   loading.value = true
   error.value = undefined
   try {
-    const [r, s, t] = await Promise.all([
+    const [r, t] = await Promise.all([
       api.runtimes(filter, kind.value || undefined),
-      api.summary(filter),
       loadChart(
         (i) => api.timeseries(filter, i, kind.value ? 'workflow_kind' : 'none'),
         (t) => firstBucket(t.buckets),
@@ -301,7 +300,6 @@ async function load() {
     // an older answer must not replace the data of a newer request
     if (current !== request) return
     stats.value = r
-    summary.value = s
     interval.value = t.interval
     series.value = t.data
   } catch (e) {
