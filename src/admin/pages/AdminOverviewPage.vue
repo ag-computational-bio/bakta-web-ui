@@ -110,7 +110,7 @@
 import Notification from '@/components/Notification.vue'
 import { formatWorkflowKind, type WorkflowKind } from '@/model/job'
 import { computed, ref, watch } from 'vue'
-import type { RouteLocationRaw } from 'vue-router'
+import type { LocationQueryRaw, RouteLocationRaw } from 'vue-router'
 import type { GroupBy, Interval, StatsSummary, Timeseries, VersionStats } from '../admin-api'
 import {
   filterQuery,
@@ -156,8 +156,8 @@ const summary = ref<StatsSummary>()
 const previous = ref<StatsSummary>()
 // the active jobs right now, with the creation time of the oldest
 const active = ref<{ total: number; oldest?: string }>()
-// the jobs that are failed now, the same jobs the link to the job list shows
-const failedNow = ref(0)
+// the jobs that are failed now, with the job list query of the request that counted them
+const failedNow = ref<{ total: number; query: LocationQueryRaw }>()
 const orphans = ref(0)
 const grouped = ref<Timeseries>()
 const overall = ref<Timeseries>()
@@ -211,12 +211,12 @@ const longActiveSeconds = 2 * 3600
 
 const attention = computed(() => {
   const items: { text: string; icon: string; to: RouteLocationRaw }[] = []
-  const failed = failedNow.value
-  if (failed) {
+  const f = failedNow.value
+  if (f?.total) {
     items.push({
-      text: `${formatCount(failed)} failed ${failed === 1 ? 'job' : 'jobs'} in this range`,
+      text: `${formatCount(f.total)} failed ${f.total === 1 ? 'job' : 'jobs'} in this range`,
       icon: 'bi-x-circle text-danger',
-      to: { path: '/admin/jobs', query: { ...filterQuery(), status: 'failed,error' } },
+      to: { path: '/admin/jobs', query: f.query },
     })
   }
   const a = active.value
@@ -257,6 +257,7 @@ let request = 0
 async function load() {
   const current = ++request
   const filter = statsFilter()
+  const failedQuery = { ...filterQuery(), status: 'failed,error' }
   loading.value = true
   error.value = undefined
   try {
@@ -283,7 +284,7 @@ async function load() {
     summary.value = s
     previous.value = p
     active.value = { total: a.total, oldest: a.items[0]?.created_at }
-    failedNow.value = f.total
+    failedNow.value = { total: f.total, query: failedQuery }
     orphans.value = o.length
     interval.value = chart.interval
     ;[grouped.value, overall.value] = chart.data
