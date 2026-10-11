@@ -165,8 +165,10 @@ class MockAdminApi implements AdminApi {
         return {
           workflow_kind: kind,
           jobs_total: ofKind.length,
-          jobs_succeeded: ofKind.filter(succeeded).length,
           jobs_finished: ofKind.filter((j) => j.outcome != null).length,
+          jobs_succeeded: ofKind.filter(succeeded).length,
+          jobs_failed: ofKind.filter((j) => j.outcome === 'failed').length,
+          jobs_error: ofKind.filter((j) => j.outcome === 'error').length,
           runtime_seconds: stats(ofKind.filter(succeeded).map((j) => j.runtime_seconds)),
         }
       }),

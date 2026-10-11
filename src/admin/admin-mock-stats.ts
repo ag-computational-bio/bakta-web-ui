@@ -45,6 +45,24 @@ export function organism(job: JobRecord): string | null {
   return [job.genus, job.species, job.strain].filter(Boolean).join(' ') || null
 }
 
+// the runtime values of sorted runtimes, all null without runtimes
+function runtimeValues(values: number[]) {
+  return {
+    jobs: values.length,
+    min: values[0] ?? null,
+    p10: percentile(values, 0.1),
+    p25: percentile(values, 0.25),
+    p50: percentile(values, 0.5),
+    p75: percentile(values, 0.75),
+    p90: percentile(values, 0.9),
+    p95: percentile(values, 0.95),
+    p99: percentile(values, 0.99),
+    max: values[values.length - 1] ?? null,
+    avg: avg(values),
+    stddev: stddev(values),
+  }
+}
+
 /**
  * The runtime statistics of the given jobs. Runtimes only use succeeded jobs.
  */
@@ -58,24 +76,11 @@ export function runtimeStats(jobs: JobRecord[]): RuntimeStats {
   const queue = sorted(jobs.map((j) => j.queue_seconds))
   return {
     jobs: done.length,
-    by_workflow_kind: kinds.map((kind) => {
-      const values = sorted(done.filter((j) => j.workflow_kind === kind).map(runtime))
-      return {
-        workflow_kind: kind,
-        jobs: values.length,
-        min: values[0] ?? null,
-        p10: percentile(values, 0.1),
-        p25: percentile(values, 0.25),
-        p50: percentile(values, 0.5),
-        p75: percentile(values, 0.75),
-        p90: percentile(values, 0.9),
-        p95: percentile(values, 0.95),
-        p99: percentile(values, 0.99),
-        max: values[values.length - 1] ?? null,
-        avg: avg(values),
-        stddev: stddev(values),
-      }
-    }),
+    overall: runtimeValues(sorted(done.map(runtime))),
+    by_workflow_kind: kinds.map((kind) => ({
+      workflow_kind: kind,
+      ...runtimeValues(sorted(done.filter((j) => j.workflow_kind === kind).map(runtime))),
+    })),
     histogram: buckets(runtimeEdges, done, runtime).map((b) => ({
       min_seconds: b.min,
       max_seconds: b.max,

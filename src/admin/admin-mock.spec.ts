@@ -43,6 +43,9 @@ describe('mock admin api', () => {
 
   it('counts the same jobs in the summary and the time series', async () => {
     const summary = await api.summary(all)
+    for (const kind of summary.by_workflow_kind) {
+      expect(kind.jobs_finished).toBe(kind.jobs_succeeded + kind.jobs_failed + kind.jobs_error)
+    }
     const series = await api.timeseries(all, 'month', 'workflow_kind')
     const total = series.buckets.reduce((sum, b) => sum + b.jobs_total, 0)
     expect(total).toBe(summary.jobs_total)
@@ -57,6 +60,9 @@ describe('mock admin api', () => {
     expect(stats.slowest).toHaveLength(10)
     const kinds = await api.runtimes(all, 'baktfold')
     expect(kinds.by_workflow_kind.map((k) => k.workflow_kind)).toEqual(['baktfold'])
+    expect(kinds.overall?.p50).toBe(kinds.by_workflow_kind[0].p50)
+    expect(stats.overall?.jobs).toBe(stats.jobs)
+    expect(stats.overall?.max).toBe(stats.slowest[0].runtime_seconds)
   })
 
   it('lists and runs bulk actions only on the previewed workflows', async () => {

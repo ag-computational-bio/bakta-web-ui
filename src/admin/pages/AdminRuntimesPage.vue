@@ -177,7 +177,6 @@ import {
   formatPeriod,
   isWorkflowKind,
   kindLabel,
-  runtimeOverall,
   secondsRange,
 } from '../format'
 
@@ -234,16 +233,15 @@ function open(id: string) {
 
 const tiles = computed(() => {
   const s = stats.value
-  // only succeeded jobs, like the charts; percentiles of several kinds cannot be combined
-  const overall = runtimeOverall(s)
-  const hint = overall.combined ? 'select one workflow' : undefined
+  // only succeeded jobs, like the charts, of all selected workflow kinds together
+  const overall = s?.overall
   return [
     { label: 'Jobs with runtime', value: formatCount(s?.jobs), hint: 'succeeded jobs' },
-    { label: 'Median runtime', value: formatDuration(overall.p50), hint },
-    { label: 'p90 runtime', value: formatDuration(overall.p90), hint },
-    { label: 'p99 runtime', value: formatDuration(overall.p99), hint },
-    { label: 'Average runtime', value: formatDuration(overall.avg) },
-    { label: 'Longest runtime', value: formatDuration(s?.slowest[0]?.runtime_seconds) },
+    { label: 'Median runtime', value: formatDuration(overall?.p50) },
+    { label: 'p90 runtime', value: formatDuration(overall?.p90) },
+    { label: 'p99 runtime', value: formatDuration(overall?.p99) },
+    { label: 'Average runtime', value: formatDuration(overall?.avg) },
+    { label: 'Longest runtime', value: formatDuration(overall?.max) },
     {
       label: 'Runtime per Mbp',
       value: formatDuration(s?.seconds_per_mbp.p50),

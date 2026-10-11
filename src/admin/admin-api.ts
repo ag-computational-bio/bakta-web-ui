@@ -82,9 +82,11 @@ export const StatsSummarySchema = z.object({
     z.object({
       workflow_kind: z.string(),
       jobs_total: z.number(),
+      // the finished, succeeded, failed and error jobs count by outcome
+      jobs_finished: z.number(),
       jobs_succeeded: z.number(),
-      // succeeded, failed and error jobs, by outcome; older servers leave it out
-      jobs_finished: z.number().nullish(),
+      jobs_failed: z.number(),
+      jobs_error: z.number(),
       runtime_seconds: PercentilesSchema,
     }),
   ),
@@ -114,25 +116,26 @@ export const TimeseriesSchema = z.object({
 })
 export type Timeseries = z.infer<typeof TimeseriesSchema>
 
+const RuntimeValuesSchema = z.object({
+  jobs: z.number(),
+  min: optionalNumber,
+  p10: optionalNumber,
+  p25: optionalNumber,
+  p50: optionalNumber,
+  p75: optionalNumber,
+  p90: optionalNumber,
+  p95: optionalNumber,
+  p99: optionalNumber,
+  max: optionalNumber,
+  avg: optionalNumber,
+  stddev: optionalNumber,
+})
+
 export const RuntimeStatsSchema = z.object({
   jobs: z.number(),
-  by_workflow_kind: z.array(
-    z.object({
-      workflow_kind: z.string(),
-      jobs: z.number(),
-      min: optionalNumber,
-      p10: optionalNumber,
-      p25: optionalNumber,
-      p50: optionalNumber,
-      p75: optionalNumber,
-      p90: optionalNumber,
-      p95: optionalNumber,
-      p99: optionalNumber,
-      max: optionalNumber,
-      avg: optionalNumber,
-      stddev: optionalNumber,
-    }),
-  ),
+  // all selected workflow kinds together
+  overall: RuntimeValuesSchema.nullable(),
+  by_workflow_kind: z.array(RuntimeValuesSchema.extend({ workflow_kind: z.string() })),
   histogram: z.array(
     z.object({ min_seconds: z.number(), max_seconds: optionalNumber, jobs: z.number() }),
   ),
