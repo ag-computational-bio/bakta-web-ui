@@ -112,9 +112,7 @@
             <label class="form-check-label fw-semibold" for="run-baktfold-after">
               Run Baktfold
             </label>
-            <span class="badge bg-primary-subtle text-primary-emphasis ms-1 align-text-top"
-              >New</span
-            >
+            <span class="badge text-bg-primary ms-1 align-text-top">New</span>
             <HelpTip
               class="ms-1"
               text="Annotate remaining hypothetical genes using protein structural annotation."
