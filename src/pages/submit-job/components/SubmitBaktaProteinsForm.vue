@@ -5,7 +5,8 @@
       <p class="text-secondary mb-3">
         Upload a protein FASTA file to run standalone protein annotation.
       </p>
-      <label class="form-label" for="protein-fasta">Protein FASTA</label>
+      <label class="form-label me-1" for="protein-fasta">Protein FASTA</label>
+      <HelpTip text="Protein sequences in FASTA format, one entry per protein." />
       <input
         id="protein-fasta"
         class="form-control"
@@ -22,6 +23,7 @@
 </template>
 
 <script setup lang="ts">
+import HelpTip from '@/components/HelpTip.vue'
 import type { BaktaProteinsJobRequest } from '@/model/bakta-service'
 import { computed, watch } from 'vue'
 

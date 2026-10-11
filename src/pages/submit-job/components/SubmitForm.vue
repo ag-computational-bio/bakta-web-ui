@@ -47,7 +47,8 @@
         v-if="(seqSource === 'none' && loadingExample == undefined) || seqSource === 'file'"
         class="mt-3"
       >
-        <label class="form-label" for="fastaFile">FASTA file</label>
+        <label class="form-label me-1" for="fastaFile">FASTA file</label>
+        <HelpTip text="Genome sequences in FASTA format, plain or gzip compressed." />
         <FastaFileChooser
           ref="fastaFileInput"
           @update:sequences="(evt) => updateParsedSequence('file', evt)"
@@ -119,7 +120,8 @@
           </div>
         </div>
         <div class="col-md-4 col-lg-3">
-          <label class="form-label" for="min-contig-length">Min contig length</label>
+          <label class="form-label me-1" for="min-contig-length">Min contig length</label>
+          <HelpTip text="Sequences shorter than this length in bp are not annotated." />
           <input
             id="min-contig-length"
             v-model.number="minContigLength"
@@ -176,7 +178,8 @@
           />
         </div>
         <div class="col-md-6">
-          <label class="form-label" for="strain">Strain</label>
+          <label class="form-label me-1" for="strain">Strain</label>
+          <HelpTip text="Strain name, written to the output files." />
           <input
             id="strain"
             v-model="strain"
@@ -228,7 +231,8 @@
           </div>
           <div class="col-md-6 col-xl-4">
             <div class="rounded-3 p-3 bg-body-tertiary h-100">
-              <label class="form-label mb-1" for="plasmid">Plasmid</label>
+              <label class="form-label mb-1 me-1" for="plasmid">Plasmid</label>
+              <HelpTip text="Name of the plasmid, if the input is a single plasmid." />
               <input
                 id="plasmid"
                 v-model="plasmid"
@@ -358,7 +362,7 @@
                       />
                       <span>{{ option.label }}</span>
                     </label>
-                    <HelpTip v-if="option.hint" class="skip-help" :text="option.hint" />
+                    <HelpTip class="skip-help" :text="option.hint" />
                   </div>
                 </div>
               </div>
@@ -672,28 +676,32 @@ function loadExampleData(evt: Event, type: 'plasmid' | 'complete') {
     })
 }
 
-const skipOptions: { key: SkipOptionKey; label: string; hint?: string }[] = [
-  { key: 'skipTrna', label: 'Skip tRNA' },
-  { key: 'skipTmrna', label: 'Skip tmRNA' },
-  { key: 'skipRrna', label: 'Skip rRNA' },
-  { key: 'skipNcrna', label: 'Skip ncRNA' },
+const skipOptions: { key: SkipOptionKey; label: string; hint: string }[] = [
+  { key: 'skipTrna', label: 'Skip tRNA', hint: 'Do not detect and annotate tRNA genes.' },
+  { key: 'skipTmrna', label: 'Skip tmRNA', hint: 'Do not detect and annotate tmRNA genes.' },
+  { key: 'skipRrna', label: 'Skip rRNA', hint: 'Do not detect and annotate rRNA genes.' },
+  { key: 'skipNcrna', label: 'Skip ncRNA', hint: 'Do not detect and annotate ncRNA genes.' },
   {
     key: 'skipNcrnaRegion',
     label: 'Skip ncRNA region',
-    hint: 'ncRNA cis-regulatory regions',
+    hint: 'Do not detect and annotate ncRNA cis-regulatory regions.',
   },
-  { key: 'skipCrispr', label: 'Skip CRISPR' },
-  { key: 'skipCds', label: 'Skip CDS' },
-  { key: 'skipPseudo', label: 'Skip pseudogenes' },
-  { key: 'skipSorf', label: 'Skip sORFs' },
-  { key: 'skipGap', label: 'Skip gaps' },
+  { key: 'skipCrispr', label: 'Skip CRISPR', hint: 'Do not detect and annotate CRISPR arrays.' },
+  { key: 'skipCds', label: 'Skip CDS', hint: 'Do not predict and annotate coding sequences.' },
+  { key: 'skipPseudo', label: 'Skip pseudogenes', hint: 'Do not detect and annotate pseudogenes.' },
+  {
+    key: 'skipSorf',
+    label: 'Skip sORFs',
+    hint: 'Do not detect and annotate small open reading frames.',
+  },
+  { key: 'skipGap', label: 'Skip gaps', hint: 'Do not detect and annotate sequence gaps.' },
   {
     key: 'skipOri',
     label: 'Skip ori',
-    hint: 'Origins of replication and transfer (oriC, oriV, oriT)',
+    hint: 'Do not detect and annotate origins of replication and transfer (oriC, oriV, oriT).',
   },
-  { key: 'skipFilter', label: 'Skip filters', hint: 'Feature overlap filters' },
-  { key: 'skipPlot', label: 'Skip circular plot', hint: 'Circular genome plots' },
+  { key: 'skipFilter', label: 'Skip filters', hint: 'Do not filter overlapping features.' },
+  { key: 'skipPlot', label: 'Skip circular plot', hint: 'Do not create the circular genome plot.' },
 ]
 
 function skipOptionValue(key: SkipOptionKey): boolean {
