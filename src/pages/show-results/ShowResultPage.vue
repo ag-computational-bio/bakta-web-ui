@@ -236,6 +236,8 @@ async function loadJobData() {
     scheduleReload()
   } catch (err) {
     handleError(`${err}`)
+    // keep following an unfinished job, so one failed request does not stop the page
+    if (jobNotFinished.value) scheduleReload()
   }
 }
 
