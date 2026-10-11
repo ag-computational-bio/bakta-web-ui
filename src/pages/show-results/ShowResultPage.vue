@@ -41,7 +41,7 @@
         />
 
         <div v-if="showRunBaktfold" class="mt-4 mb-5">
-          <div class="panel">
+          <div class="panel bg-primary-subtle">
             <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
               <div>
                 <h3 class="subsection-title mb-1"><i class="bi bi-stars me-2"></i>Run Baktfold</h3>
