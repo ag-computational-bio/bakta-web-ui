@@ -5,8 +5,10 @@
       <p class="text-secondary mb-3">
         Upload a protein FASTA file to run standalone protein annotation.
       </p>
-      <label class="form-label me-1" for="protein-fasta">Protein FASTA</label>
-      <HelpTip text="Protein sequences in FASTA format, one entry per protein." />
+      <div class="d-flex align-items-center mb-2">
+        <label class="form-label mb-0 me-1" for="protein-fasta">Protein FASTA</label>
+        <HelpTip text="Protein sequences in FASTA format, one entry per protein." />
+      </div>
       <input
         id="protein-fasta"
         class="form-control"
