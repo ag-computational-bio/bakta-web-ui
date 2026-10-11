@@ -52,7 +52,7 @@
   <div class="card p-4 mb-4">
     <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
       <h3 class="section-title mb-0">Input size over time</h3>
-      <ChipGroup v-model="interval" :options="intervalOptions" label="Interval" />
+      <ChipGroup v-model="interval" :options="intervalOptions" label="Interval" segmented />
     </div>
     <SeriesChart
       v-if="periods.length"

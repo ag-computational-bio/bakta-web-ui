@@ -1,5 +1,19 @@
 <template>
-  <div class="feature-filter" role="group" :aria-label="label">
+  <!-- small segmented buttons, for the chart controls inside cards -->
+  <div v-if="segmented" class="btn-group btn-group-sm segmented" role="group" :aria-label="label">
+    <button
+      v-for="option in options"
+      :key="option.value"
+      type="button"
+      class="btn btn-outline-secondary"
+      :class="{ active: isActive(option.value) }"
+      :aria-pressed="isActive(option.value)"
+      @click="toggle(option.value)"
+    >
+      {{ option.label }}
+    </button>
+  </div>
+  <div v-else class="feature-filter" role="group" :aria-label="label">
     <button
       v-for="option in options"
       :key="option.value"
@@ -24,6 +38,7 @@
 const props = defineProps<{
   options: { value: T; label: string; count?: number }[]
   label: string
+  segmented?: boolean
 }>()
 const model = defineModel<T | T[]>({ required: true })
 
@@ -46,5 +61,10 @@ function toggle(value: T) {
 /* chips without a count get the same padding on both sides */
 .feature-chip.plain {
   padding-right: 0.875rem;
+}
+.segmented .btn {
+  --bs-btn-padding-y: 0.125rem;
+  --bs-btn-padding-x: 0.625rem;
+  --bs-btn-font-weight: 400;
 }
 </style>

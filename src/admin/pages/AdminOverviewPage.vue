@@ -12,8 +12,8 @@
     <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
       <h3 class="section-title mb-0">Jobs over time</h3>
       <div class="d-flex flex-wrap gap-3">
-        <ChipGroup v-model="groupBy" :options="groupOptions" label="Group by" />
-        <ChipGroup v-model="interval" :options="intervalOptions" label="Interval" />
+        <ChipGroup v-model="groupBy" :options="groupOptions" label="Group by" segmented />
+        <ChipGroup v-model="interval" :options="intervalOptions" label="Interval" segmented />
       </div>
     </div>
     <SeriesChart
