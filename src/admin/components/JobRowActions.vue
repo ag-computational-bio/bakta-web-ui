@@ -16,6 +16,7 @@
         type="button"
         class="btn btn-icon btn-sm"
         data-bs-toggle="dropdown"
+        data-bs-popper-config='{"strategy":"fixed"}'
         aria-expanded="false"
         :aria-label="`More actions for job ${shortId}`"
         title="More actions"
