@@ -158,21 +158,12 @@ const table = computed(() => {
 }
 </style>
 <style>
-.annotation-table .table {
-  font-size: var(--bakta-font-size-md);
-}
 /* plain row colors instead of the per cell shadow, which shows thin lines between cells */
 .annotation-table table.table.dataTable.table-striped > tbody > tr > * {
   box-shadow: none;
 }
 .annotation-table table.table.dataTable.table-striped > tbody > tr:nth-of-type(odd) > * {
   background-color: var(--bakta-surface);
-}
-.annotation-table .table > thead > tr > th {
-  font-size: var(--bakta-font-size-sm);
-  letter-spacing: normal;
-  text-transform: none;
-  color: var(--bs-body-color);
 }
 .annotation-table .table td {
   font-variant-numeric: tabular-nums;
