@@ -38,6 +38,23 @@ describe('http admin api', () => {
     expect(headers.Authorization).toBe('Bearer token-1')
   })
 
+  it('sends the filters of the statistics and the bulk actions', async () => {
+    const fetch = vi.spyOn(window, 'fetch').mockImplementation(async () => new Response('{}'))
+    const api = createHttpAdminApi('/api/admin', () => Promise.resolve(undefined))
+    await api.runtimes({ environment: 'staging' }, 'bakta').catch(() => undefined)
+    await api.inputs({ environment: 'all', from: '2026-01-01T00:00:00Z' }).catch(() => undefined)
+    await api.workflows({ environment: 'all', orphans: true }).catch(() => undefined)
+    const request = { filter: { q: 'x' }, action: 'retry' as const, dry_run: true }
+    await api.bulk(request).catch(() => undefined)
+    expect(fetch.mock.calls.map((c) => c[0])).toEqual([
+      '/api/admin/stats/runtimes?environment=staging&workflow_kind=bakta',
+      '/api/admin/stats/inputs?environment=all&from=2026-01-01T00%3A00%3A00Z',
+      '/api/admin/workflows?environment=all&orphans=true',
+      '/api/admin/workflows/bulk',
+    ])
+    expect(JSON.parse(String(fetch.mock.calls[3][1]?.body))).toEqual(request)
+  })
+
   it('keeps the status and message of errors', async () => {
     vi.spyOn(window, 'fetch').mockResolvedValue(
       new Response(JSON.stringify({ error: 'not an admin' }), { status: 403 }),
