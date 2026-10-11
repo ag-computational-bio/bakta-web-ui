@@ -30,6 +30,16 @@
       <option value="circular">circular</option>
       <option value="linear">linear</option>
     </select>
+    <div class="d-flex justify-content-end mt-2">
+      <button
+        class="btn btn-outline-secondary btn-sm"
+        type="button"
+        title="Download the plot as shown, as an SVG file"
+        @click="downloadSvg"
+      >
+        <i class="bi bi-download me-1"></i>Download SVG
+      </button>
+    </div>
     <div class="my-2 w-100 h-100" ref="comp">
       <BaktaCircularPlot
         v-if="data.seq && type == 'circular'"
@@ -164,6 +174,25 @@ onMounted(() => {
 onUnmounted(() => {
   if (resizeObs) resizeObs.disconnect()
 })
+
+// save the plot as it is shown, including colors, zoom and position
+function downloadSvg() {
+  const svg = component.value?.querySelector('svg')
+  if (!svg) return
+  const copy = svg.cloneNode(true) as SVGSVGElement
+  copy.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
+  // the text inherits the page font in the browser, so set it on the file itself
+  copy.setAttribute('style', `font-family: ${getComputedStyle(svg).fontFamily}`)
+  const blob = new Blob([new XMLSerializer().serializeToString(copy)], {
+    type: 'image/svg+xml',
+  })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = `${currentId.value}-${type.value}-plot.svg`
+  link.click()
+  URL.revokeObjectURL(url)
+}
 
 function nextSeq() {
   if (currentPos.value < sequencCount.value) {
