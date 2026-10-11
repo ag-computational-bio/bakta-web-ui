@@ -25,8 +25,9 @@ export function chartPeriods(
   )
   const from = filter.from ?? first
   if (from == undefined) return []
-  const to = filter.to && new Date(filter.to) < now ? new Date(filter.to) : now
-  return periods(new Date(from), to, interval)
+  // the server excludes "to", the periods include their end, so the end is the moment before "to"
+  const end = filter.to ? new Date(Date.parse(filter.to) - 1) : now
+  return periods(new Date(from), end < now ? end : now, interval)
 }
 
 /**

@@ -61,3 +61,18 @@ describe('pointIndexes', () => {
     expect(pointIndexes([null, 5, null, 1, 2, null, undefined, 7], false)).toEqual([1, 7])
   })
 })
+
+describe('chartPeriods with an end', () => {
+  it('does not add a period for the excluded end', () => {
+    const filter = {
+      environment: 'all' as const,
+      from: '2026-01-01T00:00:00Z',
+      to: '2026-02-01T00:00:00Z',
+    }
+    const now = new Date('2026-10-11T00:00:00Z')
+    expect(chartPeriods([], filter, 'month', now).map((p) => p.toISOString())).toEqual([
+      '2026-01-01T00:00:00.000Z',
+    ])
+    expect(chartPeriods([], filter, 'day', now)).toHaveLength(31)
+  })
+})
