@@ -14,6 +14,7 @@
   </div>
   <div class="annotation-table">
     <DataTable
+      ref="dataTable"
       class="table table-striped"
       :columns="columns"
       :data="table"
@@ -30,12 +31,19 @@ import DataTablesCore from 'datatables.net-bs5'
 import 'datatables.net-bs5/css/dataTables.bootstrap5.css'
 import DataTable from 'datatables.net-vue3'
 
-import { computed } from 'vue'
+import { computed, nextTick, ref, unref, watch } from 'vue'
 DataTable.use(DataTablesCore)
 const props = defineProps<{
   data: Result
 }>()
 const type = defineModel<string>('type', { default: '' })
+const dataTable = ref<InstanceType<typeof DataTable>>()
+
+// another feature type starts on the first page, the old page may not exist anymore
+watch(type, async () => {
+  await nextTick()
+  unref(dataTable.value?.dt)?.page(0).draw(false)
+})
 
 const dataTableConfig = {
   scrollY: '70vh',
