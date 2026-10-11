@@ -1,9 +1,9 @@
 <template>
-  <div ref="element" class="modal fade" tabindex="-1" aria-hidden="true">
+  <div ref="element" class="modal fade" tabindex="-1" aria-hidden="true" :aria-labelledby="titleId">
     <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
       <div class="modal-content">
         <div class="modal-header">
-          <h3 class="modal-title section-title mb-0">{{ text.label }} workflows</h3>
+          <h3 :id="titleId" class="modal-title section-title mb-0">{{ text.label }} workflows</h3>
           <button type="button" class="btn-close" aria-label="Close" @click="hide"></button>
         </div>
         <div class="modal-body">
@@ -131,7 +131,7 @@ import Notification from '@/components/Notification.vue'
 import StatusBadge from '@/components/StatusBadge.vue'
 import { formatStatus } from '@/model/status-style'
 import { Modal } from 'bootstrap'
-import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
+import { computed, onMounted, onUnmounted, ref, useId, watch } from 'vue'
 import type { BulkAction, BulkItem } from '../admin-api'
 import { environments } from '../admin-filters'
 import { handleAdminError, useAdminApi } from '../admin-session'
@@ -281,6 +281,8 @@ watch(hours, () => {
   if (scope.value && !results.value) timer = window.setTimeout(load, 400)
 })
 
+// the title names the dialog for screen readers
+const titleId = useId()
 const element = ref<HTMLElement>()
 let modal: Modal | undefined
 let ran = false

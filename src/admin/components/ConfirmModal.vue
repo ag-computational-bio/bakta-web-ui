@@ -1,9 +1,9 @@
 <template>
-  <div ref="element" class="modal fade" tabindex="-1" aria-hidden="true">
+  <div ref="element" class="modal fade" tabindex="-1" aria-hidden="true" :aria-labelledby="titleId">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header">
-          <h3 class="modal-title section-title mb-0">{{ title }}</h3>
+          <h3 :id="titleId" class="modal-title section-title mb-0">{{ title }}</h3>
           <button
             type="button"
             class="btn-close"
@@ -34,7 +34,7 @@
 
 <script setup lang="ts">
 import { Modal } from 'bootstrap'
-import { onMounted, onUnmounted, ref } from 'vue'
+import { onMounted, onUnmounted, ref, useId } from 'vue'
 
 /*
  * A Bootstrap modal that asks before an action. open() resolves with true when
@@ -46,6 +46,8 @@ defineProps<{
   danger?: boolean
 }>()
 
+// the title names the dialog for screen readers
+const titleId = useId()
 const element = ref<HTMLElement>()
 let modal: Modal | undefined
 let resolve: ((confirmed: boolean) => void) | undefined
