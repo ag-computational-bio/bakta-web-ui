@@ -176,6 +176,13 @@
               <div v-if="outcomeText(job)" class="small text-secondary text-nowrap">
                 {{ outcomeText(job) }}
               </div>
+              <div
+                v-if="!job.data_available"
+                class="small text-secondary text-nowrap"
+                :title="`Input data, results and logs were deleted on ${formatDateTime(job.data_expires_at)}`"
+              >
+                <i class="bi bi-archive me-1" aria-hidden="true"></i>Data deleted
+              </div>
             </td>
             <td>
               <StatusBadge
@@ -190,7 +197,7 @@
             <td class="text-end text-nowrap" @click.stop>
               <div v-if="job.status !== 'deleted'" class="d-inline-flex gap-1">
                 <button
-                  v-for="action in workflowActions(job.workflow_phase)"
+                  v-for="action in workflowActions(job.workflow_phase, false, job.data_available)"
                   :key="action"
                   class="btn btn-sm row-action"
                   :class="

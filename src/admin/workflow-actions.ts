@@ -40,14 +40,16 @@ export const actionTexts: Record<WorkflowAction, { title: string; text: string; 
   }
 
 /**
- * The actions for a live workflow phase. Delete is always possible.
+ * The actions for a live workflow phase. Delete is always possible, retry
+ * needs the input data, which is deleted after the retention period.
  */
 export function workflowActions(
   phase: string | null | undefined,
   suspended = false,
+  dataAvailable = true,
 ): WorkflowAction[] {
   const actions: WorkflowAction[] = []
-  if (phase === 'Failed' || phase === 'Error') actions.push('retry')
+  if ((phase === 'Failed' || phase === 'Error') && dataAvailable) actions.push('retry')
   if (suspended) actions.push('resume')
   if (phase === 'Pending' || phase === 'Running') actions.push('stop')
   actions.push('delete')

@@ -88,7 +88,7 @@
                         <span v-if="w.error" class="small text-secondary ms-1">{{ w.error }}</span>
                       </template>
                       <span v-else-if="w.applicable"><i class="bi bi-check-lg"></i> Yes</span>
-                      <span v-else class="small">No, {{ text.reason }}</span>
+                      <span v-else class="small">No, {{ reasonText(w) }}</span>
                     </td>
                   </tr>
                 </tbody>
@@ -132,7 +132,7 @@ import StatusBadge from '@/components/StatusBadge.vue'
 import { formatStatus } from '@/model/status-style'
 import { Modal } from 'bootstrap'
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
-import type { BulkAction } from '../admin-api'
+import type { BulkAction, BulkItem } from '../admin-api'
 import { environments } from '../admin-filters'
 import { handleAdminError, useAdminApi } from '../admin-session'
 import { useBulkPreview, type BulkScope } from '../bulk-preview'
@@ -217,6 +217,12 @@ const { page, pageSize, pageItems } = useClientPages(
 const confirming = ref(false)
 watch([preview, results], () => (confirming.value = false))
 watch(items, () => (page.value = 1))
+
+// the reason of the server, like "Input data deleted after the retention period", reads after "No, "
+function reasonText(w: BulkItem): string {
+  if (!w.reason) return text.value.reason
+  return w.reason.charAt(0).toLowerCase() + w.reason.slice(1)
+}
 
 function count(n: number): string {
   return `${formatCount(n)} ${n === 1 ? 'workflow' : 'workflows'}`
