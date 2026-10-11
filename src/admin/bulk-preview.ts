@@ -67,7 +67,31 @@ export function bulkScope(list: JobListFilters): BulkScope {
 
 type Preview = { request: BulkRequest; items: BulkItem[] }
 
-export function useBulkPreview(api: Pick<AdminApi, 'bulk'>, handleError: (e: unknown) => string) {
+const searchPageSize = 500
+
+/**
+ * The workflow names of the jobs that the search of the job list finds. The job
+ * search matches organism, name and job ID, the workflow filter would only
+ * match workflow names and job IDs, so the bulk action uses these names.
+ */
+async function searchNames(api: Pick<AdminApi, 'jobs'>, s: BulkScope): Promise<string[]> {
+  const names: string[] = []
+  for (let offset = 0; ; offset += searchPageSize) {
+    const page = await api.jobs({
+      environment: s.environment,
+      q: s.q,
+      limit: searchPageSize,
+      offset,
+    })
+    names.push(...page.items.flatMap((j) => (j.workflow_name ? [j.workflow_name] : [])))
+    if (!page.items.length || offset + searchPageSize >= page.total) return names
+  }
+}
+
+export function useBulkPreview(
+  api: Pick<AdminApi, 'bulk' | 'jobs'>,
+  handleError: (e: unknown) => string,
+) {
   const action = ref<BulkAction>('delete')
   const scope = shallowRef<BulkScope>()
   // text, so an empty field means any time
@@ -89,7 +113,6 @@ export function useBulkPreview(api: Pick<AdminApi, 'bulk'>, handleError: (e: unk
     const h = Number(hours.value)
     return {
       filter: {
-        q: s.q,
         phases: s.phases.length ? s.phases : undefined,
         workflow_kinds: s.kinds.length ? s.kinds : undefined,
         finished_before_hours: hours.value === '' || !(h >= 0) ? undefined : h,
@@ -114,6 +137,15 @@ export function useBulkPreview(api: Pick<AdminApi, 'bulk'>, handleError: (e: unk
     }
     busy.value = true
     try {
+      // a search of the job list limits the preview to the workflows of the found jobs
+      if (scope.value?.q) {
+        req.workflow_names = await searchNames(api, scope.value)
+        if (current !== token) return
+        if (!req.workflow_names.length) {
+          preview.value = { request: req, items: [] }
+          return
+        }
+      }
       const result = await api.bulk(req)
       if (current === token) preview.value = { request: req, items: result.items }
     } catch (e) {

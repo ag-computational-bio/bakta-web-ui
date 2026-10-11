@@ -46,7 +46,7 @@ describe('useBulkPreview', () => {
         ? [item('a'), item('b', false)]
         : [{ ...item('a'), result: 'done' as const }],
     }))
-    const p = useBulkPreview({ bulk }, String)
+    const p = useBulkPreview({ bulk, jobs: vi.fn() }, String)
     p.action.value = 'retry'
     p.scope.value = bulkScope({ ...list, statuses: ['failed'] })
     p.hours.value = 24
@@ -72,7 +72,7 @@ describe('useBulkPreview', () => {
     const first = deferred()
     const second = deferred()
     const bulk = vi.fn().mockReturnValueOnce(first.promise).mockReturnValueOnce(second.promise)
-    const p = useBulkPreview({ bulk }, String)
+    const p = useBulkPreview({ bulk, jobs: vi.fn() }, String)
     p.scope.value = bulkScope(list)
     p.action.value = 'delete'
     const a = p.load()
@@ -91,7 +91,7 @@ describe('useBulkPreview', () => {
       dry_run: r.dry_run,
       items: [item('a')],
     }))
-    const p = useBulkPreview({ bulk }, String)
+    const p = useBulkPreview({ bulk, jobs: vi.fn() }, String)
     p.scope.value = bulkScope(list)
     await p.load()
     p.hours.value = 5
@@ -102,7 +102,7 @@ describe('useBulkPreview', () => {
 
   it('does not ask the server when status and phase exclude each other', async () => {
     const bulk = vi.fn()
-    const p = useBulkPreview({ bulk }, String)
+    const p = useBulkPreview({ bulk, jobs: vi.fn() }, String)
     p.scope.value = bulkScope({ ...list, statuses: ['running'], phases: ['Failed'] })
     await p.load()
     expect(bulk).not.toHaveBeenCalled()
@@ -114,7 +114,7 @@ describe('useBulkPreview', () => {
     const bulk = vi.fn(async (r: BulkRequest) =>
       r.dry_run ? { action: r.action, dry_run: true, items: [item('a')] } : real.promise,
     )
-    const p = useBulkPreview({ bulk }, String)
+    const p = useBulkPreview({ bulk, jobs: vi.fn() }, String)
     p.scope.value = bulkScope(list)
     await p.load()
     const first = p.run()
@@ -130,5 +130,35 @@ describe('useBulkPreview', () => {
     await first
     expect(p.running.value).toBe(false)
     expect(p.results.value?.map((w) => w.result)).toEqual(['done'])
+  })
+
+  it('limits the preview to the workflows of the jobs the search finds', async () => {
+    const jobs = vi.fn(async ({ offset = 0 }: { offset?: number }) => ({
+      total: 501,
+      items: offset
+        ? [{ workflow_name: 'w-2' }]
+        : [{ workflow_name: 'w-1' }, { workflow_name: null }],
+    }))
+    const bulk = vi.fn(async (r: BulkRequest) => ({ action: r.action, dry_run: true, items: [] }))
+    const p = useBulkPreview({ bulk, jobs: jobs as never }, String)
+    p.scope.value = bulkScope({ ...list, q: 'coli' })
+    await p.load()
+    expect(jobs).toHaveBeenCalledTimes(2)
+    expect(jobs).toHaveBeenLastCalledWith(
+      expect.objectContaining({ q: 'coli', environment: 'production', offset: 500 }),
+    )
+    const request = bulk.mock.calls[0][0]
+    expect(request.filter).not.toHaveProperty('q')
+    expect(request.workflow_names).toEqual(['w-1', 'w-2'])
+  })
+
+  it('shows an empty preview when the search finds no workflows', async () => {
+    const jobs = vi.fn(async () => ({ total: 0, items: [] }))
+    const bulk = vi.fn()
+    const p = useBulkPreview({ bulk, jobs: jobs as never }, String)
+    p.scope.value = bulkScope({ ...list, q: 'nothing' })
+    await p.load()
+    expect(bulk).not.toHaveBeenCalled()
+    expect(p.preview.value?.items).toEqual([])
   })
 })

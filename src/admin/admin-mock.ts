@@ -432,6 +432,7 @@ class MockAdminApi implements AdminApi {
       .filter((w) => !phases?.length || phases.includes(w.phase as WorkflowPhase))
       .filter((w) => !workflow_kinds?.length || workflow_kinds.includes(w.workflow_kind ?? ''))
       .filter((w) => limit == null || (!!w.finished_at && Date.parse(w.finished_at) < limit))
+      .filter((w) => !request.workflow_names || request.workflow_names.includes(w.name))
   }
 
   async #bulkRun(action: BulkAction, w: WorkflowItem) {
