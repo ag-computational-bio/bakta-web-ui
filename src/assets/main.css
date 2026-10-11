@@ -136,7 +136,11 @@ a {
   --bs-btn-focus-shadow-rgb: 53, 98, 155;
 }
 
-/* Form controls */
+/* Form controls: small controls keep the same corners as normal ones */
+.form-control-sm,
+.form-select-sm {
+  border-radius: var(--bs-border-radius);
+}
 .form-label {
   font-weight: 500;
 }
@@ -203,6 +207,12 @@ a {
   --bs-badge-padding-y: 0.45em;
 }
 
+/* Accordions look like the other bordered boxes */
+.accordion {
+  --bs-accordion-border-radius: var(--bs-border-radius-lg);
+  --bs-accordion-inner-border-radius: calc(var(--bs-border-radius-lg) - 1px);
+}
+
 /* Alerts */
 .alert {
   --bs-alert-border-radius: var(--bs-border-radius-lg);
@@ -224,6 +234,7 @@ a {
 
 /* Pagination (used by the annotation table) */
 .pagination {
+  --bs-pagination-font-size: var(--bakta-font-size-md);
   --bs-pagination-color: var(--bs-link-color);
   --bs-pagination-hover-color: var(--bs-link-hover-color);
   --bs-pagination-focus-color: var(--bs-link-hover-color);

@@ -157,6 +157,10 @@ const table = computed(() => {
 }
 </style>
 <style>
+/* the table controls (page size, search, paging) use the same size as the table text */
+.annotation-table .dt-container {
+  font-size: var(--bakta-font-size-md);
+}
 /* plain row colors instead of the per cell shadow, which shows thin lines between cells */
 .annotation-table table.table.dataTable.table-striped > tbody > tr > * {
   box-shadow: none;
