@@ -1,2 +1,9 @@
 **/node_modules
 Dockerfile
+.git
+.claude
+dist
+storybook-static
+playwright-report
+test-results
+coverage

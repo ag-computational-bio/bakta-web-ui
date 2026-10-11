@@ -1,12 +1,15 @@
 FROM mcr.microsoft.com/playwright:v1.58.2-noble AS builder
 
-COPY . /src
 WORKDIR /src
+# install the dependencies first, so this layer is reused when only the source changes
+COPY package.json package-lock.json ./
 RUN npm ci
+COPY . .
 RUN npx vitest --run
 RUN npm run build
 
-FROM nginx:stable-alpine
+# the slim variant keeps the core modules nginx.conf needs (static files, proxy) and drops the rest
+FROM nginx:stable-alpine-slim
 
 LABEL org.opencontainers.image.authors="lukas.jelonek@computational.bio.uni-giessen.de"
 LABEL org.opencontainers.image.url='https://github.com/ag-computational-bio/bakta-web-ui'
