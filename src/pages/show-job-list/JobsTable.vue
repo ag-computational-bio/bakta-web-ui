@@ -1,5 +1,5 @@
 <template>
-  <div class="table-responsive">
+  <div class="table-responsive jobs-table">
     <table class="table align-middle mb-0">
       <thead>
         <tr>
@@ -101,3 +101,14 @@ function routeName(workflowKind: WorkflowKind | undefined): 'Job' | 'JobBakta' |
   return workflowRouteName(workflowKind)
 }
 </script>
+<style scoped>
+/* the table sits directly in the card, so give the outer columns the card padding */
+.jobs-table th:first-child,
+.jobs-table td:first-child {
+  padding-left: 1.5rem;
+}
+.jobs-table th:last-child,
+.jobs-table td:last-child {
+  padding-right: 1.5rem;
+}
+</style>
