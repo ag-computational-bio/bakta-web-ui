@@ -227,7 +227,7 @@ type ApiBaktaConfig = {
 // {"result":{"podName":"bakta-job-..."}}. The backend passes it through as text.
 const logEndMarker = /^\{"result":\{"podName":"[^"]*"\}\}\n?/gm
 
-function stripLogEndMarkers(content: string): string {
+export function stripLogEndMarkers(content: string): string {
   return content.replace(logEndMarker, '')
 }
 
