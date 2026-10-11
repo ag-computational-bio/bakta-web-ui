@@ -16,7 +16,7 @@
           <div class="fw-semibold">Your job is not finished yet.</div>
           <div class="text-secondary small">
             Status:
-            <StatusBadge :status="displayStatus" />
+            <StatusBadge :status="displayStatus" strong />
           </div>
         </div>
         <button
@@ -67,7 +67,7 @@
                   :class="openLogs.has(stage.stage) ? 'bi-chevron-up' : 'bi-chevron-down'"
                 ></i>
               </button>
-              <StatusBadge :status="stage.status" />
+              <StatusBadge :status="stage.status" strong />
             </div>
             <pre
               v-if="stage.status === 'running' && openLogs.has(stage.stage)"
