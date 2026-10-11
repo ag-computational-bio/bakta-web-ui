@@ -361,6 +361,7 @@ async function load() {
   // archived logs are gone with the data, only a live workflow still has them
   if (!d.job.data_available && !d.workflow) {
     logsDeleted.value = true
+    logs.value = undefined
     return
   }
   api
@@ -368,7 +369,10 @@ async function load() {
     .then((l) => current === request && (logs.value = l))
     .catch((e) => {
       if (current !== request) return
-      if (e instanceof AdminApiError && e.status === 410) logsDeleted.value = true
+      if (e instanceof AdminApiError && e.status === 410) {
+        logsDeleted.value = true
+        logs.value = undefined
+      }
       else logsError.value = handleAdminError(e)
     })
 }
