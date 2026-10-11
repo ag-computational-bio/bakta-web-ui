@@ -156,6 +156,8 @@ const summary = ref<StatsSummary>()
 const previous = ref<StatsSummary>()
 // the active jobs right now, with the creation time of the oldest
 const active = ref<{ total: number; oldest?: string }>()
+// the jobs that are failed now, the same jobs the link to the job list shows
+const failedNow = ref(0)
 const orphans = ref(0)
 const grouped = ref<Timeseries>()
 const overall = ref<Timeseries>()
@@ -209,8 +211,7 @@ const longActiveSeconds = 2 * 3600
 
 const attention = computed(() => {
   const items: { text: string; icon: string; to: RouteLocationRaw }[] = []
-  const s = summary.value
-  const failed = s ? s.jobs_failed + s.jobs_error : 0
+  const failed = failedNow.value
   if (failed) {
     items.push({
       text: `${formatCount(failed)} failed ${failed === 1 ? 'job' : 'jobs'} in this range`,
@@ -261,10 +262,11 @@ async function load() {
   try {
     const before = previousFilter(filter)
     const environment = filters.environment
-    const [s, p, a, o, chart, v] = await Promise.all([
+    const [s, p, a, f, o, chart, v] = await Promise.all([
       api.summary(filter),
       before ? api.summary(before) : undefined,
       api.jobs({ environment, status: ['submitted', 'running'], sort: '-created_at', limit: 1 }),
+      api.jobs({ ...filter, environment, status: ['failed', 'error'], limit: 1 }),
       api.workflows({ environment, orphans: true }),
       loadChart(
         (i) =>
@@ -281,6 +283,7 @@ async function load() {
     summary.value = s
     previous.value = p
     active.value = { total: a.total, oldest: a.items[0]?.created_at }
+    failedNow.value = f.total
     orphans.value = o.length
     interval.value = chart.interval
     ;[grouped.value, overall.value] = chart.data
