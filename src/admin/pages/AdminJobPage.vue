@@ -120,7 +120,7 @@
                 <td>{{ node.display_name }}</td>
                 <td>{{ node.type }}</td>
                 <td><StatusBadge :status="phaseStatus(node.phase)" /></td>
-                <td class="small">{{ node.pod_name ?? '-' }}</td>
+                <td class="small text-nowrap">{{ node.pod_name ?? '-' }}</td>
                 <td class="text-nowrap">{{ formatDateTime(node.started_at) }}</td>
                 <td class="text-end text-nowrap">
                   {{ formatDuration(seconds(node.started_at, node.finished_at)) }}
