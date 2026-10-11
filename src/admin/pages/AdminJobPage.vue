@@ -31,6 +31,14 @@
           <i class="bi bi-arrow-repeat me-1"></i>Retry
         </button>
         <button
+          v-if="workflow?.suspended"
+          class="btn btn-outline-secondary btn-sm"
+          :disabled="busy"
+          @click="runAction('resume')"
+        >
+          <i class="bi bi-play-circle me-1"></i>Resume
+        </button>
+        <button
           class="btn btn-outline-secondary btn-sm"
           :disabled="busy || job.status === 'deleted'"
           @click="runAction('resubmit')"
@@ -89,6 +97,9 @@
         <div class="d-flex flex-wrap align-items-center gap-3 mb-3">
           <span>{{ workflow.name }}</span>
           <StatusBadge :status="phaseStatus(workflow.phase)" />
+          <span v-if="workflow.suspended" class="badge bg-info-subtle text-info-emphasis fw-medium">
+            <i class="bi bi-pause-circle me-1"></i>Suspended
+          </span>
           <span v-if="workflow.message" class="text-secondary">{{ workflow.message }}</span>
         </div>
         <div class="table-responsive">
@@ -172,7 +183,7 @@ import {
 } from '../format'
 import { useClientPages } from '../pagination'
 
-type Action = 'retry' | 'resubmit' | 'stop'
+type Action = 'retry' | 'resubmit' | 'stop' | 'resume'
 
 const api = useAdminApi()
 const route = useRoute()
@@ -293,6 +304,11 @@ const actionTexts: Record<Action, { title: string; text: string; danger: boolean
   resubmit: {
     title: 'Resubmit the job?',
     text: 'Argo starts a new workflow with the same parameters. The job then points to the new workflow.',
+    danger: false,
+  },
+  resume: {
+    title: 'Resume the workflow?',
+    text: 'Argo continues the suspended workflow.',
     danger: false,
   },
   stop: {
