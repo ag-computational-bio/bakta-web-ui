@@ -62,14 +62,12 @@ describe('mock admin api', () => {
     const preview = await api.bulk({ filter, action: 'retry', dry_run: true })
     expect(preview.items.length).toBeGreaterThan(0)
     const names = preview.items.filter((w) => w.applicable).map((w) => w.name)
-    const orphans = preview.items.filter((w) => !w.job_id)
-    expect(orphans.length).toBeGreaterThan(0)
+    expect(preview.items.some((w) => !w.job_id)).toBe(true)
     const run = await api.bulk({ filter, action: 'retry', dry_run: false, workflow_names: names })
     expect(run.items.map((w) => w.name)).toEqual(names)
-    const done = run.items.filter((w) => w.result === 'done').length
-    expect(done).toBe(names.length - orphans.length)
+    expect(run.items.every((w) => w.result === 'done')).toBe(true)
     const after = await api.bulk({ filter, action: 'retry', dry_run: true })
-    expect(after.items.length).toBe(orphans.length)
+    expect(after.items).toEqual([])
   })
 
   it('lists workflows without a job record', async () => {

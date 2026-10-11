@@ -118,6 +118,7 @@
   </div>
 
   <OrphanWorkflows ref="orphans" />
+  <BulkActionsPanel @done="reloadAll" />
 
   <ConfirmModal ref="confirmModal" v-bind="modal">
     <p class="mb-0">{{ modal.text }}</p>
@@ -144,6 +145,7 @@ import {
 import { filters, statsFilter } from '../admin-filters'
 import { handleAdminError, useAdminApi } from '../admin-session'
 import AdminFilterBar from '../components/AdminFilterBar.vue'
+import BulkActionsPanel from '../components/BulkActionsPanel.vue'
 import ChipGroup from '../components/ChipGroup.vue'
 import ConfirmModal from '../components/ConfirmModal.vue'
 import ListPagination from '../components/ListPagination.vue'
@@ -253,6 +255,13 @@ async function load() {
   } finally {
     if (current === request) loading.value = false
   }
+}
+
+const orphans = ref<InstanceType<typeof OrphanWorkflows>>()
+
+function reloadAll() {
+  load()
+  orphans.value?.load()
 }
 
 async function runAction(job: JobListItem, action: WorkflowAction) {

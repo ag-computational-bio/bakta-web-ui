@@ -398,8 +398,17 @@ class MockAdminApi implements AdminApi {
 
   async #bulkRun(action: BulkAction, w: WorkflowItem) {
     if (!w.job_id) {
-      if (action !== 'delete') throw new AdminApiError(409, 'the workflow has no job record')
-      this.#orphans.delete(w.name)
+      // Argo acts on the workflow alone, there is no job record to update
+      const orphan = this.#orphans.get(w.name)
+      if (!orphan) throw new AdminApiError(404, 'workflow not found')
+      if (action === 'delete') this.#orphans.delete(w.name)
+      else if (action === 'stop') orphan.phase = 'Failed'
+      else if (action === 'resume') orphan.suspended = false
+      else
+        Object.assign(orphan, {
+          phase: action === 'retry' ? 'Running' : 'Pending',
+          finished_at: null,
+        })
       return
     }
     if (action === 'delete') this.#workflows.delete(w.job_id)
