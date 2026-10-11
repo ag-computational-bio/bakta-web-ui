@@ -50,3 +50,13 @@ export function bucketValues(
   }
   return values
 }
+
+/**
+ * The indexes that get a point in a line chart. With few periods every value
+ * gets one, with many only the values without a neighbour, which the line
+ * cannot show.
+ */
+export function pointIndexes(values: (number | null | undefined)[], every: boolean): number[] {
+  const has = (i: number) => values[i] != null
+  return values.map((_, i) => i).filter((i) => has(i) && (every || (!has(i - 1) && !has(i + 1))))
+}

@@ -37,6 +37,7 @@
 import * as d3 from 'd3'
 import { onMounted, onUnmounted, ref, watch } from 'vue'
 import type { ChartSeries } from '../chart-colors'
+import { pointIndexes } from '../chart-data'
 
 /*
  * A small chart over periods or buckets: stacked bars for counts, lines for
@@ -193,16 +194,16 @@ function draw() {
           .style('stroke', s.color)
           .attr('d', line(d3.range(n)))
       }
-      if (n <= 40 || props.kind === 'dots') {
-        g.selectAll(null)
-          .data(d3.range(n).filter((i) => valueAt(s.key, i) != null))
-          .join('circle')
-          .attr('class', 'point')
-          .attr('r', 4)
-          .attr('cx', (i) => (x(i) ?? 0) + x.bandwidth() / 2)
-          .attr('cy', (i) => y(valueAt(s.key, i) ?? 0))
-          .style('fill', s.color)
-      }
+      // isolated values are not part of a line, they always get a point
+      const values = d3.range(n).map((i) => valueAt(s.key, i))
+      g.selectAll(null)
+        .data(pointIndexes(values, n <= 40 || props.kind === 'dots'))
+        .join('circle')
+        .attr('class', 'point')
+        .attr('r', 4)
+        .attr('cx', (i) => (x(i) ?? 0) + x.bandwidth() / 2)
+        .attr('cy', (i) => y(valueAt(s.key, i) ?? 0))
+        .style('fill', s.color)
     }
   }
 

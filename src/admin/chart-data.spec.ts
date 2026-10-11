@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { Bucket } from './admin-api'
-import { bucketValues, chartPeriods } from './chart-data'
+import { bucketValues, chartPeriods, pointIndexes } from './chart-data'
 
 function bucket(start: string, group: string | null, total: number, p50?: number): Bucket {
   return {
@@ -49,5 +49,15 @@ describe('bucketValues', () => {
 
   it('leaves missing durations empty', () => {
     expect(bucketValues(buckets, list, 'runtime_p50').bakta).toEqual([400, null, 300])
+  })
+})
+
+describe('pointIndexes', () => {
+  it('gives every value a point with few periods', () => {
+    expect(pointIndexes([1, null, 2, 3], true)).toEqual([0, 2, 3])
+  })
+
+  it('keeps the isolated values visible with many periods', () => {
+    expect(pointIndexes([null, 5, null, 1, 2, null, undefined, 7], false)).toEqual([1, 7])
   })
 })
