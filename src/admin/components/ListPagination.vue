@@ -12,7 +12,12 @@
     <nav v-if="pages > 1" class="ms-auto" :aria-label="`${label} pages`">
       <ul class="pagination pagination-sm flex-wrap mb-0">
         <li class="page-item" :class="{ disabled: page === 1 }">
-          <button class="page-link" aria-label="Previous page" @click="page--">
+          <button
+            class="page-link"
+            aria-label="Previous page"
+            :disabled="page <= 1"
+            @click="go(page - 1)"
+          >
             <i class="bi bi-chevron-left"></i>
           </button>
         </li>
@@ -22,10 +27,15 @@
           class="page-item"
           :class="{ active: p === page, disabled: p === 0 }"
         >
-          <button class="page-link" @click="p && (page = p)">{{ p || '...' }}</button>
+          <button class="page-link" :disabled="p === 0" @click="go(p)">{{ p || '...' }}</button>
         </li>
         <li class="page-item" :class="{ disabled: page === pages }">
-          <button class="page-link" aria-label="Next page" @click="page++">
+          <button
+            class="page-link"
+            aria-label="Next page"
+            :disabled="page >= pages"
+            @click="go(page + 1)"
+          >
             <i class="bi bi-chevron-right"></i>
           </button>
         </li>
@@ -52,6 +62,11 @@ const pageSize = defineModel<number>('pageSize', { required: true })
 
 const pages = computed(() => pageCount(props.total, pageSize.value))
 const buttons = computed(() => pageButtons(page.value, pages.value))
+
+// a page between the first and the last one, also when a click comes from the keyboard
+function go(p: number) {
+  if (p >= 1) page.value = Math.min(p, pages.value)
+}
 const countText = computed(() => {
   const first = (page.value - 1) * pageSize.value + 1
   const last = Math.min(props.total, page.value * pageSize.value)
