@@ -459,7 +459,10 @@ const activeFilters = computed(() => [
 
 const filterToggle = ref<HTMLElement>()
 function closeFilters() {
-  if (filterToggle.value) Dropdown.getOrCreateInstance(filterToggle.value).hide()
+  if (!filterToggle.value) return
+  Dropdown.getOrCreateInstance(filterToggle.value).hide()
+  // the focused button is gone with the menu, so the toggle takes the focus
+  filterToggle.value.focus()
 }
 
 function resetFilters() {
