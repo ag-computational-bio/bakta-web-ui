@@ -66,3 +66,27 @@ describe('http admin api', () => {
     expect(error.message).toBe('not an admin')
   })
 })
+
+describe('http admin api after a 401', () => {
+  it('renews the token and tries once more', async () => {
+    const fetch = vi
+      .spyOn(window, 'fetch')
+      .mockResolvedValueOnce(new Response('{"error":"expired"}', { status: 401 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ username: 'admin' })))
+    const token = vi.fn(async (renew?: boolean) => (renew ? 'new' : 'old'))
+    const api = createHttpAdminApi('/api/admin', token)
+    await api.me().catch(() => {})
+    expect(fetch).toHaveBeenCalledTimes(2)
+    const headers = fetch.mock.calls[1][1]?.headers as Record<string, string>
+    expect(headers.Authorization).toBe('Bearer new')
+  })
+
+  it('gives up when the renewal brings no new token', async () => {
+    const fetch = vi
+      .spyOn(window, 'fetch')
+      .mockImplementation(async () => new Response('{"error":"expired"}', { status: 401 }))
+    const api = createHttpAdminApi('/api/admin', async () => 'same')
+    await expect(api.me()).rejects.toMatchObject({ status: 401 })
+    expect(fetch).toHaveBeenCalledTimes(1)
+  })
+})

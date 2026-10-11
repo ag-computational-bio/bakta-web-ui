@@ -473,15 +473,16 @@ export function toWorkflowLogs(payload: unknown): WorkflowLogs {
 
 class HttpAdminApi implements AdminApi {
   #baseUrl: string
-  #token: () => Promise<string | undefined>
+  #token: (renew?: boolean) => Promise<string | undefined>
 
-  constructor(baseUrl: string, token: () => Promise<string | undefined>) {
+  constructor(baseUrl: string, token: (renew?: boolean) => Promise<string | undefined>) {
     this.#baseUrl = baseUrl
     this.#token = token
   }
 
-  async #request(method: string, path: string, body?: unknown): Promise<unknown> {
-    const token = await this.#token()
+  // "renewed" is the token of the second try after a 401 answer
+  async #request(method: string, path: string, body?: unknown, renewed?: string): Promise<unknown> {
+    const token = renewed ?? (await this.#token())
     const headers: Record<string, string> = { Accept: 'application/json' }
     if (token) headers.Authorization = `Bearer ${token}`
     if (body != undefined) headers['Content-Type'] = 'application/json'
@@ -498,6 +499,11 @@ class HttpAdminApi implements AdminApi {
       payload = text
     }
     if (response.ok) return payload
+    // the token may have expired on the way: renew it and try once more
+    if (response.status === 401 && renewed == undefined) {
+      const fresh = await this.#token(true)
+      if (fresh && fresh !== token) return this.#request(method, path, body, fresh)
+    }
     const message =
       payload && typeof payload === 'object' && 'error' in payload
         ? String(payload.error)
@@ -605,7 +611,7 @@ class HttpAdminApi implements AdminApi {
 
 export function createHttpAdminApi(
   baseUrl: string,
-  token: () => Promise<string | undefined>,
+  token: (renew?: boolean) => Promise<string | undefined>,
 ): AdminApi {
   return new HttpAdminApi(baseUrl, token)
 }

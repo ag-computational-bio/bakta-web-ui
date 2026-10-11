@@ -70,7 +70,7 @@ async function start(): Promise<void> {
       session.status = 'signed-out'
       return
     }
-    api = createHttpAdminApi(config.api, () => oidc.accessToken())
+    api = createHttpAdminApi(config.api, (renew) => oidc.accessToken(renew))
   }
   try {
     session.user = await api.me()

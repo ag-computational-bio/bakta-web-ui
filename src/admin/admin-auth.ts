@@ -8,7 +8,8 @@ import { UserManager, WebStorageStateStore, type User } from 'oidc-client-ts'
 export type AdminAuth = {
   /** The current user, renewed with the refresh token when the access token expired. */
   user(): Promise<User | null>
-  accessToken(): Promise<string | undefined>
+  /** The access token, renewed first when `renew` is set, for example after a 401 answer. */
+  accessToken(renew?: boolean): Promise<string | undefined>
   signIn(returnTo: string): Promise<void>
   completeSignIn(): Promise<string>
   signOut(): Promise<void>
@@ -28,17 +29,29 @@ export function createAdminAuth(authority: string, clientId: string): AdminAuth 
     userStore: new WebStorageStateStore({ store: window.sessionStorage }),
   })
 
+  // one renewal at a time: with rotating refresh tokens a second parallel
+  // renewal would use an old refresh token and fail
+  let renewing: Promise<User | null> | undefined
+  function renew(): Promise<User | null> {
+    renewing ??= manager
+      .signinSilent()
+      .catch(() => null)
+      .finally(() => (renewing = undefined))
+    return renewing
+  }
+
   async function user(): Promise<User | null> {
+    if (renewing) return renewing
     const current = await manager.getUser()
     if (current == null || !current.expired) return current
     // the access token expired: try the refresh token before asking for a new login
-    return manager.signinSilent().catch(() => null)
+    return renew()
   }
 
   return {
     user,
-    async accessToken() {
-      return (await user())?.access_token
+    async accessToken(force = false) {
+      return (await (force ? renew() : user()))?.access_token
     },
     signIn(returnTo: string) {
       return manager.signinRedirect({ state: { returnTo } })
