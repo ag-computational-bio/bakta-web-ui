@@ -17,7 +17,6 @@
         </option>
       </select>
       <span v-if="loading" class="spinner-border spinner-border-sm text-secondary ms-1"></span>
-      <span class="ms-auto small text-secondary">{{ countText }}</span>
     </div>
     <div class="d-flex flex-column gap-2 mb-3">
       <ChipGroup v-model="statuses" :options="statusOptions" label="Status" />
@@ -71,24 +70,7 @@
       </table>
     </div>
 
-    <nav v-if="pages > 1" class="d-flex justify-content-end mt-3" aria-label="Job pages">
-      <ul class="pagination pagination-sm mb-0">
-        <li class="page-item" :class="{ disabled: page === 1 }">
-          <button class="page-link" @click="page--">Previous</button>
-        </li>
-        <li
-          v-for="p in pageButtons"
-          :key="p"
-          class="page-item"
-          :class="{ active: p === page, disabled: p === 0 }"
-        >
-          <button class="page-link" @click="p && (page = p)">{{ p || '...' }}</button>
-        </li>
-        <li class="page-item" :class="{ disabled: page === pages }">
-          <button class="page-link" @click="page++">Next</button>
-        </li>
-      </ul>
-    </nav>
+    <ListPagination v-model:page="page" v-model:page-size="pageSize" :total="total" label="jobs" />
   </div>
 </template>
 
@@ -98,7 +80,7 @@ import Shield from '@/components/Shield.vue'
 import StatusBadge from '@/components/StatusBadge.vue'
 import { formatWorkflowKind, workflowShieldProps, WorkflowKinds } from '@/model/job'
 import { formatStatus } from '@/model/status-style'
-import { computed, ref, watch } from 'vue'
+import { ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import {
   AdminJobStatuses,
@@ -111,9 +93,10 @@ import { filters, statsFilter } from '../admin-filters'
 import { handleAdminError, useAdminApi } from '../admin-session'
 import AdminFilterBar from '../components/AdminFilterBar.vue'
 import ChipGroup from '../components/ChipGroup.vue'
+import ListPagination from '../components/ListPagination.vue'
 import { formatBp, formatCount, formatDateTime, formatDuration } from '../format'
+import { pageSizes } from '../pagination'
 
-const pageSize = 50
 const sortOptions: { value: JobSort; label: string }[] = [
   { value: 'created_at', label: 'Newest first' },
   { value: '-created_at', label: 'Oldest first' },
@@ -142,28 +125,12 @@ const statuses = ref(
 )
 const kinds = ref(queryList(route.query.kind))
 const page = ref(Math.max(1, Number(route.query.page) || 1))
+const pageSize = ref<number>(pageSizes.find((n) => n === Number(route.query.size)) ?? 50)
 
 const jobs = ref<JobListItem[]>([])
 const total = ref(0)
 const loading = ref(false)
 const error = ref<string>()
-
-const pages = computed(() => Math.max(1, Math.ceil(total.value / pageSize)))
-const countText = computed(() => {
-  if (total.value === 0) return ''
-  const first = (page.value - 1) * pageSize + 1
-  const last = Math.min(total.value, page.value * pageSize)
-  return `${formatCount(first)} to ${formatCount(last)} of ${formatCount(total.value)} jobs`
-})
-// first, last and the pages around the current one, 0 stands for a gap
-const pageButtons = computed(() => {
-  const list: number[] = []
-  for (let p = 1; p <= pages.value; p++) {
-    if (p === 1 || p === pages.value || Math.abs(p - page.value) <= 2) list.push(p)
-    else if (list[list.length - 1] !== 0) list.push(0)
-  }
-  return list
-})
 
 function detailLink(id: string) {
   return { name: 'AdminJob', params: { id } }
@@ -185,6 +152,7 @@ async function load() {
       status: statuses.value.join(',') || undefined,
       kind: kinds.value.join(',') || undefined,
       page: page.value > 1 ? page.value : undefined,
+      size: pageSize.value === 50 ? undefined : pageSize.value,
     },
   })
   try {
@@ -194,8 +162,8 @@ async function load() {
       status: statuses.value,
       workflowKind: kinds.value,
       sort: sort.value,
-      limit: pageSize,
-      offset: (page.value - 1) * pageSize,
+      limit: pageSize.value,
+      offset: (page.value - 1) * pageSize.value,
     })
     if (current !== request) return
     jobs.value = result.items
@@ -213,7 +181,9 @@ watch(search, () => {
   window.clearTimeout(searchTimer)
   searchTimer = window.setTimeout(() => (page.value === 1 ? load() : (page.value = 1)), 300)
 })
-watch([filters, sort, statuses, kinds], () => (page.value === 1 ? load() : (page.value = 1)))
+watch([filters, sort, statuses, kinds, pageSize], () =>
+  page.value === 1 ? load() : (page.value = 1),
+)
 watch(page, load)
 load()
 </script>
