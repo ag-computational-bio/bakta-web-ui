@@ -25,7 +25,8 @@ export function createAdminAuth(authority: string, clientId: string): AdminAuth 
     post_logout_redirect_uri: `${origin}/admin/`,
     response_type: 'code',
     scope: 'openid profile email',
-    automaticSilentRenew: true,
+    // the renewal below runs automatic and manual renewals through one guard
+    automaticSilentRenew: false,
     userStore: new WebStorageStateStore({ store: window.sessionStorage }),
   })
 
@@ -39,6 +40,8 @@ export function createAdminAuth(authority: string, clientId: string): AdminAuth 
       .finally(() => (renewing = undefined))
     return renewing
   }
+  // renew shortly before the access token expires, like automaticSilentRenew
+  manager.events.addAccessTokenExpiring(() => void renew())
 
   async function user(): Promise<User | null> {
     if (renewing) return renewing
