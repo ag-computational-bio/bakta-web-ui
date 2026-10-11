@@ -168,9 +168,9 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="job in jobs" :key="job.id" @click="open(job.id)">
+          <tr v-for="job in jobs" :key="job.id">
             <td>
-              <RouterLink :to="detailLink(job.id)" :title="job.id" @click.stop>
+              <RouterLink :to="detailLink(job.id)" :title="job.id">
                 {{ job.id.slice(0, 8) }}
               </RouterLink>
             </td>
@@ -212,23 +212,15 @@
             </td>
             <td class="text-nowrap">{{ formatDateTime(job.created_at) }}</td>
             <td class="text-end text-nowrap">{{ formatDuration(job.runtime_seconds) }}</td>
-            <td class="text-end text-nowrap" @click.stop>
-              <div v-if="job.status !== 'deleted'" class="d-inline-flex gap-1">
-                <button
-                  v-for="action in workflowActions(job.workflow_phase, false, job.data_available)"
-                  :key="action"
-                  class="btn btn-sm row-action"
-                  :class="
-                    actionTexts[action].danger ? 'btn-outline-danger' : 'btn-outline-secondary'
-                  "
-                  :title="actionLabels[action]"
-                  :aria-label="`${actionLabels[action]} job ${job.id.slice(0, 8)}`"
-                  :disabled="busy"
-                  @click="runAction(job, action)"
-                >
-                  <i class="bi" :class="actionIcons[action]"></i>
-                </button>
-              </div>
+            <td class="text-end text-nowrap">
+              <JobRowActions
+                v-if="job.status !== 'deleted'"
+                :id="job.id"
+                :phase="job.workflow_phase"
+                :data-available="job.data_available"
+                :busy="busy"
+                @run="runAction(job, $event)"
+              />
             </td>
           </tr>
           <tr v-if="!loading && jobs.length === 0">
@@ -277,6 +269,7 @@ import AdminSelect from '../components/AdminSelect.vue'
 import BulkActionModal from '../components/BulkActionModal.vue'
 import ConfirmModal from '../components/ConfirmModal.vue'
 import ListPagination from '../components/ListPagination.vue'
+import JobRowActions from '../components/JobRowActions.vue'
 import OrphanWorkflows from '../components/OrphanWorkflows.vue'
 import {
   argoNote,
@@ -288,13 +281,7 @@ import {
   outcomeText,
 } from '../format'
 import { clampPage, pageSizes } from '../pagination'
-import {
-  actionIcons,
-  actionLabels,
-  actionTexts,
-  workflowActions,
-  type WorkflowAction,
-} from '../workflow-actions'
+import { actionLabels, actionTexts, jobActionTitle, type WorkflowAction } from '../workflow-actions'
 
 const sortOptions: { value: JobSort; label: string }[] = [
   { value: 'created_at', label: 'Newest first' },
@@ -351,10 +338,6 @@ const modal = ref({ title: '', text: '', confirmLabel: '', danger: false })
 
 function detailLink(id: string) {
   return { name: 'AdminJob', params: { id } }
-}
-
-function open(id: string) {
-  router.push(detailLink(id))
 }
 
 let request = 0
@@ -460,7 +443,11 @@ function reloadAll() {
 
 async function runAction(job: JobListItem, action: WorkflowAction) {
   const label = actionLabels[action]
-  modal.value = { ...actionTexts[action], confirmLabel: label }
+  modal.value = {
+    ...actionTexts[action],
+    title: jobActionTitle(label, job.id, job.organism),
+    confirmLabel: label,
+  }
   if (!(await confirmModal.value?.open())) return
   busy.value = true
   error.value = undefined
@@ -517,12 +504,5 @@ load()
   padding: 0.125rem 0.375rem 0.125rem 0.625rem;
   gap: 0.25rem;
   font-size: var(--bakta-font-size-sm);
-}
-.row-action {
-  --bs-btn-padding-x: 0.375rem;
-  --bs-btn-padding-y: 0.125rem;
-}
-.jobs tbody tr {
-  cursor: pointer;
 }
 </style>

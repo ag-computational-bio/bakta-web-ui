@@ -220,6 +220,7 @@ import {
   phaseStatus,
 } from '../format'
 import { useClientPages } from '../pagination'
+import { jobActionTitle } from '../workflow-actions'
 
 type Action = 'retry' | 'resubmit' | 'stop' | 'resume'
 
@@ -248,6 +249,9 @@ const {
   pageItems: nodePage,
 } = useClientPages(computed(() => workflow.value?.nodes ?? []))
 const options = computed(() => configEntries(job.value.config ?? {}))
+const organism = computed(() =>
+  [job.value.genus, job.value.species, job.value.strain].filter(Boolean).join(' '),
+)
 
 // back to the list with its last search and filters
 const listLink = computed(() => ({
@@ -416,7 +420,14 @@ async function runAction(action: Action) {
   const texts = actionTexts[action]
   const label = action.charAt(0).toUpperCase() + action.slice(1)
   const jobId = job.value.id
-  if (!(await confirm({ ...texts, confirmLabel: label }))) return
+  if (
+    !(await confirm({
+      ...texts,
+      title: jobActionTitle(label, jobId, organism.value),
+      confirmLabel: label,
+    }))
+  )
+    return
   await perform(jobId, async () => {
     const r = await api[action](jobId)
     return `${label}: workflow ${r.workflow_name} is now ${r.phase.toLowerCase()}.`
@@ -427,7 +438,7 @@ async function runDelete() {
   const jobId = job.value.id
   purgeData.value = false
   const confirmed = await confirm({
-    title: 'Delete the job?',
+    title: jobActionTitle('Delete', jobId, organism.value),
     text: 'The Argo workflow and its pods are deleted and the job is marked as deleted. The statistics keep the job record.',
     confirmLabel: 'Delete',
     danger: true,

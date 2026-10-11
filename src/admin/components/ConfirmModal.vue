@@ -21,7 +21,7 @@
           <button
             type="button"
             class="btn"
-            :class="danger ? 'btn-outline-danger' : 'btn-primary'"
+            :class="danger ? 'btn-danger' : 'btn-primary'"
             @click="close(true)"
           >
             {{ confirmLabel }}

@@ -55,3 +55,11 @@ export function workflowActions(
   actions.push('delete')
   return actions
 }
+
+/**
+ * The title of a confirmation that names the job, like
+ * "Stop job e675834b (Escherichia coli K-12)?".
+ */
+export function jobActionTitle(label: string, id: string, organism?: string | null): string {
+  return `${label} job ${id.slice(0, 8)}${organism ? ` (${organism})` : ''}?`
+}
