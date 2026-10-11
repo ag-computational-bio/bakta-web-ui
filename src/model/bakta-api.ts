@@ -223,6 +223,14 @@ type ApiBaktaConfig = {
   skip_plot: boolean
 }
 
+// Argo ends every log stream with a line that only names the pod, like
+// {"result":{"podName":"bakta-job-..."}}. The backend passes it through as text.
+const logEndMarker = /^\{"result":\{"podName":"[^"]*"\}\}\n?/gm
+
+function stripLogEndMarkers(content: string): string {
+  return content.replace(logEndMarker, '')
+}
+
 class BaktaApiImpl implements BaktaApi {
   baseUrl: string
 
@@ -451,7 +459,10 @@ class BaktaApiImpl implements BaktaApi {
 
     return WorkflowLogsSchema.parse({
       workflowKind: payload.workflow_kind,
-      stages: payload.stages,
+      stages: payload.stages.map((stage) => ({
+        ...stage,
+        content: stripLogEndMarkers(stage.content),
+      })),
     })
   }
 
