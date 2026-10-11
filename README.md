@@ -32,6 +32,27 @@ The app reads the backend URL at startup from `config/config.json`, so one build
 
 For local development, `public/config/config.json` points to the staging backend.
 
+### Admin area
+
+The hidden admin area under `/admin` shows job statistics, the job list with details, and the Argo workflows with actions like retry, stop, delete and cleanup. It is not linked in the navigation. Admins sign in with Keycloak (Authorization Code flow with PKCE, public client `bakta-admin`), and the backend checks for the admin group. The API contract is `docs/admin-api.md` in the backend repository.
+
+The optional `admin` key configures it:
+
+```json
+{
+  "api": "https://api.bakta.computational.bio/api/v2",
+  "admin": {
+    "oidcAuthority": "https://auth.bakta.computational.bio/realms/bakta",
+    "clientId": "bakta-admin"
+  }
+}
+```
+
+- `oidcAuthority`: the Keycloak realm issuer. Without it, the admin area shows that it is not configured.
+- `clientId`: the Keycloak client, `bakta-admin` by default.
+- `api`: the admin API URL. By default the version at the end of `api` is replaced, so `.../api/v2` becomes `.../api/admin`.
+- `mock`: set `"mock": true` to use fake data generated in the browser and to skip the login. Use it only for development and previews, never in a deployed config.
+
 ## Development
 
 ```sh
