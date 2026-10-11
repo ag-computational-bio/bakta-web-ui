@@ -223,7 +223,7 @@ const attention = computed(() => {
   if (a?.oldest && (Date.now() - Date.parse(a.oldest)) / 1000 > longActiveSeconds) {
     const age = formatDuration((Date.now() - Date.parse(a.oldest)) / 1000)
     items.push({
-      text: `${formatCount(a.total)} active ${a.total === 1 ? 'job' : 'jobs'}, the oldest for ${age}`,
+      text: `${formatCount(a.total)} active ${a.total === 1 ? 'job' : 'jobs'}, the oldest was created ${age} ago`,
       icon: 'bi-hourglass-split text-warning-emphasis',
       to: {
         path: '/admin/jobs',
