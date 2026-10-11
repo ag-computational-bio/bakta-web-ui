@@ -1,0 +1,157 @@
+import { computed, ref, shallowRef, watch } from 'vue'
+import type {
+  AdminApi,
+  AdminJobStatus,
+  BulkAction,
+  BulkItem,
+  BulkRequest,
+  Environment,
+  WorkflowPhase,
+} from './admin-api'
+
+/*
+ * A bulk action on the live workflows that match the filters of the job list.
+ * The real run only processes the workflows of the preview that is shown, with
+ * the action and the filters of that preview.
+ */
+
+// job statuses with a workflow phase of the same meaning
+const statusPhases: Partial<Record<AdminJobStatus, WorkflowPhase>> = {
+  running: 'Running',
+  succeeded: 'Succeeded',
+  failed: 'Failed',
+  error: 'Error',
+}
+
+/** The filters of the job list that a bulk action takes over. */
+export type JobListFilters = {
+  q: string
+  environment: Environment
+  kinds: string[]
+  statuses: AdminJobStatus[]
+  phases: WorkflowPhase[]
+}
+
+/** The workflow filter for the job list filters. */
+export type BulkScope = {
+  q?: string
+  environment: Environment
+  kinds: string[]
+  phases: WorkflowPhase[]
+  // job statuses without a matching workflow phase, they are not used
+  unusedStatuses: AdminJobStatus[]
+  // the status and the phase filters exclude each other, so nothing can match
+  empty: boolean
+}
+
+/**
+ * Maps the job list filters onto a workflow filter. Statuses with a clear
+ * workflow phase become phases, the other statuses are listed as not used.
+ */
+export function bulkScope(list: JobListFilters): BulkScope {
+  const mapped = list.statuses.flatMap((s) => statusPhases[s] ?? [])
+  const unusedStatuses = list.statuses.filter((s) => !statusPhases[s])
+  let phases = list.phases
+  if (mapped.length) {
+    phases = phases.length ? phases.filter((p) => mapped.includes(p)) : mapped
+  }
+  return {
+    q: list.q.trim() || undefined,
+    environment: list.environment,
+    kinds: list.kinds,
+    phases,
+    unusedStatuses,
+    empty: mapped.length > 0 && list.phases.length > 0 && phases.length === 0,
+  }
+}
+
+type Preview = { request: BulkRequest; items: BulkItem[] }
+
+export function useBulkPreview(api: Pick<AdminApi, 'bulk'>, handleError: (e: unknown) => string) {
+  const action = ref<BulkAction>('delete')
+  const scope = shallowRef<BulkScope>()
+  // text, so an empty field means any time
+  const hours = ref<number | string>('')
+  const preview = shallowRef<Preview>()
+  const results = shallowRef<BulkItem[]>()
+  const busy = ref(false)
+  const error = ref<string>()
+  const applicable = computed(() => (preview.value?.items ?? []).filter((w) => w.applicable))
+
+  // every change of the settings starts a new token, older answers are dropped
+  let token = 0
+
+  function request(): BulkRequest | undefined {
+    const s = scope.value
+    if (!s) return undefined
+    const h = Number(hours.value)
+    return {
+      filter: {
+        q: s.q,
+        phases: s.phases.length ? s.phases : undefined,
+        workflow_kinds: s.kinds.length ? s.kinds : undefined,
+        finished_before_hours: hours.value === '' || !(h >= 0) ? undefined : h,
+        environment: s.environment,
+      },
+      action: action.value,
+      dry_run: true,
+    }
+  }
+
+  async function load() {
+    const current = ++token
+    preview.value = undefined
+    results.value = undefined
+    error.value = undefined
+    const req = request()
+    if (!req) return
+    if (scope.value?.empty) {
+      preview.value = { request: req, items: [] }
+      return
+    }
+    busy.value = true
+    try {
+      const result = await api.bulk(req)
+      if (current === token) preview.value = { request: req, items: result.items }
+    } catch (e) {
+      if (current === token) error.value = handleError(e)
+    } finally {
+      if (current === token) busy.value = false
+    }
+  }
+
+  /** Runs the action of the shown preview on exactly its applicable workflows. */
+  async function run() {
+    const shown = preview.value
+    if (!shown || !applicable.value.length) return
+    const current = ++token
+    busy.value = true
+    error.value = undefined
+    try {
+      const result = await api.bulk({
+        ...shown.request,
+        dry_run: false,
+        workflow_names: applicable.value.map((w) => w.name),
+      })
+      if (current === token) results.value = result.items
+    } catch (e) {
+      if (current === token) error.value = handleError(e)
+    } finally {
+      if (current === token) busy.value = false
+    }
+  }
+
+  // other settings make the shown preview invalid, at once and not after a tick
+  watch(
+    [action, scope, hours],
+    () => {
+      token++
+      preview.value = undefined
+      results.value = undefined
+      busy.value = false
+    },
+    { flush: 'sync' },
+  )
+
+  return { action, scope, hours, preview, results, applicable, busy, error, load, run }
+}
