@@ -24,6 +24,9 @@ export const AdminJobStatuses = [
 export const AdminJobStatusSchema = z.enum(AdminJobStatuses)
 export type AdminJobStatus = z.infer<typeof AdminJobStatusSchema>
 
+// the final workflow result, kept when the status later becomes deleted or expired
+export const OutcomeSchema = z.enum(['succeeded', 'failed', 'error']).nullish()
+
 export const WorkflowPhases = ['Pending', 'Running', 'Succeeded', 'Failed', 'Error'] as const
 export type WorkflowPhase = (typeof WorkflowPhases)[number]
 
@@ -92,6 +95,7 @@ const BucketSchema = z.object({
   jobs_total: z.number(),
   jobs_succeeded: z.number(),
   jobs_failed: z.number(),
+  jobs_error: z.number().nullish(),
   runtime_p50: optionalNumber,
   runtime_p90: optionalNumber,
   runtime_avg: optionalNumber,
@@ -178,6 +182,7 @@ const JobListItemSchema = z.object({
   environment: z.string(),
   workflow_kind: WorkflowKindSchema,
   status: AdminJobStatusSchema,
+  outcome: OutcomeSchema,
   organism: optionalText,
   sequence_count: optionalNumber,
   total_length: optionalNumber,
@@ -202,6 +207,7 @@ export const JobRecordSchema = z.object({
   workflow_kind: WorkflowKindSchema,
   api_version: z.string(),
   status: AdminJobStatusSchema,
+  outcome: OutcomeSchema,
   name: optionalText,
   genus: optionalText,
   species: optionalText,

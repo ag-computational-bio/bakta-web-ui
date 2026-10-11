@@ -4,6 +4,7 @@ import {
   configEntries,
   formatDuration,
   formatPercent,
+  outcomeText,
   percentile,
   periods,
   phaseStatus,
@@ -101,5 +102,13 @@ describe('bucket ranges', () => {
     expect(secondsRange(14400, null)).toEqual({ label: '4 h and more', tick: '≥ 4 h' })
     expect(bpRange(1e6, 2e6).label).toBe('1 to 2 Mbp')
     expect(bpRange(12e6, null).label).toBe('12 Mbp and more')
+  })
+})
+
+describe('outcomeText', () => {
+  it('shows the outcome of deleted and expired jobs only', () => {
+    expect(outcomeText({ status: 'expired', outcome: 'succeeded' })).toBe('outcome: succeeded')
+    expect(outcomeText({ status: 'failed', outcome: 'failed' })).toBe('')
+    expect(outcomeText({ status: 'deleted', outcome: null })).toBe('')
   })
 })

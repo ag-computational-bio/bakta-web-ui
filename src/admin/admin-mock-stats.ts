@@ -47,7 +47,7 @@ export function organism(job: JobRecord): string | null {
  * The runtime statistics of the given jobs. Runtimes only use succeeded jobs.
  */
 export function runtimeStats(jobs: JobRecord[]): RuntimeStats {
-  const done = jobs.filter((j) => j.status === 'succeeded' && j.runtime_seconds != null)
+  const done = jobs.filter((j) => j.outcome === 'succeeded' && j.runtime_seconds != null)
   const runtime = (j: JobRecord) => j.runtime_seconds ?? 0
   const kinds = [...new Set(done.map((j) => j.workflow_kind))].sort()
   const perMbp = sorted(

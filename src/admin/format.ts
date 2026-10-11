@@ -199,3 +199,12 @@ export function isWorkflowKind(kind: string | null | undefined): kind is Workflo
 export function kindLabel(kind: string): string {
   return isWorkflowKind(kind) ? formatWorkflowKind(kind) : kind
 }
+
+/**
+ * The final result of a deleted or expired job, like "outcome: succeeded".
+ * Other jobs show their result in the status already.
+ */
+export function outcomeText(job: { status: string; outcome?: string | null }): string {
+  if (!job.outcome || (job.status !== 'deleted' && job.status !== 'expired')) return ''
+  return `outcome: ${job.outcome}`
+}

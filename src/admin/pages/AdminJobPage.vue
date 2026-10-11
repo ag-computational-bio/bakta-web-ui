@@ -14,6 +14,7 @@
       <div class="d-flex flex-wrap align-items-center gap-2">
         <h3 class="section-title mb-0">{{ job.id }}</h3>
         <StatusBadge :status="job.status" />
+        <span v-if="outcomeText(job)" class="text-secondary">{{ outcomeText(job) }}</span>
         <Shield v-bind="workflowShieldProps(job.workflow_kind)">
           {{ formatWorkflowKind(job.workflow_kind) }}
         </Shield>
@@ -166,6 +167,7 @@ import {
   formatCount,
   formatDateTime,
   formatDuration,
+  outcomeText,
   phaseStatus,
 } from '../format'
 import { useClientPages } from '../pagination'

@@ -72,7 +72,12 @@
                 {{ formatWorkflowKind(job.workflow_kind) }}
               </Shield>
             </td>
-            <td><StatusBadge :status="job.status" /></td>
+            <td>
+              <StatusBadge :status="job.status" />
+              <div v-if="outcomeText(job)" class="small text-secondary text-nowrap">
+                {{ outcomeText(job) }}
+              </div>
+            </td>
             <td>
               <StatusBadge
                 v-if="job.workflow_phase"
@@ -143,7 +148,14 @@ import ChipGroup from '../components/ChipGroup.vue'
 import ConfirmModal from '../components/ConfirmModal.vue'
 import ListPagination from '../components/ListPagination.vue'
 import OrphanWorkflows from '../components/OrphanWorkflows.vue'
-import { formatBp, formatCount, formatDateTime, formatDuration, phaseStatus } from '../format'
+import {
+  formatBp,
+  formatCount,
+  formatDateTime,
+  formatDuration,
+  outcomeText,
+  phaseStatus,
+} from '../format'
 import { pageSizes } from '../pagination'
 import {
   actionIcons,

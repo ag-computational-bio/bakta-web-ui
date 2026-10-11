@@ -91,6 +91,16 @@ function createJob(createdMs: number, now: number): JobRecord {
   const fromFasta = kind === 'bakta' || kind === 'bakta_baktfold'
   const totalLength = Math.round(length * (0.95 + rnd() * 0.1))
   const status = now - createdMs < 3_600_000 ? activeStatus() : finalStatus()
+  // expired and deleted jobs keep the result they had before
+  const outcome =
+    status === 'succeeded' || status === 'failed' || status === 'error'
+      ? status
+      : status === 'expired' || status === 'deleted'
+        ? pick<'succeeded' | 'failed'>([
+            ['succeeded', 9],
+            ['failed', 1],
+          ])
+        : null
   const queue = 2 + rnd() * rnd() * 120
   const factor = kind === 'baktfold' ? 4 : kind === 'bakta_baktfold' ? 5 : 1
   const runtime = (90 + (totalLength / 1e6) * 60) * factor * (0.7 + rnd() * rnd() * 1.5)
@@ -98,7 +108,7 @@ function createJob(createdMs: number, now: number): JobRecord {
   const startedMs =
     status === 'created' || status === 'submitted' ? null : submittedMs + queue * 1000
   const finished = startedMs != null && status !== 'running'
-  const runtimeSeconds = status === 'failed' || status === 'error' ? runtime * rnd() : runtime
+  const runtimeSeconds = outcome === 'failed' || outcome === 'error' ? runtime * rnd() : runtime
   const finishedMs = finished && startedMs != null ? startedMs + runtimeSeconds * 1000 : null
   const version = versionHistory.find((v) => iso(createdMs) < v.until) ?? versionHistory[0]
   const withBaktfold = kind === 'baktfold' || kind === 'bakta_baktfold'
@@ -109,6 +119,7 @@ function createJob(createdMs: number, now: number): JobRecord {
     workflow_kind: kind,
     api_version: createdMs < now - 400 * day && rnd() < 0.7 ? 'v1' : 'v2',
     status,
+    outcome,
     name: rnd() < 0.8 ? `${genus} ${species} ${strain ?? 'isolate'}` : null,
     genus: fromFasta ? genus : null,
     species: fromFasta ? species : null,
@@ -128,9 +139,9 @@ function createJob(createdMs: number, now: number): JobRecord {
     runtime_seconds: finishedMs == null ? null : runtimeSeconds,
     queue_seconds: startedMs == null ? null : queue,
     error_message:
-      status === 'failed'
+      outcome === 'failed'
         ? 'bakta exited with code 1'
-        : status === 'error'
+        : outcome === 'error'
           ? 'pod was evicted'
           : null,
     updated_at: iso(finishedMs ?? startedMs ?? createdMs),

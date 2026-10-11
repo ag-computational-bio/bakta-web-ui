@@ -46,7 +46,12 @@ export function statsFilter(now = new Date()): StatsFilter {
     }
     case 'custom':
       if (filters.customFrom) filter.from = `${filters.customFrom}T00:00:00Z`
-      if (filters.customTo) filter.to = `${filters.customTo}T23:59:59Z`
+      // the server excludes "to", so the range ends at the start of the next day
+      if (filters.customTo) {
+        const to = new Date(`${filters.customTo}T00:00:00Z`)
+        to.setUTCDate(to.getUTCDate() + 1)
+        filter.to = to.toISOString()
+      }
       break
   }
   return filter

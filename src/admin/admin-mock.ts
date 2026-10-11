@@ -32,7 +32,7 @@ import { percentile, truncDate } from './format'
 function inFilter(job: JobRecord, filter: StatsFilter): boolean {
   if (filter.environment !== 'all' && job.environment !== filter.environment) return false
   if (filter.from && job.created_at < new Date(filter.from).toISOString()) return false
-  if (filter.to && job.created_at > new Date(filter.to).toISOString()) return false
+  if (filter.to && job.created_at >= new Date(filter.to).toISOString()) return false
   return true
 }
 
@@ -46,8 +46,11 @@ function stats(values: (number | null | undefined)[]): Percentiles {
   }
 }
 
-const finishedStatuses: AdminJobStatus[] = ['succeeded', 'failed', 'error']
 const activeStatuses: AdminJobStatus[] = ['created', 'submitted', 'running']
+
+function succeeded(job: JobRecord): boolean {
+  return job.outcome === 'succeeded'
+}
 
 function phaseOf(status: AdminJobStatus): WorkflowPhase {
   switch (status) {
@@ -142,8 +145,9 @@ class MockAdminApi implements AdminApi {
 
   summary(filter: StatsFilter) {
     const jobs = this.#filtered(filter)
-    const count = (s: AdminJobStatus) => jobs.filter((j) => j.status === s).length
-    const finished = jobs.filter((j) => finishedStatuses.includes(j.status)).length
+    // finished jobs count by outcome, so expiry does not change the numbers
+    const count = (o: JobRecord['outcome']) => jobs.filter((j) => j.outcome === o).length
+    const finished = jobs.filter((j) => j.outcome).length
     const kinds = [...new Set(jobs.map((j) => j.workflow_kind))]
     return delay({
       jobs_total: jobs.length,
@@ -151,9 +155,9 @@ class MockAdminApi implements AdminApi {
       jobs_succeeded: count('succeeded'),
       jobs_failed: count('failed'),
       jobs_error: count('error'),
-      jobs_active: jobs.filter((j) => activeStatuses.includes(j.status)).length,
+      jobs_active: jobs.filter((j) => j.status === 'submitted' || j.status === 'running').length,
       success_rate: finished ? count('succeeded') / finished : null,
-      runtime_seconds: stats(jobs.map((j) => j.runtime_seconds)),
+      runtime_seconds: stats(jobs.filter(succeeded).map((j) => j.runtime_seconds)),
       queue_seconds: stats(jobs.map((j) => j.queue_seconds)),
       total_input_bp: jobs.reduce((sum, j) => sum + (j.total_length ?? 0), 0),
       by_workflow_kind: kinds.map((kind) => {
@@ -161,8 +165,8 @@ class MockAdminApi implements AdminApi {
         return {
           workflow_kind: kind,
           jobs_total: ofKind.length,
-          jobs_succeeded: ofKind.filter((j) => j.status === 'succeeded').length,
-          runtime_seconds: stats(ofKind.map((j) => j.runtime_seconds)),
+          jobs_succeeded: ofKind.filter(succeeded).length,
+          runtime_seconds: stats(ofKind.filter(succeeded).map((j) => j.runtime_seconds)),
         }
       }),
     })
@@ -178,13 +182,14 @@ class MockAdminApi implements AdminApi {
     }
     const buckets: Bucket[] = [...groups.entries()].map(([key, jobs]) => {
       const [start, group] = key.split('|')
-      const runtime = stats(jobs.map((j) => j.runtime_seconds))
+      const runtime = stats(jobs.filter(succeeded).map((j) => j.runtime_seconds))
       return {
         period_start: start.replace('.000Z', 'Z'),
         group: groupBy === 'none' ? null : group,
         jobs_total: jobs.length,
-        jobs_succeeded: jobs.filter((j) => j.status === 'succeeded').length,
-        jobs_failed: jobs.filter((j) => j.status === 'failed' || j.status === 'error').length,
+        jobs_succeeded: jobs.filter(succeeded).length,
+        jobs_failed: jobs.filter((j) => j.outcome === 'failed').length,
+        jobs_error: jobs.filter((j) => j.outcome === 'error').length,
         runtime_p50: runtime.p50,
         runtime_p90: runtime.p90,
         runtime_avg: runtime.avg,
@@ -310,6 +315,7 @@ class MockAdminApi implements AdminApi {
     const job = this.#find(id)
     if (newWorkflow) job.workflow_name = `${job.workflow_kind}-job-${uuid().slice(0, 8)}`
     job.status = status
+    job.outcome = status === 'failed' ? 'failed' : null
     job.updated_at = new Date().toISOString()
     this.#workflows.add(id)
     this.#suspended.delete(id)
