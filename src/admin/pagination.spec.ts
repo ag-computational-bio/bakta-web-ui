@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { nextTick, ref } from 'vue'
-import { pageButtons, pageCount, useClientPages } from './pagination'
+import { clampPage, pageButtons, pageCount, useClientPages } from './pagination'
 
 describe('pageButtons', () => {
   it('shows the first, the last and the pages around the current one', () => {
@@ -12,6 +12,15 @@ describe('pageButtons', () => {
   it('has at least one page', () => {
     expect(pageCount(0, 25)).toBe(1)
     expect(pageCount(51, 25)).toBe(3)
+  })
+})
+
+describe('clampPage', () => {
+  it('moves back to the last page when the list got shorter', () => {
+    expect(clampPage(3, 50, 25)).toBe(2)
+    expect(clampPage(2, 0, 25)).toBe(1)
+    expect(clampPage(2, 51, 25)).toBe(2)
+    expect(clampPage(0, 51, 25)).toBe(1)
   })
 })
 

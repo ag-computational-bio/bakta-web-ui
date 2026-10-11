@@ -260,7 +260,7 @@ import {
   outcomeText,
   phaseStatus,
 } from '../format'
-import { pageSizes } from '../pagination'
+import { clampPage, pageSizes } from '../pagination'
 import {
   actionIcons,
   actionLabels,
@@ -361,6 +361,9 @@ async function load() {
     if (current !== request) return
     jobs.value = result.items
     total.value = result.total
+    // after a delete the page can be beyond the end, then the last page loads
+    const last = clampPage(page.value, result.total, pageSize.value)
+    if (last !== page.value) page.value = last
   } catch (e) {
     if (current === request) error.value = handleAdminError(e)
   } finally {

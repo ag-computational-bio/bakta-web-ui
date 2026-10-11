@@ -15,6 +15,13 @@ export function pageCount(total: number, pageSize: number): number {
 }
 
 /**
+ * The page, moved back to the last page when the list got shorter.
+ */
+export function clampPage(page: number, total: number, pageSize: number): number {
+  return Math.max(1, Math.min(page, pageCount(total, pageSize)))
+}
+
+/**
  * The page buttons: first, last and the pages around the current one. 0 stands for a gap.
  */
 export function pageButtons(page: number, pages: number, around = 1): number[] {
