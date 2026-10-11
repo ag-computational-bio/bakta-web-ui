@@ -103,7 +103,7 @@ export function readFilterQuery(query: Record<string, unknown>) {
  */
 export function chartInterval(
   range: TimeRange,
-  filter: StatsFilter,
+  filter: Pick<StatsFilter, 'from' | 'to'>,
   now = new Date(),
   dataStart?: string,
 ): Interval {
