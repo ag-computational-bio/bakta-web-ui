@@ -32,12 +32,21 @@ export function adminApiUrl(api: string): string {
   return api.replace(/\/v\d+\/?$/, '') + '/admin'
 }
 
-export function initAdminConfig(api: string, config?: AdminConfig): void {
+/**
+ * Takes the admin settings. Mock mode only works in development builds, a
+ * production build ignores it and needs the normal login.
+ */
+export function initAdminConfig(
+  api: string,
+  config?: AdminConfig,
+  dev = import.meta.env.DEV,
+): void {
+  if (config?.mock && !dev) console.warn('The admin mock mode only works in development builds.')
   settings = {
     api: config?.api ?? adminApiUrl(api),
     oidcAuthority: config?.oidcAuthority,
     clientId: config?.clientId ?? 'bakta-admin',
-    mock: config?.mock ?? false,
+    mock: dev && (config?.mock ?? false),
   }
 }
 
