@@ -34,21 +34,20 @@
     <h2 class="stat-title">Feature counts (Total: {{ data.features.length }})</h2>
     <div class="row">
       <div v-for="(column, idx) in featureColumns" :key="idx" class="col-md-4">
-        <button
-          v-for="type in column"
-          :key="type"
-          type="button"
-          class="feature-count"
-          :disabled="!featureCount[type]"
-          :title="`Show all ${bakta.featureTypeLabel(type)} features in the annotation table`"
-          @click="emit('select:type', type)"
-        >
-          <display-tuple
-            :break="6"
-            :label="bakta.featureTypeLabel(type)"
-            :value="featureCount[type]"
-          />
-        </button>
+        <div v-for="type in column" :key="type" class="row py-1">
+          <div class="col-6">
+            <a
+              v-if="featureCount[type]"
+              href="#"
+              class="feature-link"
+              :title="`Show all ${bakta.featureTypeLabel(type)} features in the annotation table`"
+              @click.prevent="emit('select:type', type)"
+              >{{ bakta.featureTypeLabel(type) }}</a
+            >
+            <span v-else class="text-secondary">{{ bakta.featureTypeLabel(type) }}</span>
+          </div>
+          <div class="col-6 feature-value">{{ featureCount[type] }}</div>
+        </div>
       </div>
     </div>
   </section>
@@ -102,21 +101,15 @@ function formatDuration(from: string, to: string) {
 </script>
 
 <style scoped>
-.feature-count {
-  display: block;
-  width: 100%;
-  padding: 0 0.5rem;
-  border: 0;
-  border-radius: var(--bs-border-radius);
-  background: none;
-  color: inherit;
-  text-align: start;
+.feature-link {
+  text-decoration: none;
 }
-.feature-count:not(:disabled):hover {
-  background-color: var(--bs-primary-bg-subtle);
+.feature-link:hover {
+  text-decoration: underline;
 }
-.feature-count:disabled {
-  cursor: default;
+.feature-value {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
 }
 .stat-panel {
   height: 100%;
