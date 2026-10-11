@@ -27,6 +27,7 @@
     "datatables.net-vue3": "^3.0.4",
     "humanize-duration": "^3.33.2",
     "igv": "^3.8.0",
+    "oidc-client-ts": "^3.5.0",
     "pako": "^2.1.0",
     "vue": "^3.5.31",
     "vue-router": "^5.0.4",
