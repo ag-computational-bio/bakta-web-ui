@@ -49,7 +49,7 @@
                 <td>{{ formatWorkflowKind(row.workflow_kind as WorkflowKind) }}</td>
                 <td class="text-end">{{ formatCount(row.jobs_total) }}</td>
                 <td class="text-end">
-                  {{ formatPercent(row.jobs_total ? row.jobs_succeeded / row.jobs_total : null) }}
+                  {{ formatPercent(successRate(row)) }}
                 </td>
                 <td class="text-end">{{ formatDuration(row.runtime_seconds.p50) }}</td>
                 <td class="text-end">{{ formatDuration(row.runtime_seconds.p90) }}</td>
@@ -117,6 +117,7 @@ import {
   formatDateTime,
   formatDuration,
   formatPercent,
+  successRate,
   formatPeriod,
 } from '../format'
 import { useClientPages } from '../pagination'

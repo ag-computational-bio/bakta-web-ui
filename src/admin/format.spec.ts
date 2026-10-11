@@ -7,6 +7,7 @@ import {
   outcomeText,
   percentile,
   runtimeOverall,
+  successRate,
   periods,
   phaseStatus,
   secondsRange,
@@ -148,5 +149,13 @@ describe('runtimeOverall', () => {
   it('has no values without succeeded jobs, also not from other kinds', () => {
     expect(runtimeOverall(stats([]))).toEqual({ combined: false })
     expect(runtimeOverall(undefined)).toEqual({ combined: false })
+  })
+})
+
+describe('successRate', () => {
+  it('divides the succeeded by the finished jobs', () => {
+    expect(successRate({ jobs_succeeded: 3, jobs_finished: 4 })).toBe(0.75)
+    expect(successRate({ jobs_succeeded: 0, jobs_finished: 0 })).toBeNull()
+    expect(successRate({ jobs_succeeded: 3 })).toBeNull()
   })
 })

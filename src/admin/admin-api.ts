@@ -83,6 +83,8 @@ export const StatsSummarySchema = z.object({
       workflow_kind: z.string(),
       jobs_total: z.number(),
       jobs_succeeded: z.number(),
+      // succeeded, failed and error jobs, by outcome; older servers leave it out
+      jobs_finished: z.number().nullish(),
       runtime_seconds: PercentilesSchema,
     }),
   ),

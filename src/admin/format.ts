@@ -235,3 +235,14 @@ export function runtimeOverall(stats: RuntimeStats | undefined): {
   const avg = jobs ? kinds.reduce((sum, k) => sum + k.avg! * k.jobs, 0) / jobs : null
   return { avg, combined: true }
 }
+
+/**
+ * The success rate like the headline rate: succeeded of the finished jobs,
+ * none when nothing finished or the server does not send the finished jobs.
+ */
+export function successRate(row: {
+  jobs_succeeded: number
+  jobs_finished?: number | null
+}): number | null {
+  return row.jobs_finished ? row.jobs_succeeded / row.jobs_finished : null
+}
