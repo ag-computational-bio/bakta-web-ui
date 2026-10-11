@@ -1,0 +1,326 @@
+<template>
+  <RouterLink to="/admin/jobs" class="small d-inline-block mb-3">
+    <i class="bi bi-arrow-left me-1"></i>All jobs
+  </RouterLink>
+  <Notification v-if="error" class="mb-3" type="danger" :message="error" />
+  <Notification v-if="result" class="mb-3" type="primary" :message="result" />
+
+  <div v-if="!detail && !error" class="card text-center p-5">
+    <div class="spinner-border text-primary mx-auto" role="status"></div>
+  </div>
+
+  <template v-if="detail">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+      <div class="d-flex flex-wrap align-items-center gap-2">
+        <h3 class="section-title mb-0 font-monospace">{{ job.id }}</h3>
+        <StatusBadge :status="job.status" />
+        <Shield v-bind="workflowShieldProps(job.workflow_kind)">
+          {{ formatWorkflowKind(job.workflow_kind) }}
+        </Shield>
+      </div>
+      <div class="d-flex flex-wrap gap-2">
+        <button class="btn btn-icon btn-sm" title="Reload" :disabled="busy" @click="load">
+          <i class="bi bi-arrow-clockwise"></i>
+        </button>
+        <button
+          class="btn btn-outline-secondary btn-sm"
+          :disabled="busy || !canRetry"
+          @click="runAction('retry')"
+        >
+          <i class="bi bi-arrow-repeat me-1"></i>Retry
+        </button>
+        <button
+          class="btn btn-outline-secondary btn-sm"
+          :disabled="busy || job.status === 'deleted'"
+          @click="runAction('resubmit')"
+        >
+          <i class="bi bi-send me-1"></i>Resubmit
+        </button>
+        <button
+          class="btn btn-outline-danger btn-sm"
+          :disabled="busy || !canStop"
+          @click="runAction('stop')"
+        >
+          <i class="bi bi-stop-circle me-1"></i>Stop
+        </button>
+        <button
+          class="btn btn-outline-danger btn-sm"
+          :disabled="busy || job.status === 'deleted'"
+          @click="runDelete"
+        >
+          <i class="bi bi-trash me-1"></i>Delete
+        </button>
+      </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+      <div v-for="panel in panels" :key="panel.title" class="col-md-6 col-xl-3">
+        <section class="panel h-100">
+          <h4 class="section-label">{{ panel.title }}</h4>
+          <DisplayTuple
+            v-for="row in panel.rows"
+            :key="row.label"
+            :label="row.label"
+            :value="row.value"
+          />
+        </section>
+      </div>
+    </div>
+
+    <div v-if="job.error_message" class="alert alert-danger mb-4">
+      <i class="bi bi-x-circle me-1"></i>{{ job.error_message }}
+    </div>
+
+    <div class="card p-4 mb-4">
+      <h3 class="section-title">Input options</h3>
+      <div v-if="options.length" class="row">
+        <div v-for="option in options" :key="option.label" class="col-md-6 col-xl-4">
+          <DisplayTuple :label="option.label" :value="option.value" :break="7" />
+        </div>
+      </div>
+      <p v-else class="text-secondary mb-0">No input options stored for this job.</p>
+    </div>
+
+    <div class="card p-4 mb-4">
+      <h3 class="section-title">Argo workflow</h3>
+      <p v-if="!workflow" class="text-secondary mb-0">The workflow no longer exists in Argo.</p>
+      <template v-else>
+        <div class="d-flex flex-wrap align-items-center gap-3 mb-3">
+          <span class="font-monospace">{{ workflow.name }}</span>
+          <StatusBadge :status="phaseStatus(workflow.phase)" />
+          <span v-if="workflow.message" class="text-secondary">{{ workflow.message }}</span>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-striped align-middle mb-0">
+            <thead>
+              <tr>
+                <th>Step</th>
+                <th>Type</th>
+                <th>Phase</th>
+                <th>Pod</th>
+                <th>Started</th>
+                <th class="text-end">Duration</th>
+                <th>Message</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="node in workflow.nodes" :key="node.name">
+                <td>{{ node.display_name }}</td>
+                <td>{{ node.type }}</td>
+                <td><StatusBadge :status="phaseStatus(node.phase)" /></td>
+                <td class="font-monospace small">{{ node.pod_name ?? '-' }}</td>
+                <td class="text-nowrap">{{ formatDateTime(node.started_at) }}</td>
+                <td class="text-end text-nowrap">
+                  {{ formatDuration(seconds(node.started_at, node.finished_at)) }}
+                </td>
+                <td>{{ node.message ?? '' }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </template>
+    </div>
+
+    <div class="card p-4">
+      <h3 class="section-title">Logs</h3>
+      <WorkflowLogViewer v-if="logs" :logs="logs" />
+      <p v-else-if="logsError" class="text-secondary mb-0">No logs available: {{ logsError }}</p>
+      <div v-else class="spinner-border spinner-border-sm text-secondary"></div>
+    </div>
+  </template>
+
+  <ConfirmModal ref="confirmModal" v-bind="modal">
+    <p class="mb-0">{{ modal.text }}</p>
+    <div v-if="modal.purgeOption" class="form-check mt-3">
+      <input id="purge-data" v-model="purgeData" class="form-check-input" type="checkbox" />
+      <label class="form-check-label" for="purge-data">
+        Also delete the S3 data of the job (input and result files)
+      </label>
+    </div>
+  </ConfirmModal>
+</template>
+
+<script setup lang="ts">
+import DisplayTuple from '@/components/DisplayTuple.vue'
+import Notification from '@/components/Notification.vue'
+import Shield from '@/components/Shield.vue'
+import StatusBadge from '@/components/StatusBadge.vue'
+import WorkflowLogViewer from '@/components/WorkflowLogViewer.vue'
+import { formatWorkflowKind, workflowShieldProps } from '@/model/job'
+import type { WorkflowLogs } from '@/model/submit'
+import { computed, ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
+import type { JobDetail } from '../admin-api'
+import { handleAdminError, useAdminApi } from '../admin-session'
+import ConfirmModal from '../components/ConfirmModal.vue'
+import {
+  configEntries,
+  formatBp,
+  formatCount,
+  formatDateTime,
+  formatDuration,
+  phaseStatus,
+} from '../format'
+
+type Action = 'retry' | 'resubmit' | 'stop'
+
+const api = useAdminApi()
+const route = useRoute()
+const detail = ref<JobDetail>()
+const logs = ref<WorkflowLogs>()
+const logsError = ref<string>()
+const error = ref<string>()
+const result = ref<string>()
+const busy = ref(false)
+const purgeData = ref(false)
+const confirmModal = ref<InstanceType<typeof ConfirmModal>>()
+const modal = ref({ title: '', confirmLabel: '', danger: false, text: '', purgeOption: false })
+
+const id = computed(() => String(route.params.id))
+const job = computed(() => detail.value!.job)
+const workflow = computed(() => detail.value?.workflow)
+const canRetry = computed(() => ['Failed', 'Error'].includes(workflow.value?.phase ?? ''))
+const canStop = computed(() => workflow.value?.phase === 'Running')
+const options = computed(() => configEntries(job.value.config ?? {}))
+
+function seconds(from?: string | null, to?: string | null): number | null {
+  if (!from || !to) return null
+  return (Date.parse(to) - Date.parse(from)) / 1000
+}
+
+const panels = computed(() => {
+  const j = job.value
+  return [
+    {
+      title: 'Job',
+      rows: [
+        { label: 'Name', value: j.name ?? '-' },
+        { label: 'Environment', value: j.environment },
+        { label: 'API version', value: j.api_version },
+        { label: 'Workflow', value: j.workflow_name ?? '-' },
+      ],
+    },
+    {
+      title: 'Input',
+      rows: [
+        {
+          label: 'Organism',
+          value: [j.genus, j.species, j.strain].filter(Boolean).join(' ') || '-',
+        },
+        { label: 'Sequences', value: formatCount(j.sequence_count) },
+        { label: 'Total length', value: formatBp(j.total_length) },
+      ],
+    },
+    {
+      title: 'Times',
+      rows: [
+        { label: 'Created', value: formatDateTime(j.created_at) },
+        { label: 'Submitted', value: formatDateTime(j.submitted_at) },
+        { label: 'Started', value: formatDateTime(j.started_at) },
+        { label: 'Finished', value: formatDateTime(j.finished_at) },
+        { label: 'Updated', value: formatDateTime(j.updated_at) },
+        { label: 'Queue time', value: formatDuration(j.queue_seconds) },
+        { label: 'Runtime', value: formatDuration(j.runtime_seconds) },
+      ],
+    },
+    {
+      title: 'Versions',
+      rows: [
+        { label: 'Bakta', value: j.bakta_version ?? '-' },
+        { label: 'Bakta DB', value: j.bakta_db_version ?? '-' },
+        { label: 'Baktfold', value: j.baktfold_version ?? '-' },
+        { label: 'Baktfold DB', value: j.baktfold_db_version ?? '-' },
+      ],
+    },
+  ]
+})
+
+async function load() {
+  error.value = undefined
+  try {
+    detail.value = await api.job(id.value)
+  } catch (e) {
+    error.value = handleAdminError(e)
+    return
+  }
+  api
+    .jobLogs(id.value)
+    .then((l) => (logs.value = l))
+    .catch((e) => (logsError.value = handleAdminError(e)))
+}
+
+async function confirm(settings: Partial<typeof modal.value>): Promise<boolean> {
+  modal.value = { title: '', confirmLabel: '', danger: false, text: '', purgeOption: false }
+  Object.assign(modal.value, settings)
+  return (await confirmModal.value?.open()) ?? false
+}
+
+async function perform(task: () => Promise<string>) {
+  busy.value = true
+  error.value = undefined
+  result.value = undefined
+  try {
+    result.value = await task()
+    await load()
+  } catch (e) {
+    error.value = handleAdminError(e)
+  } finally {
+    busy.value = false
+  }
+}
+
+const actionTexts: Record<Action, { title: string; text: string; danger: boolean }> = {
+  retry: {
+    title: 'Retry the workflow?',
+    text: 'Argo runs the failed steps of the workflow again.',
+    danger: false,
+  },
+  resubmit: {
+    title: 'Resubmit the job?',
+    text: 'Argo starts a new workflow with the same parameters. The job then points to the new workflow.',
+    danger: false,
+  },
+  stop: {
+    title: 'Stop the workflow?',
+    text: 'Argo terminates the running workflow. The job ends as failed.',
+    danger: true,
+  },
+}
+
+async function runAction(action: Action) {
+  const texts = actionTexts[action]
+  const label = action.charAt(0).toUpperCase() + action.slice(1)
+  if (!(await confirm({ ...texts, confirmLabel: label }))) return
+  await perform(async () => {
+    const r = await api[action](id.value)
+    return `${label}: workflow ${r.workflow_name} is now ${r.phase.toLowerCase()}.`
+  })
+}
+
+async function runDelete() {
+  purgeData.value = false
+  const confirmed = await confirm({
+    title: 'Delete the job?',
+    text: 'The Argo workflow and its pods are deleted and the job is marked as deleted. The statistics keep the job record.',
+    confirmLabel: 'Delete',
+    danger: true,
+    purgeOption: true,
+  })
+  if (!confirmed) return
+  const purge = purgeData.value
+  await perform(async () => {
+    const r = await api.deleteJob(id.value, purge)
+    const workflowText = r.deleted_workflow ? 'Workflow deleted' : 'No workflow to delete'
+    return purge ? `${workflowText}, ${r.purged_objects} S3 objects deleted.` : `${workflowText}.`
+  })
+}
+
+watch(id, () => {
+  detail.value = undefined
+  logs.value = undefined
+  logsError.value = undefined
+  result.value = undefined
+  load()
+})
+load()
+</script>

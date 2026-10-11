@@ -2,6 +2,8 @@ import {
   bpScale,
   formatBp as formatBpScale,
 } from '@/components/bakta-result/feature-plot/circluar-plot/formatters'
+import type { AnyStatus } from '@/model/status-style'
+import { StageStatuses, type StageStatus } from '@/model/submit'
 import type { Interval } from './admin-api'
 
 /*
@@ -126,4 +128,28 @@ export function percentile(sorted: number[], p: number): number | null {
   const lower = Math.floor(pos)
   const upper = Math.ceil(pos)
   return sorted[lower] + (sorted[upper] - sorted[lower]) * (pos - lower)
+}
+
+/**
+ * The badge status of an Argo phase like "Running" or "Failed".
+ */
+export function phaseStatus(phase: string | null | undefined): AnyStatus {
+  const status = (phase ?? '').toLowerCase()
+  return (StageStatuses as readonly string[]).includes(status) ? (status as StageStatus) : 'unknown'
+}
+
+/**
+ * The input options of a job as readable label and value pairs.
+ */
+export function configEntries(config: Record<string, unknown>): { label: string; value: string }[] {
+  return Object.entries(config).map(([key, value]) => {
+    const words = key.replace(/_/g, ' ')
+    const label = words.charAt(0).toUpperCase() + words.slice(1)
+    let text: string
+    if (value == null || value === '') text = missing
+    else if (typeof value === 'boolean') text = value ? 'Yes' : 'No'
+    else if (typeof value === 'object') text = JSON.stringify(value)
+    else text = String(value)
+    return { label, value: text }
+  })
 }

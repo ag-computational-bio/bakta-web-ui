@@ -1,5 +1,13 @@
 import { describe, expect, it } from 'vitest'
-import { formatDuration, formatPercent, percentile, periods, truncDate } from './format'
+import {
+  configEntries,
+  formatDuration,
+  formatPercent,
+  percentile,
+  periods,
+  phaseStatus,
+  truncDate,
+} from './format'
 
 describe('formatDuration', () => {
   it('uses short units', () => {
@@ -55,5 +63,30 @@ describe('percentile', () => {
     expect(percentile([1, 2, 3, 4], 0.5)).toBe(2.5)
     expect(percentile([10], 0.9)).toBe(10)
     expect(percentile([], 0.5)).toBe(null)
+  })
+})
+
+describe('configEntries', () => {
+  it('shows options as readable text', () => {
+    expect(
+      configEntries({
+        complete_genome: true,
+        genus: 'Escherichia',
+        locus: null,
+        min_contig_length: 1,
+      }),
+    ).toEqual([
+      { label: 'Complete genome', value: 'Yes' },
+      { label: 'Genus', value: 'Escherichia' },
+      { label: 'Locus', value: '-' },
+      { label: 'Min contig length', value: '1' },
+    ])
+  })
+})
+
+describe('phaseStatus', () => {
+  it('maps Argo phases to badge statuses', () => {
+    expect(phaseStatus('Failed')).toBe('failed')
+    expect(phaseStatus('Omitted')).toBe('unknown')
   })
 })
