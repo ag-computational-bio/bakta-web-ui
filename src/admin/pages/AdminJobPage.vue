@@ -1,6 +1,8 @@
 <template>
-  <RouterLink :to="listLink" class="small d-inline-block mb-3" @click="backToList">
-    <i class="bi bi-arrow-left me-1"></i>All jobs
+  <RouterLink v-slot="{ href, navigate }" :to="listLink" custom>
+    <a :href="href" class="small d-inline-block mb-3" @click="backToList($event, navigate)">
+      <i class="bi bi-arrow-left me-1"></i>All jobs
+    </a>
   </RouterLink>
   <Notification v-if="error" class="mb-3" type="danger" :message="error" />
   <Notification v-if="result" class="mb-3" type="primary" :message="result" />
@@ -258,12 +260,17 @@ const listLink = computed(() => ({
   path: '/admin/jobs',
   query: lastJobListQuery.value ?? filterQuery(),
 }))
-function backToList(event: MouseEvent) {
+function backToList(event: MouseEvent, navigate: (e: MouseEvent) => unknown) {
+  // a modified click or another button keeps the normal link behavior of the browser
+  if (event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return
   // coming from the list, the browser history has the list with its scroll position
   const back = window.history.state?.back
   if (typeof back === 'string' && back.split('?')[0] === '/admin/jobs') {
     event.preventDefault()
     router.back()
+  } else {
+    // the router link stops the browser itself, and pushes the list
+    navigate(event)
   }
 }
 
