@@ -72,6 +72,7 @@
             <pre
               v-if="stage.status === 'running' && openLogs.has(stage.stage)"
               ref="logBlocks"
+              :data-stage="stage.stage"
               class="log-block mt-2 mb-0 p-3 rounded-3"
               >{{ stage.content || 'No log output yet.' }}</pre
             >
@@ -107,12 +108,34 @@ const emit = defineEmits<{
 const openLogs = ref(new Set<string>())
 const logBlocks = useTemplateRef<HTMLPreElement[]>('logBlocks')
 
-// keep the newest log lines in view while the job runs
+// the text length of each open log at the last update
+const logLengths = new Map<string, number>()
+
+function atBottom(el: HTMLElement): boolean {
+  return el.scrollHeight - el.scrollTop - el.clientHeight < 24
+}
+
+// A log opens at its newest lines. Later it only follows new lines when the
+// reader is still at the end, so reading older lines is not interrupted.
 watch(
-  () => [openLogs.value.size, props.stages.map((stage) => stage.content.length)],
+  () => [...openLogs.value, ...props.stages.map((s) => `${s.stage}:${s.content.length}`)].join(),
   async () => {
+    const following = new Set(
+      (logBlocks.value ?? []).filter(atBottom).map((el) => el.dataset.stage),
+    )
     await nextTick()
-    for (const el of logBlocks.value ?? []) el.scrollTop = el.scrollHeight
+    for (const el of logBlocks.value ?? []) {
+      const stage = el.dataset.stage ?? ''
+      const length = el.textContent?.length ?? 0
+      const known = logLengths.get(stage)
+      if (known == undefined || (length > known && following.has(stage))) {
+        el.scrollTop = el.scrollHeight
+      }
+      logLengths.set(stage, length)
+    }
+    for (const stage of [...logLengths.keys()]) {
+      if (!openLogs.value.has(stage)) logLengths.delete(stage)
+    }
   },
 )
 
