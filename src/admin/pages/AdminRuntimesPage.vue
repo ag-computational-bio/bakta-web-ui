@@ -283,7 +283,8 @@ const timeValues = computed(() => {
   return { p50: field('runtime_p50'), p90: field('runtime_p90'), avg: field('runtime_avg') }
 })
 
-// the succeeded jobs behind each runtime value
+// the succeeded jobs of each period, the API does not give the number of runtime values,
+// so a point can have fewer measurements than this count
 const timeCounts = computed(
   () =>
     bucketValues(series.value?.buckets ?? [], periods.value, 'jobs_succeeded')[kind.value] ?? [],

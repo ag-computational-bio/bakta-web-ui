@@ -59,7 +59,7 @@ const props = defineProps<{
   notes?: string[]
   // a second, smaller line under each x label, like "n = 12"
   subLabels?: string[]
-  // the jobs behind each column: points of fewer than 3 jobs are drawn hollow
+  // the jobs counted for each column: points of fewer than 3 jobs are drawn hollow
   counts?: (number | null)[]
   // the title of the y axis, like "Jobs" or "Minutes"
   yTitle?: string
@@ -76,7 +76,7 @@ const svg = ref<SVGSVGElement>()
 const width = ref(600)
 const height = 260
 const baseMargin = { top: 8, right: 8, bottom: 28, left: 72 }
-// values of fewer jobs than this are not reliable, their points are hollow
+// values of fewer counted jobs than this are not reliable, their points are hollow
 const fewJobs = 3
 
 // stacked bars list the top of the stack first, like they are drawn

@@ -263,7 +263,8 @@ const timeValues = computed(() => {
   return { p50: field('input_p50_bp'), avg: field('input_avg_bp') }
 })
 
-// the jobs behind each input value
+// the jobs of each period, the API does not give the number of jobs with an input size,
+// so a point can have fewer measurements than this count
 const timeCounts = computed(
   () => bucketValues(series.value?.buckets ?? [], periods.value, 'jobs_total')[kind.value] ?? [],
 )
