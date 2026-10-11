@@ -38,6 +38,25 @@ function deferred() {
 }
 
 describe('useBulkPreview', () => {
+  it('never deletes a pending or running workflow', async () => {
+    const bulk = vi.fn(async (r: BulkRequest) => ({
+      action: r.action,
+      dry_run: r.dry_run,
+      items: [
+        { name: 'a', phase: 'Running', applicable: true },
+        { name: 'b', phase: 'Pending', applicable: true },
+        { name: 'c', phase: 'Failed', applicable: true },
+      ],
+    }))
+    const p = useBulkPreview({ bulk, jobs: vi.fn() }, String)
+    p.action.value = 'delete'
+    p.scope.value = bulkScope(list)
+    await p.load()
+    expect(p.applicable.value.map((w) => w.name)).toEqual(['c'])
+    await p.run()
+    expect(bulk.mock.calls[1][0].workflow_names).toEqual(['c'])
+  })
+
   it('runs the action of the shown preview on exactly its applicable workflows', async () => {
     const bulk = vi.fn(async (r: BulkRequest) => ({
       action: r.action,

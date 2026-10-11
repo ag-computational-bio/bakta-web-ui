@@ -67,6 +67,21 @@ export function bulkScope(list: JobListFilters): BulkScope {
 
 type Preview = { request: BulkRequest; items: BulkItem[] }
 
+const stillRunningReason = 'Still running, stop it first'
+
+/**
+ * A delete never applies to a pending or running workflow, whatever the backend
+ * answers. The workflow has to be stopped first.
+ */
+function guardDelete(action: BulkAction, items: BulkItem[]): BulkItem[] {
+  if (action !== 'delete') return items
+  return items.map((w) =>
+    w.applicable && (w.phase === 'Pending' || w.phase === 'Running')
+      ? { ...w, applicable: false, reason: stillRunningReason }
+      : w,
+  )
+}
+
 const searchPageSize = 500
 
 /**
@@ -147,7 +162,7 @@ export function useBulkPreview(
         }
       }
       const result = await api.bulk(req)
-      if (current === token) preview.value = { request: req, items: result.items }
+      if (current === token) preview.value = { request: req, items: guardDelete(req.action, result.items) }
     } catch (e) {
       if (current === token) error.value = handleError(e)
     } finally {
