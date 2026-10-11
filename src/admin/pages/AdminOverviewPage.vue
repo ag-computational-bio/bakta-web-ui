@@ -42,7 +42,7 @@
     <div class="col-xl-6">
       <div class="card p-4 h-100">
         <h3 class="section-title">By workflow kind</h3>
-        <div class="table-responsive">
+        <div class="table-responsive scroll-hint">
           <table class="table table-striped align-middle text-nowrap mb-0">
             <thead>
               <tr>
@@ -71,7 +71,7 @@
     <div class="col-xl-6">
       <div class="card p-4 h-100">
         <h3 class="section-title">Versions</h3>
-        <div class="table-responsive">
+        <div class="table-responsive scroll-hint">
           <table class="table table-striped align-middle text-nowrap mb-0">
             <thead>
               <tr>
@@ -79,6 +79,7 @@
                 <th>Database</th>
                 <th>Baktfold</th>
                 <th class="text-end">Jobs</th>
+                <th>First seen</th>
                 <th>Last seen</th>
               </tr>
             </thead>
@@ -88,9 +89,8 @@
                 <td>{{ row.bakta_db_version ?? '-' }}</td>
                 <td>{{ row.baktfold_version ?? '-' }}</td>
                 <td class="text-end">{{ formatCount(row.jobs_total) }}</td>
-                <td :title="`First seen ${formatDateTime(row.first_seen)}`">
-                  {{ formatDateTime(row.last_seen) }}
-                </td>
+                <td>{{ formatDateTime(row.first_seen) }}</td>
+                <td>{{ formatDateTime(row.last_seen) }}</td>
               </tr>
             </tbody>
           </table>
@@ -298,6 +298,16 @@ watch([filters, groupBy], load, { immediate: true })
 </script>
 
 <style scoped>
+/* on small screens wide tables scroll sideways: room at the end and a fade as a hint */
+@media (max-width: 575.98px) {
+  .scroll-hint {
+    mask-image: linear-gradient(to right, #000 calc(100% - 1.5rem), transparent);
+  }
+  .scroll-hint table td:last-child,
+  .scroll-hint table th:last-child {
+    padding-right: 1.5rem;
+  }
+}
 .loading {
   opacity: 0.6;
 }

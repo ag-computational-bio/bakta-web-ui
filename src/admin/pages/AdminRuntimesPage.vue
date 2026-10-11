@@ -123,9 +123,9 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="job in stats?.slowest ?? []" :key="job.id" @click="open(job.id)">
+          <tr v-for="job in stats?.slowest ?? []" :key="job.id">
             <td>
-              <RouterLink :to="detailLink(job.id)" :title="job.id" @click.stop>
+              <RouterLink :to="detailLink(job.id)" :title="job.id">
                 {{ job.id.slice(0, 8) }}
               </RouterLink>
             </td>
@@ -159,7 +159,6 @@ import Notification from '@/components/Notification.vue'
 import Shield from '@/components/Shield.vue'
 import { formatWorkflowKind, workflowShieldProps } from '@/model/job'
 import { computed, ref, watch } from 'vue'
-import { useRouter } from 'vue-router'
 import type { Interval, RuntimeStats, Timeseries } from '../admin-api'
 import {
   filters,
@@ -214,7 +213,6 @@ const timeSeries = [
 ]
 
 const api = useAdminApi()
-const router = useRouter()
 const kind = ref('')
 const interval = ref<Interval>('day')
 const stats = ref<RuntimeStats>()
@@ -233,10 +231,6 @@ function minutes(values: (number | null | undefined)[] = []): (number | null)[] 
 
 function detailLink(id: string) {
   return { name: 'AdminJob', params: { id } }
-}
-
-function open(id: string) {
-  router.push(detailLink(id))
 }
 
 const tiles = computed(() => {
@@ -327,8 +321,5 @@ watch([filters, kind], load, { immediate: true })
 <style scoped>
 .loading {
   opacity: 0.6;
-}
-.jobs tbody tr {
-  cursor: pointer;
 }
 </style>
