@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/playwright:v1.58.2-noble AS builder
+FROM mcr.microsoft.com/playwright:v1.64.0-noble AS builder
 
 WORKDIR /src
 # install the dependencies first, so this layer is reused when only the source changes

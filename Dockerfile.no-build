@@ -1,4 +1,4 @@
-FROM nginx:stable-alpine
+FROM nginx:stable-alpine-slim
 
 LABEL org.opencontainers.image.authors="lukas.jelonek@computational.bio.uni-giessen.de"
 LABEL org.opencontainers.image.url='https://github.com/ag-computational-bio/bakta-web-ui'
