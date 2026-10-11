@@ -38,9 +38,9 @@ const _iconClass = computed(() => 'bi ' + props.icon)
   white-space: nowrap;
 }
 .shield .left {
-  border-radius: var(--bs-border-radius-pill) 0 0 var(--bs-border-radius-pill);
+  border-radius: var(--bs-border-radius-sm) 0 0 var(--bs-border-radius-sm);
 }
 .shield .right {
-  border-radius: 0 var(--bs-border-radius-pill) var(--bs-border-radius-pill) 0;
+  border-radius: 0 var(--bs-border-radius-sm) var(--bs-border-radius-sm) 0;
 }
 </style>

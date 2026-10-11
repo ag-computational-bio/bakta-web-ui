@@ -128,9 +128,9 @@ const table = computed(() => {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  padding: 0.25rem 0.4rem 0.25rem 0.75rem;
+  padding: 0.375rem 0.5rem 0.375rem 0.875rem;
   border: 1px solid var(--bs-border-color);
-  border-radius: var(--bs-border-radius-pill);
+  border-radius: var(--bs-border-radius-sm);
   background-color: var(--bs-body-bg);
   color: var(--bs-body-color);
   font-size: var(--bakta-font-size-md);
@@ -140,8 +140,8 @@ const table = computed(() => {
   background-color: var(--bakta-surface);
 }
 .feature-chip .count {
-  padding: 0 0.45rem;
-  border-radius: var(--bs-border-radius-pill);
+  padding: 0.0625rem 0.5rem;
+  border-radius: calc(var(--bs-border-radius-sm) - 0.125rem);
   background-color: var(--bakta-surface);
   color: var(--bs-secondary-color);
   font-size: var(--bakta-font-size-xs);
@@ -175,8 +175,8 @@ const table = computed(() => {
 .dbxref {
   display: inline-block;
   margin: 0 0.25rem 0.25rem 0;
-  padding: 0 0.4rem;
-  border-radius: var(--bs-border-radius-pill);
+  padding: 0.125rem 0.5rem;
+  border-radius: var(--bs-border-radius-sm);
   background-color: var(--bs-primary-bg-subtle);
   font-size: var(--bakta-font-size-sm);
   text-decoration: none;

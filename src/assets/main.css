@@ -196,9 +196,11 @@ a {
   box-shadow: none;
 }
 
-/* Badges: always fully rounded, like the feature type chips */
+/* Badges: the same small radius as the feature type chips and workflow shields */
 .badge {
-  --bs-badge-border-radius: var(--bs-border-radius-pill);
+  --bs-badge-border-radius: var(--bs-border-radius-sm);
+  --bs-badge-padding-x: 0.75em;
+  --bs-badge-padding-y: 0.45em;
 }
 
 /* Alerts */
