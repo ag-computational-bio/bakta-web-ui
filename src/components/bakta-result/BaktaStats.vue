@@ -34,20 +34,22 @@
     <h2 class="stat-title">Feature counts (Total: {{ data.features.length }})</h2>
     <div class="row">
       <div v-for="(column, idx) in featureColumns" :key="idx" class="col-md-4">
-        <div v-for="type in column" :key="type" class="row py-1">
-          <div class="col-6">
-            <a
-              v-if="featureCount[type]"
-              href="#"
-              class="feature-link"
-              :title="`Show all ${bakta.featureTypeLabel(type)} features in the annotation table`"
-              @click.prevent="emit('select:type', type)"
-              >{{ bakta.featureTypeLabel(type) }}</a
-            >
-            <span v-else class="text-secondary">{{ bakta.featureTypeLabel(type) }}</span>
-          </div>
+        <component
+          :is="featureCount[type] ? 'a' : 'div'"
+          v-for="type in column"
+          :key="type"
+          class="row py-1 feature-row"
+          :href="featureCount[type] ? '#' : undefined"
+          :title="
+            featureCount[type]
+              ? `Show all ${bakta.featureTypeLabel(type)} features in the annotation table`
+              : undefined
+          "
+          @click="featureCount[type] && selectType($event, type)"
+        >
+          <div class="col-6 feature-label">{{ bakta.featureTypeLabel(type) }}</div>
           <div class="col-6 feature-value">{{ featureCount[type] }}</div>
-        </div>
+        </component>
       </div>
     </div>
   </section>
@@ -73,6 +75,11 @@ const props = withDefaults(
 const emit = defineEmits<{
   (e: 'select:type', type: string): void
 }>()
+
+function selectType(event: Event, type: string) {
+  event.preventDefault()
+  emit('select:type', type)
+}
 
 const featureColumns = [
   ['tRNA', 'tmRNA', 'rRNA', 'ncRNA'],
@@ -101,10 +108,21 @@ function formatDuration(from: string, to: string) {
 </script>
 
 <style scoped>
-.feature-link {
+.feature-row {
+  border-radius: var(--bs-border-radius);
+  color: var(--bs-body-color);
   text-decoration: none;
 }
-.feature-link:hover {
+div.feature-row .feature-label {
+  color: var(--bs-secondary-color);
+}
+a.feature-row .feature-label {
+  color: var(--bs-link-color);
+}
+a.feature-row:hover {
+  background-color: var(--bs-primary-bg-subtle);
+}
+a.feature-row:hover .feature-label {
   text-decoration: underline;
 }
 .feature-value {
