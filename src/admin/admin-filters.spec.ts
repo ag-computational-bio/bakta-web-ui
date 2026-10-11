@@ -56,9 +56,20 @@ describe('time range', () => {
     expect(filterQuery()).toEqual({ range: undefined, from: undefined, to: undefined })
     Object.assign(filters, { range: '90d', customFrom: '2026-01-01' })
     expect(filterQuery()).toEqual({ range: '90d', from: undefined, to: undefined })
-    readFilterQuery({ range: 'custom', from: '2026-01-01', to: 'bad' })
+    readFilterQuery({ range: 'custom', from: '2026-01-01' })
     expect(filters).toMatchObject({ range: 'custom', customFrom: '2026-01-01', customTo: '' })
     expect(filterQuery()).toEqual({ range: 'custom', from: '2026-01-01', to: undefined })
+  })
+
+  it('uses the default range for dates that do not exist', () => {
+    for (const to of ['bad', '2026-13-01', '2026-02-30']) {
+      Object.assign(filters, { range: '90d' })
+      readFilterQuery({ range: 'custom', from: '2026-01-01', to })
+      expect(filters).toMatchObject({ range: '30d', customFrom: '', customTo: '' })
+      expect(() => statsFilter(now)).not.toThrow()
+    }
+    readFilterQuery({ range: 'custom', from: '2024-02-29', to: '2024-03-01' })
+    expect(filters).toMatchObject({ customFrom: '2024-02-29', customTo: '2024-03-01' })
   })
 })
 

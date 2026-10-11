@@ -105,12 +105,26 @@ export function filterQuery(): Record<string, string | undefined> {
 export function readFilterQuery(query: Record<string, unknown>) {
   const range = timeRanges.find((r) => r.value === query.range)?.value
   if (range) filters.range = range
-  const date = (value: unknown) =>
-    typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value) ? value : ''
   if (filters.range === 'custom') {
-    filters.customFrom = date(query.from)
-    filters.customTo = date(query.to)
+    const from = query.from == undefined ? '' : calendarDate(query.from)
+    const to = query.to == undefined ? '' : calendarDate(query.to)
+    // a broken date would break the statistics requests, so the default range is used
+    if (from == undefined || to == undefined) {
+      Object.assign(filters, { range: '30d', customFrom: '', customTo: '' })
+      return
+    }
+    filters.customFrom = from
+    filters.customTo = to
   }
+}
+
+/**
+ * The value when it is a real day as yyyy-mm-dd, like 2026-02-28 but not 2026-02-30.
+ */
+function calendarDate(value: unknown): string | undefined {
+  if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return undefined
+  const date = new Date(`${value}T00:00:00Z`)
+  return !isNaN(date.getTime()) && date.toISOString().startsWith(value) ? value : undefined
 }
 
 /**
