@@ -26,9 +26,9 @@ export function statusTone(status: AnyStatus): StatusTone {
   }
 }
 
-// active states use strong colors, finished and waiting states light ones
+// active and waiting states use strong colors, finished states light ones
 export function isActiveStatus(status: AnyStatus): boolean {
-  return status === 'INIT' || status === 'RUNNING' || status === 'running'
+  return status === 'INIT' || status === 'pending' || status === 'RUNNING' || status === 'running'
 }
 
 export function statusIcon(status: AnyStatus): string {
