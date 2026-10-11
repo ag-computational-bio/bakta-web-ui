@@ -26,6 +26,11 @@ export function statusTone(status: AnyStatus): StatusTone {
   }
 }
 
+// active states use strong colors, finished and waiting states light ones
+export function isActiveStatus(status: AnyStatus): boolean {
+  return status === 'INIT' || status === 'RUNNING' || status === 'running'
+}
+
 export function statusIcon(status: AnyStatus): string {
   switch (status) {
     case 'INIT':
@@ -37,13 +42,13 @@ export function statusIcon(status: AnyStatus): string {
     case 'SUCCESSFUL':
     case 'SUCCESSFULL':
     case 'succeeded':
-      return 'bi-check-circle-fill'
+      return 'bi-check-circle'
     case 'NOT_FOUND':
     case 'UNAUTHORIZED':
     case 'ERROR':
     case 'failed':
     case 'error':
-      return 'bi-x-circle-fill'
+      return 'bi-x-circle'
     case 'unknown':
       return 'bi-question-circle'
   }
