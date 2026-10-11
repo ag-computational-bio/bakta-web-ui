@@ -12,25 +12,125 @@
         placeholder="Search by job ID, organism or name"
         aria-label="Search jobs"
       />
-      <select v-model="sort" class="form-select form-select-sm sort" aria-label="Sort">
-        <option v-for="option in sortOptions" :key="option.value" :value="option.value">
-          {{ option.label }}
-        </option>
-      </select>
-      <span v-if="loading" class="spinner-border spinner-border-sm text-secondary ms-1"></span>
-    </div>
-    <div class="d-flex flex-column gap-2 mb-3">
-      <div class="chip-row">
-        <span class="section-label mb-0">Status</span>
-        <ChipGroup v-model="statuses" :options="statusOptions" label="Status" />
+      <div class="dropdown">
+        <button
+          type="button"
+          class="btn btn-outline-secondary btn-sm dropdown-toggle"
+          data-bs-toggle="dropdown"
+          data-bs-auto-close="outside"
+          aria-expanded="false"
+        >
+          <i class="bi bi-funnel me-1"></i>Filters
+          <span v-if="activeFilters.length" class="badge rounded-pill bg-primary ms-1">
+            {{ activeFilters.length }}
+          </span>
+        </button>
+        <div class="dropdown-menu p-3">
+          <div class="filter-menu">
+            <fieldset>
+              <legend class="section-label">Status</legend>
+              <div v-for="option in statusOptions" :key="option.value" class="form-check">
+                <input
+                  :id="`filter-statuses-${option.value}`"
+                  v-model="statuses"
+                  class="form-check-input"
+                  type="checkbox"
+                  :value="option.value"
+                />
+                <label
+                  class="form-check-label text-nowrap"
+                  :for="`filter-statuses-${option.value}`"
+                >
+                  {{ option.label }}
+                </label>
+              </div>
+            </fieldset>
+            <fieldset>
+              <legend class="section-label">Workflow</legend>
+              <div v-for="option in kindOptions" :key="option.value" class="form-check">
+                <input
+                  :id="`filter-kinds-${option.value}`"
+                  v-model="kinds"
+                  class="form-check-input"
+                  type="checkbox"
+                  :value="option.value"
+                />
+                <label class="form-check-label text-nowrap" :for="`filter-kinds-${option.value}`">
+                  {{ option.label }}
+                </label>
+              </div>
+            </fieldset>
+            <fieldset>
+              <legend class="section-label">Live phase</legend>
+              <div v-for="option in phaseOptions" :key="option.value" class="form-check">
+                <input
+                  :id="`filter-phases-${option.value}`"
+                  v-model="phases"
+                  class="form-check-input"
+                  type="checkbox"
+                  :value="option.value"
+                />
+                <label class="form-check-label text-nowrap" :for="`filter-phases-${option.value}`">
+                  {{ option.label }}
+                </label>
+              </div>
+            </fieldset>
+          </div>
+        </div>
       </div>
-      <div class="chip-row">
-        <span class="section-label mb-0">Workflow</span>
-        <ChipGroup v-model="kinds" :options="kindOptions" label="Workflow" />
-      </div>
-      <div class="chip-row">
-        <span class="section-label mb-0">Live phase</span>
-        <ChipGroup v-model="phases" :options="phaseOptions" label="Live phase" />
+      <button
+        v-for="chip in activeFilters"
+        :key="chip.label"
+        type="button"
+        class="feature-chip filter-chip"
+        :aria-label="`Remove filter ${chip.label}`"
+        @click="chip.remove()"
+      >
+        {{ chip.label }}<i class="bi bi-x"></i>
+      </button>
+      <button
+        v-if="activeFilters.length"
+        type="button"
+        class="btn btn-link btn-sm px-1"
+        @click="resetFilters"
+      >
+        Reset
+      </button>
+      <div class="d-flex flex-wrap align-items-center gap-2 ms-auto">
+        <span v-if="loading" class="spinner-border spinner-border-sm text-secondary"></span>
+        <span class="small text-secondary text-nowrap">
+          {{ formatCount(total) }} {{ total === 1 ? 'job' : 'jobs' }}
+        </span>
+        <select v-model="sort" class="form-select form-select-sm sort" aria-label="Sort">
+          <option v-for="option in sortOptions" :key="option.value" :value="option.value">
+            {{ option.label }}
+          </option>
+        </select>
+        <div class="dropdown">
+          <button
+            type="button"
+            class="btn btn-outline-secondary btn-sm dropdown-toggle"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+          >
+            Bulk actions
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end">
+            <template v-for="item in bulkItems" :key="item.action">
+              <li v-if="item.action === 'stop'"><hr class="dropdown-divider" /></li>
+              <li>
+                <button
+                  type="button"
+                  class="dropdown-item"
+                  :class="{ 'text-danger': item.danger }"
+                  @click="openBulk(item.action)"
+                >
+                  <i class="bi me-2" :class="item.icon"></i>{{ item.label }}
+                </button>
+              </li>
+            </template>
+          </ul>
+        </div>
       </div>
     </div>
 
@@ -118,7 +218,7 @@
   </div>
 
   <OrphanWorkflows ref="orphans" />
-  <BulkActionsPanel @done="reloadAll" />
+  <BulkActionModal ref="bulkModal" @done="reloadAll" />
 
   <ConfirmModal ref="confirmModal" v-bind="modal">
     <p class="mb-0">{{ modal.text }}</p>
@@ -131,22 +231,23 @@ import Shield from '@/components/Shield.vue'
 import StatusBadge from '@/components/StatusBadge.vue'
 import { formatWorkflowKind, workflowShieldProps, WorkflowKinds } from '@/model/job'
 import { formatStatus } from '@/model/status-style'
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import {
   AdminJobStatuses,
   JobSorts,
   WorkflowPhases,
   type AdminJobStatus,
+  type BulkAction,
   type JobListItem,
   type JobSort,
   type WorkflowPhase,
 } from '../admin-api'
 import { filterQuery, filters, statsFilter } from '../admin-filters'
 import { handleAdminError, useAdminApi } from '../admin-session'
+import { bulkScope } from '../bulk-preview'
 import AdminFilterBar from '../components/AdminFilterBar.vue'
-import BulkActionsPanel from '../components/BulkActionsPanel.vue'
-import ChipGroup from '../components/ChipGroup.vue'
+import BulkActionModal from '../components/BulkActionModal.vue'
 import ConfirmModal from '../components/ConfirmModal.vue'
 import ListPagination from '../components/ListPagination.vue'
 import OrphanWorkflows from '../components/OrphanWorkflows.vue'
@@ -155,6 +256,7 @@ import {
   formatCount,
   formatDateTime,
   formatDuration,
+  kindLabel,
   outcomeText,
   phaseStatus,
 } from '../format'
@@ -178,6 +280,14 @@ const sortOptions: { value: JobSort; label: string }[] = [
 const statusOptions = AdminJobStatuses.map((value) => ({ value, label: formatStatus(value) }))
 const kindOptions = WorkflowKinds.map((value) => ({ value, label: formatWorkflowKind(value) }))
 const phaseOptions = WorkflowPhases.map((value) => ({ value, label: value }))
+// the bulk menu: the actions that change nothing for good first, then stop and delete
+const bulkItems: { action: BulkAction; label: string; icon: string; danger: boolean }[] = [
+  { action: 'retry', label: 'Retry', icon: 'bi-arrow-repeat', danger: false },
+  { action: 'resume', label: 'Resume', icon: 'bi-play-circle', danger: false },
+  { action: 'resubmit', label: 'Resubmit', icon: 'bi-send', danger: false },
+  { action: 'stop', label: 'Stop', icon: 'bi-stop-circle', danger: true },
+  { action: 'delete', label: 'Delete', icon: 'bi-trash', danger: true },
+]
 
 const api = useAdminApi()
 const route = useRoute()
@@ -259,6 +369,42 @@ async function load() {
 }
 
 const orphans = ref<InstanceType<typeof OrphanWorkflows>>()
+const bulkModal = ref<InstanceType<typeof BulkActionModal>>()
+
+// the active filters as removable chips
+const activeFilters = computed(() => [
+  ...statuses.value.map((v) => ({
+    label: `Status: ${formatStatus(v)}`,
+    remove: () => (statuses.value = statuses.value.filter((s) => s !== v)),
+  })),
+  ...kinds.value.map((v) => ({
+    label: `Workflow: ${kindLabel(v)}`,
+    remove: () => (kinds.value = kinds.value.filter((k) => k !== v)),
+  })),
+  ...phases.value.map((v) => ({
+    label: `Phase: ${v}`,
+    remove: () => (phases.value = phases.value.filter((p) => p !== v)),
+  })),
+])
+
+function resetFilters() {
+  statuses.value = []
+  kinds.value = []
+  phases.value = []
+}
+
+function openBulk(action: BulkAction) {
+  bulkModal.value?.open(
+    action,
+    bulkScope({
+      q: search.value,
+      environment: filters.environment,
+      kinds: kinds.value,
+      statuses: statuses.value,
+      phases: phases.value,
+    }),
+  )
+}
 
 function reloadAll() {
   load()
@@ -308,14 +454,21 @@ load()
 .sort {
   width: auto;
 }
-.chip-row {
+.filter-menu {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
-  gap: 0.25rem 0.75rem;
+  gap: 1rem 2rem;
+  width: max-content;
+  max-width: calc(100vw - 3rem);
 }
-.chip-row .section-label {
-  width: 6rem;
+.filter-menu fieldset {
+  min-width: 8rem;
+}
+/* the active filters: small chips with a remove icon */
+.feature-chip.filter-chip {
+  padding: 0.125rem 0.375rem 0.125rem 0.625rem;
+  gap: 0.25rem;
+  font-size: var(--bakta-font-size-sm);
 }
 .row-action {
   --bs-btn-padding-x: 0.375rem;
