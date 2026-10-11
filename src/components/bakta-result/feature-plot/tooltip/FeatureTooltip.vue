@@ -1,5 +1,5 @@
 <template>
-  <h5>{{ feature.id }}</h5>
+  <h3 class="subsection-title">{{ feature.id }}</h3>
   <table class="table table-sm">
     <tbody>
       <tr>

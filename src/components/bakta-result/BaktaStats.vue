@@ -2,7 +2,7 @@
   <div class="row g-3 mb-3">
     <div class="col-lg-4">
       <section class="stat-panel">
-        <h2 class="stat-title">Input</h2>
+        <h2 class="section-label">Input</h2>
         <display-tuple label="Organism" :value="name" />
         <display-tuple label="Sequences" :value="sequencesCount" />
         <display-tuple label="Genome size" :value="size" />
@@ -11,7 +11,7 @@
 
     <div v-if="job" class="col-lg-4">
       <section class="stat-panel">
-        <h2 class="stat-title">Runtime</h2>
+        <h2 class="section-label">Runtime</h2>
         <display-tuple label="Start" :value="started" />
         <display-tuple label="Stop" :value="ended" />
         <display-tuple label="Duration" :value="duration" />
@@ -20,7 +20,7 @@
 
     <div class="col-lg-4">
       <section class="stat-panel">
-        <h2 class="stat-title">Statistics</h2>
+        <h2 class="section-label">Statistics</h2>
         <display-tuple label="N50" :value="formatBp(data.stats.n50, 'bp')" />
         <display-tuple v-if="data.stats.n90" label="N90" :value="formatBp(data.stats.n90, 'bp')" />
         <display-tuple label="GC-content" :value="formatGc(data.stats.gc)" />
@@ -31,7 +31,7 @@
   </div>
 
   <section class="stat-panel">
-    <h2 class="stat-title">Feature counts (Total: {{ data.features.length }})</h2>
+    <h2 class="section-label">Feature counts (Total: {{ data.features.length }})</h2>
     <div class="row">
       <div v-for="(column, idx) in featureColumns" :key="idx" class="col-md-4">
         <component
@@ -134,13 +134,5 @@ a.feature-row:hover .feature-label {
   padding: 1rem 1.25rem;
   border-radius: var(--bs-border-radius-lg);
   background-color: var(--bakta-surface);
-}
-.stat-title {
-  margin-bottom: 0.5rem;
-  font-size: var(--bakta-font-size-sm);
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--bs-secondary-color);
 }
 </style>

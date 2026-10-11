@@ -44,7 +44,7 @@
           <div class="rounded-3 p-4 bg-body-tertiary">
             <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
               <div>
-                <h5 class="mb-1"><i class="bi bi-stars me-2"></i>Run Baktfold</h5>
+                <h3 class="subsection-title mb-1"><i class="bi bi-stars me-2"></i>Run Baktfold</h3>
                 <p class="text-secondary mb-0">
                   This job was run without Baktfold. Submit the result JSON to run protein structure
                   prediction as a standalone Baktfold workflow.

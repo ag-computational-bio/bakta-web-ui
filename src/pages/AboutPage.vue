@@ -1,7 +1,7 @@
 <template>
   <div class="flex-grow-1">
     <div class="container">
-      <h2>General</h2>
+      <h2 class="section-title">General</h2>
       <p>
         Bakta is a tool for the rapid &amp; standardized annotation of bacterial genomes and
         plasmids from both isolates and MAGs.
@@ -11,7 +11,7 @@
         that is given below refers to this web service. Information regarding the commandline tool
         are provided via <a href="https://github.com/oschwengers/bakta" target="_blank">GitHub</a>.
       </p>
-      <h2>Terms of use</h2>
+      <h2 class="section-title mt-4">Terms of use</h2>
       <ul>
         <li>
           General contact and questions:
@@ -73,10 +73,6 @@
 }
 .container > * {
   max-width: 52rem;
-}
-h2 {
-  margin-top: 1.5rem;
-  font-size: 1.35rem;
 }
 a {
   overflow-wrap: anywhere;

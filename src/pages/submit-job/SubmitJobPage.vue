@@ -3,7 +3,7 @@
     <notification :message="error" />
 
     <div class="alert alert-primary mb-4">
-      <h2 class="fs-6 fw-bold mb-2">News</h2>
+      <h2 class="section-label">News</h2>
       <article>
         <i class="bi bi-newspaper me-2"></i><b>2026-10</b> Added protein structural annotation
         support using:

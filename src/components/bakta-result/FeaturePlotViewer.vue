@@ -64,11 +64,11 @@
         <div class="accordion-body">
           <div class="d-flex">
             <div class="col">
-              <h2 class="fs-5">Feature colors</h2>
+              <h3 class="subsection-title">Feature colors</h3>
               <ColorLegend :colors="featureColors" />
             </div>
             <div class="col">
-              <h2 class="fs-5">CDS colors</h2>
+              <h3 class="subsection-title">CDS colors</h3>
               <ColorLegend :colors="cogHelper.baktaCogColors" />
             </div>
           </div>
@@ -90,14 +90,14 @@
       </div>
       <div class="accordion-collapse collapse" id="gc-explanation" data-bs-parent="#documentation">
         <div class="accordion-body">
-          <h2>GC-plot</h2>
+          <h2 class="section-title">GC-plot</h2>
           <p>
             GC-information (the percentage of G and C nucleotides in the sequence) is presented at
             two places in the plot. The overall GC-content for the whole sequence is shown in the
             center of the plot, below the sequence name. Regionspecific deviations from the overall
             GC-content are shown in the GC content track.
           </p>
-          <h3>GC calculation</h3>
+          <h3 class="subsection-title">GC calculation</h3>
           <p>
             The GC-track shows 1440 values (four values per degree of the circle). This should
             present a good enough trade-off between detail and low memory usage. For each position
@@ -106,12 +106,12 @@
             gc_total.
           </p>
 
-          <h2>GC-skew-plot</h2>
+          <h2 class="section-title">GC-skew-plot</h2>
           <p>
             GC-skew information (the differences in the count of G and C nucleotides, normalized to
             the total amount of G and C) is presented in the GC skew track.
           </p>
-          <h3>GC-skew calculation</h3>
+          <h3 class="subsection-title">GC-skew calculation</h3>
           <p>
             The track shows 1440 values (four values per degree of the circle). This should present
             a good enough trade-off between detail and low memory usage. For each position the

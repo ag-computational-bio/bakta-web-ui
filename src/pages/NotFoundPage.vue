@@ -1,7 +1,7 @@
 <template>
   <div class="container">
     <div class="alert alert-danger">
-      <h2 class="h5">Page not found: {{ route.fullPath }}</h2>
+      <h2 class="section-title">Page not found: {{ route.fullPath }}</h2>
       <RouterLink to="/">Back to the start page</RouterLink>
     </div>
   </div>

@@ -204,11 +204,6 @@ a {
   --bs-table-striped-bg: var(--bakta-surface);
 }
 .table > thead > tr > th {
-  font-size: var(--bakta-font-size-sm);
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--bs-secondary-color);
   border-bottom-width: 1px;
 }
 
@@ -228,10 +223,30 @@ a {
   --bs-progress-border-radius: var(--bs-border-radius-pill);
 }
 
-/* Section titles inside form cards and panels */
+/*
+ * Headings. section-title for sections of a page or card, subsection-title for
+ * groups inside a section, section-label for small upper case labels above
+ * panels and in table headers.
+ */
 .section-title {
   margin-bottom: 0.75rem;
   font-size: 1.15rem;
+}
+.subsection-title {
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+}
+.section-label,
+.table > thead > tr > th {
+  font-size: var(--bakta-font-size-sm);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--bs-secondary-color);
+}
+.section-label {
+  margin-bottom: 0.5rem;
 }
 
 /* Tooltips behind the help icons */

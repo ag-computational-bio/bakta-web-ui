@@ -259,7 +259,7 @@
           <div class="col-12">
             <div class="rounded-3 p-3 bg-body-tertiary">
               <div class="mb-3">
-                <h5 class="mb-0">Additional evidence files</h5>
+                <h3 class="subsection-title mb-0">Additional evidence files</h3>
                 <div class="small text-secondary">Only applied when a file is provided.</div>
               </div>
               <div class="row g-3">
@@ -341,7 +341,7 @@
 
           <div class="col-12">
             <div class="rounded-3 p-3 bg-body-tertiary">
-              <h5 class="mb-0">Skip features</h5>
+              <h3 class="subsection-title mb-0">Skip features</h3>
               <div class="small text-secondary mb-3">
                 Select annotations you want Bakta to skip.
               </div>

@@ -31,7 +31,7 @@
       </div>
 
       <div v-if="stages.length > 0">
-        <div class="text-secondary small fw-semibold mb-2">Workflow steps</div>
+        <div class="section-label">Workflow steps</div>
         <div class="d-flex flex-column gap-0">
           <div
             v-for="(stage, idx) in stages"

@@ -29,7 +29,7 @@
       <template v-if="!jobNotFinished && (job || result)">
         <div class="d-flex justify-content-between align-items-center mb-4 mt-3">
           <div>
-            <h2 class="h4 mb-1">{{ job?.name ?? result?.name ?? 'Bakta Proteins' }}</h2>
+            <h2 class="section-title mb-1">{{ job?.name ?? result?.name ?? 'Bakta Proteins' }}</h2>
             <div class="text-secondary">Standalone protein annotation workflow summary</div>
           </div>
           <Shield v-bind="workflowShieldProps('bakta_proteins')">

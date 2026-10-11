@@ -3,7 +3,7 @@
     <Notification v-if="error" class="mb-3" type="warning" :message="error" />
     <template v-if="logs == undefined">
       <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
-        <h2 class="h5 mb-0">Your jobs</h2>
+        <h2 class="section-title mb-0">Your jobs</h2>
         <div class="d-flex align-items-center gap-3">
           <span v-if="polling" class="small text-secondary d-flex align-items-center gap-2">
             <span v-if="loading" class="spinner-border spinner-border-sm" role="status">
@@ -40,7 +40,7 @@
     </template>
     <div v-else>
       <div class="w-100 d-flex justify-content-between align-items-center mb-3">
-        <h2 class="h5 mb-0">Job logs</h2>
+        <h2 class="section-title mb-0">Job logs</h2>
         <button
           class="btn btn-sm btn-outline-secondary"
           title="Close logs"
