@@ -20,7 +20,11 @@
           </button>
         </div>
       </div>
-      <div v-if="hasJobs" class="card overflow-hidden">
+      <div v-if="!loaded" class="card text-center p-5">
+        <div class="spinner-border text-primary mx-auto" role="status"></div>
+        <p class="text-secondary mt-3 mb-0">Loading your jobs...</p>
+      </div>
+      <div v-else-if="hasJobs" class="card overflow-hidden">
         <JobsTable
           :jobs="jobs"
           @delete:job="deleteJob"
@@ -65,6 +69,8 @@ import { usePollManager } from './poll-manager'
 
 const jobs = ref<JobList>([])
 const loading = ref(false)
+// stays false until the first job list arrives, so an empty list is not shown too early
+const loaded = ref(false)
 const bakta = useBaktaService()
 const hasJobs = computed(() => jobs.value.length > 0)
 const hasNotFoundJobs = computed(() => jobs.value.some((j) => j.jobStatus === 'NOT_FOUND'))
@@ -105,10 +111,13 @@ function updateJobs(): Promise<JobList> {
         return bs.valueOf() - as.valueOf()
       })
       jobs.value = x
-      loading.value = false
       return x
     })
     .catch((err) => (error.value = err))
+    .finally(() => {
+      loading.value = false
+      loaded.value = true
+    })
 }
 
 function deleteJob(jobID: string) {
