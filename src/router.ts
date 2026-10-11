@@ -61,6 +61,23 @@ const routes = [
     name: 'Submit',
     component: Submit,
   },
+  // the hidden admin area, loaded only when opened
+  {
+    path: '/admin/callback',
+    name: 'AdminCallback',
+    component: () => import('@/admin/pages/AdminCallbackPage.vue'),
+  },
+  {
+    path: '/admin',
+    component: () => import('@/admin/pages/AdminLayout.vue'),
+    children: [
+      {
+        path: '',
+        name: 'AdminOverview',
+        component: () => import('@/admin/pages/AdminOverviewPage.vue'),
+      },
+    ],
+  },
   {
     path: '/:catchAll(.*)',
     component: NotFound,
