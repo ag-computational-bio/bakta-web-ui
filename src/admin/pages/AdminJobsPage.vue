@@ -118,13 +118,22 @@
             <template v-for="item in bulkItems" :key="item.action">
               <li v-if="item.action === 'stop'"><hr class="dropdown-divider" /></li>
               <li>
+                <!-- delete and stop on everything are too easy to start by mistake -->
                 <button
                   type="button"
                   class="dropdown-item"
-                  :class="{ 'text-danger': item.danger }"
-                  @click="openBulk(item.action)"
+                  :class="{ 'text-danger': item.danger && narrowed }"
+                  :aria-disabled="(item.danger && !narrowed) || undefined"
+                  :title="item.danger && !narrowed ? 'Set a filter first' : undefined"
+                  @click="(!item.danger || narrowed) && openBulk(item.action)"
                 >
-                  <i class="bi" :class="item.icon" aria-hidden="true"></i>{{ item.label }}
+                  <i class="bi" :class="item.icon" aria-hidden="true"></i>
+                  <span>
+                    <span class="d-block">{{ item.label }}</span>
+                    <span v-if="item.danger && !narrowed" class="item-description">
+                      Set a filter first
+                    </span>
+                  </span>
                 </button>
               </li>
             </template>
@@ -403,6 +412,15 @@ function resetFilters() {
   kinds.value = []
   phases.value = []
 }
+
+// a filter that narrows the jobs: status, phase, workflow kind or search
+const narrowed = computed(
+  () =>
+    !!search.value.trim() ||
+    !!statuses.value.length ||
+    !!kinds.value.length ||
+    !!phases.value.length,
+)
 
 function openBulk(action: BulkAction) {
   bulkModal.value?.open(

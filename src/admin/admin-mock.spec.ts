@@ -143,4 +143,14 @@ describe('mock data retention', () => {
     })
     expect(deletion.items[0]).toMatchObject({ applicable: true, reason: null })
   })
+
+  it('does not delete running workflows', async () => {
+    const mock = createMockAdminApi()
+    const filter = { ...all, phases: ['Running' as const] }
+    const preview = await mock.bulk({ filter, action: 'delete', dry_run: true })
+    expect(preview.items.length).toBeGreaterThan(0)
+    for (const w of preview.items) {
+      expect(w).toMatchObject({ applicable: false, reason: 'Still running, stop it first' })
+    }
+  })
 })

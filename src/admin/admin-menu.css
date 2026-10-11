@@ -83,6 +83,11 @@
   font-weight: 400;
   color: var(--bs-secondary-color);
 }
+.admin-menu .dropdown-item[aria-disabled='true'] {
+  color: var(--bs-secondary-color);
+  background-color: transparent;
+  cursor: not-allowed;
+}
 .admin-menu .dropdown-item.text-danger:hover,
 .admin-menu .dropdown-item.text-danger:focus {
   background-color: var(--bs-danger-bg-subtle);

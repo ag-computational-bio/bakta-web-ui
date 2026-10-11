@@ -7,10 +7,14 @@
           <button type="button" class="btn-close" aria-label="Close" @click="hide"></button>
         </div>
         <div class="modal-body">
+          <p v-if="scope" class="fw-semibold mb-2">{{ scopeText }}</p>
           <p class="text-secondary mb-2">{{ text.confirm }}</p>
-          <div v-if="scope" class="small mb-3">
+          <div
+            v-if="scope && (usedFilters.length || scope.unusedStatuses.length)"
+            class="small mb-3"
+          >
             <span class="section-label mb-1 d-block">Filters of the job list</span>
-            <ul class="list-unstyled mb-0 d-flex flex-wrap gap-1">
+            <ul v-if="usedFilters.length" class="list-unstyled mb-0 d-flex flex-wrap gap-1">
               <li
                 v-for="f in usedFilters"
                 :key="f"
@@ -19,8 +23,9 @@
                 {{ f }}
               </li>
             </ul>
-            <p v-if="ignoredFilters.length" class="text-secondary mt-1 mb-0">
-              Not used for workflows: {{ ignoredFilters.join(', ') }}.
+            <p v-if="scope.unusedStatuses.length" class="text-secondary mt-1 mb-0">
+              Not used for workflows: status
+              {{ scope.unusedStatuses.map((v) => formatStatus(v)).join(', ') }}.
             </p>
           </div>
 
@@ -53,7 +58,7 @@
                     <th>Job</th>
                     <th>Phase</th>
                     <th>Finished</th>
-                    <th>{{ results ? 'Result' : 'Applies' }}</th>
+                    <th class="text-nowrap">{{ results ? 'Result' : appliesHeader }}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -107,6 +112,24 @@
             <i class="bi bi-exclamation-triangle me-1"></i>Check the list, then click again to
             confirm.
           </span>
+          <!-- many workflows: the number is typed instead of a second click -->
+          <div
+            v-else-if="needsTypedCount && !results && preview"
+            class="d-flex flex-wrap align-items-center gap-2 me-auto"
+          >
+            <label class="small text-danger" :for="countId">
+              Type {{ applicable.length }} to confirm
+            </label>
+            <input
+              :id="countId"
+              v-model="typedCount"
+              type="text"
+              inputmode="numeric"
+              autocomplete="off"
+              class="form-control form-control-sm count"
+              :disabled="running"
+            />
+          </div>
           <button type="button" class="btn btn-outline-secondary" @click="hide">
             {{ results ? 'Close' : 'Cancel' }}
           </button>
@@ -115,7 +138,7 @@
             type="button"
             class="btn"
             :class="text.danger ? 'btn-danger' : 'btn-primary'"
-            :disabled="busy || running"
+            :disabled="busy || running || (needsTypedCount && !countTyped)"
             @click="confirm"
           >
             <i class="bi me-1" :class="text.icon"></i>{{ runLabel }}
@@ -143,7 +166,8 @@ import ListPagination from './ListPagination.vue'
 /*
  * One action on the live workflows that match the filters of the job list:
  * a preview first, then the real run on exactly the previewed workflows.
- * Delete and stop need a second click.
+ * Delete and stop need a second click, or the typed number of workflows when
+ * there are many.
  */
 
 const emit = defineEmits<{ (e: 'done'): void }>()
@@ -161,7 +185,7 @@ const texts: Record<BulkAction, BulkText> = {
   delete: {
     label: 'Delete',
     done: 'deleted',
-    reason: '',
+    reason: 'still running, stop it first',
     icon: 'bi-trash',
     danger: true,
     confirm: 'The workflows and their pods are deleted from Argo. This cannot be undone.',
@@ -248,24 +272,49 @@ const summary = computed(() => {
 const usedFilters = computed(() => {
   const s = scope.value
   if (!s) return []
-  const env = environments.find((e) => e.value === s.environment)?.label ?? s.environment
-  const list = [`Environment: ${env}`]
+  const list: string[] = []
   if (s.q) list.push(`Search: ${s.q}`)
   if (s.kinds.length) list.push(`Workflow: ${s.kinds.map(kindLabel).join(', ')}`)
   if (s.phases.length) list.push(`Phase: ${s.phases.join(', ')}`)
   if (s.empty) list.push('Status and phase exclude each other')
   return list
 })
-const ignoredFilters = computed(() => {
+// the workflows the action works on, in one sentence at the top
+const scopeText = computed(() => {
   const s = scope.value
-  if (!s) return []
-  const list = ['the time range']
-  if (s.unusedStatuses.length)
-    list.push(`status ${s.unusedStatuses.map((v) => formatStatus(v)).join(', ')}`)
-  return list
+  if (!s) return ''
+  const env =
+    s.environment === 'all'
+      ? 'all environments'
+      : (environments.find((e) => e.value === s.environment)?.label ?? s.environment)
+  const h = Number(hours.value)
+  const age =
+    hours.value === '' || !(h >= 0)
+      ? 'of any age'
+      : `that finished more than ${formatCount(h)} ${h === 1 ? 'hour' : 'hours'} ago`
+  return `This works on live Argo workflows in ${env}, ${age}. The time range of the page is not used.`
 })
 
+const appliesHeader = computed(() => {
+  const list = preview.value?.items ?? []
+  return `${formatCount(applicable.value.length)} of ${formatCount(list.length)} apply`
+})
+
+// above this many workflows a danger action needs the typed number instead of a second click
+const typedCountLimit = 10
+const countId = useId()
+const typedCount = ref('')
+const needsTypedCount = computed(
+  () => text.value.danger && applicable.value.length > typedCountLimit,
+)
+const countTyped = computed(() => typedCount.value.trim() === String(applicable.value.length))
+watch(preview, () => (typedCount.value = ''))
+
 function confirm() {
+  if (needsTypedCount.value) {
+    if (countTyped.value) run()
+    return
+  }
   if (text.value.danger && !confirming.value) {
     confirming.value = true
     return
@@ -347,6 +396,9 @@ defineExpose({ open })
 }
 .hours {
   width: 5.5rem;
+}
+.count {
+  width: 5rem;
 }
 .not-applicable td {
   color: var(--bs-secondary-color);

@@ -82,7 +82,8 @@ export function bulkApplicable(action: BulkAction, phase: string, suspended: boo
     case 'resubmit':
       return phase === 'Succeeded' || phase === 'Failed' || phase === 'Error'
     case 'delete':
-      return true
+      // a running workflow is stopped first, so a delete does not hit it by surprise
+      return phase !== 'Pending' && phase !== 'Running'
   }
 }
 
@@ -90,6 +91,7 @@ export function bulkApplicable(action: BulkAction, phase: string, suspended: boo
 const inputsDeleted = 'Input data was deleted after the retention period'
 const logsDeleted = 'Logs were deleted after the retention period'
 const inputsDeletedReason = 'Input data deleted after the retention period'
+const stillRunningReason = 'Still running, stop it first'
 
 const orphanNames = ['bakta-job-1.12.2-orphan', 'baktfold-job-0.3.0-orphan', 'bakta-job-1.11.0-old']
 
@@ -459,16 +461,18 @@ class MockAdminApi implements AdminApi {
     const needsData = request.action === 'retry' || request.action === 'resubmit'
     const item = (w: WorkflowItem): BulkItem => {
       const deleted = needsData && !this.#dataAvailable(w)
+      const applies = bulkApplicable(request.action, w.phase, !!w.suspended)
+      const running = request.action === 'delete' && !applies
       return {
         name: w.name,
         job_id: w.job_id,
         workflow_kind: w.workflow_kind,
         phase: w.phase,
         finished_at: w.finished_at,
-        applicable: !deleted && bulkApplicable(request.action, w.phase, !!w.suspended),
+        applicable: !deleted && applies,
         result: null,
         error: null,
-        reason: deleted ? inputsDeletedReason : null,
+        reason: deleted ? inputsDeletedReason : running ? stillRunningReason : null,
       }
     }
     if (request.dry_run) {
