@@ -1,5 +1,5 @@
 <template>
-  <div class="row g-3 mb-3">
+  <div class="row g-3 mb-3 text-large">
     <div class="col-lg-4">
       <section class="panel h-100">
         <h2 class="section-label">Input</h2>
@@ -30,7 +30,7 @@
     </div>
   </div>
 
-  <section class="panel h-100">
+  <section class="panel h-100 text-large">
     <h2 class="section-label">Feature counts (Total: {{ data.features.length }})</h2>
     <div class="row">
       <div v-for="(column, idx) in featureColumns" :key="idx" class="col-md-4">

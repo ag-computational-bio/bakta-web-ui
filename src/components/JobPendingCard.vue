@@ -1,6 +1,6 @@
 <template>
   <div class="py-4">
-    <div class="card p-4">
+    <div class="card p-4 text-large">
       <div class="d-flex align-items-center gap-3 mb-3">
         <!-- once a step runs, its own spinner shows the progress -->
         <div

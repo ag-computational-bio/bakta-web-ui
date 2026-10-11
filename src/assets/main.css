@@ -44,6 +44,16 @@ body,
   height: 100%;
 }
 
+/* a slightly larger base size; all rem based sizes and spacing follow it */
+html {
+  font-size: 106.25%;
+}
+
+/* the result overview and the job follow page are read the most, so their text is one step larger */
+.text-large {
+  font-size: 1.0625rem;
+}
+
 body {
   -webkit-font-smoothing: antialiased;
 }
