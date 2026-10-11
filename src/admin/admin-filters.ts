@@ -19,12 +19,12 @@ export const timeRanges: { value: TimeRange; label: string }[] = [
 export const environments: { value: Environment; label: string }[] = [
   { value: 'production', label: 'Production' },
   { value: 'staging', label: 'Staging' },
-  { value: 'all', label: 'All' },
+  { value: 'all', label: 'All environments' },
 ]
 
 // the workflow kind filter of the statistics tabs, '' stands for all kinds
 export const kindFilterOptions = [
-  { value: '', label: 'All' },
+  { value: '', label: 'All workflows' },
   ...WorkflowKinds.map((value) => ({ value, label: formatWorkflowKind(value) })),
 ]
 

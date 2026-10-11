@@ -1,6 +1,10 @@
 <template>
   <AdminFilterBar>
-    <ChipGroup v-model="kind" :options="kindFilterOptions" label="Workflow" />
+    <select v-model="kind" class="form-select form-select-sm w-auto" aria-label="Workflow">
+      <option v-for="option in kindFilterOptions" :key="option.value" :value="option.value">
+        {{ option.label }}
+      </option>
+    </select>
   </AdminFilterBar>
   <Notification v-if="error" class="mb-3" type="danger" :message="error" />
 
