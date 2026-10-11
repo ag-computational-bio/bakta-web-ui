@@ -15,17 +15,19 @@
       <div class="dropdown">
         <button
           type="button"
-          class="btn btn-outline-secondary btn-sm dropdown-toggle"
+          class="btn btn-outline-secondary btn-sm admin-toggle"
           data-bs-toggle="dropdown"
           data-bs-auto-close="outside"
           aria-expanded="false"
         >
-          <i class="bi bi-funnel me-1"></i>Filters
-          <span v-if="activeFilters.length" class="badge rounded-pill bg-primary ms-1">
+          <i class="bi bi-funnel" aria-hidden="true"></i>
+          <span class="toggle-value">Filters</span>
+          <span v-if="activeFilters.length" class="badge rounded-pill bg-primary">
             {{ activeFilters.length }}
           </span>
+          <i class="bi bi-chevron-down toggle-chevron" aria-hidden="true"></i>
         </button>
-        <div class="dropdown-menu p-3">
+        <div class="dropdown-menu admin-menu p-2">
           <div class="filter-menu">
             <fieldset>
               <legend class="section-label">Status</legend>
@@ -101,21 +103,18 @@
         <span class="small text-secondary text-nowrap">
           {{ formatCount(total) }} {{ total === 1 ? 'job' : 'jobs' }}
         </span>
-        <select v-model="sort" class="form-select form-select-sm sort" aria-label="Sort">
-          <option v-for="option in sortOptions" :key="option.value" :value="option.value">
-            {{ option.label }}
-          </option>
-        </select>
+        <AdminSelect v-model="sort" label="Sort" icon="bi-sort-down" :options="sortOptions" end />
         <div class="dropdown">
           <button
             type="button"
-            class="btn btn-outline-secondary btn-sm dropdown-toggle"
+            class="btn btn-outline-secondary btn-sm admin-toggle"
             data-bs-toggle="dropdown"
             aria-expanded="false"
           >
-            Bulk actions
+            <span class="toggle-value">Bulk actions</span>
+            <i class="bi bi-chevron-down toggle-chevron" aria-hidden="true"></i>
           </button>
-          <ul class="dropdown-menu dropdown-menu-end">
+          <ul class="dropdown-menu dropdown-menu-end admin-menu">
             <template v-for="item in bulkItems" :key="item.action">
               <li v-if="item.action === 'stop'"><hr class="dropdown-divider" /></li>
               <li>
@@ -125,7 +124,7 @@
                   :class="{ 'text-danger': item.danger }"
                   @click="openBulk(item.action)"
                 >
-                  <i class="bi me-2" :class="item.icon"></i>{{ item.label }}
+                  <i class="bi" :class="item.icon" aria-hidden="true"></i>{{ item.label }}
                 </button>
               </li>
             </template>
@@ -246,7 +245,9 @@ import {
 import { filterQuery, filters, statsFilter } from '../admin-filters'
 import { handleAdminError, useAdminApi } from '../admin-session'
 import { bulkScope } from '../bulk-preview'
+import '../admin-menu.css'
 import AdminFilterBar from '../components/AdminFilterBar.vue'
+import AdminSelect from '../components/AdminSelect.vue'
 import BulkActionModal from '../components/BulkActionModal.vue'
 import ConfirmModal from '../components/ConfirmModal.vue'
 import ListPagination from '../components/ListPagination.vue'
@@ -454,13 +455,10 @@ load()
 .search {
   max-width: 22rem;
 }
-.sort {
-  width: auto;
-}
 .filter-menu {
   display: flex;
   flex-wrap: wrap;
-  gap: 1rem 2rem;
+  gap: 0.5rem 1rem;
   width: max-content;
   max-width: calc(100vw - 3rem);
 }
