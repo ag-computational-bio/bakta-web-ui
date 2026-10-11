@@ -184,6 +184,9 @@ const JobListItemSchema = z.object({
   created_at: time,
   finished_at: optionalTime,
   runtime_seconds: optionalNumber,
+  workflow_name: optionalText,
+  // the phase of the live Argo workflow, null when none exists
+  workflow_phase: optionalText,
 })
 export type JobListItem = z.infer<typeof JobListItemSchema>
 
@@ -240,6 +243,7 @@ const LiveWorkflowSchema = z.object({
   started_at: optionalTime,
   finished_at: optionalTime,
   message: optionalText,
+  suspended: z.boolean().nullish(),
   nodes: z.array(WorkflowNodeSchema),
 })
 export type LiveWorkflow = z.infer<typeof LiveWorkflowSchema>
@@ -279,30 +283,54 @@ const WorkflowItemSchema = z.object({
   started_at: optionalTime,
   finished_at: optionalTime,
   message: optionalText,
+  suspended: z.boolean().nullish(),
 })
 export type WorkflowItem = z.infer<typeof WorkflowItemSchema>
 
 export const WorkflowListSchema = z.object({ items: z.array(WorkflowItemSchema) })
 
-export type CleanupRequest = {
-  phases: WorkflowPhase[]
-  older_than_hours: number
+export const BulkActions = ['delete', 'stop', 'retry', 'resume', 'resubmit'] as const
+export type BulkAction = (typeof BulkActions)[number]
+
+export type WorkflowQuery = {
   environment: Environment
-  dry_run: boolean
+  phases?: WorkflowPhase[]
+  // only workflows without a job record
+  orphans?: boolean
 }
 
-export const CleanupResultSchema = z.object({
+export type BulkRequest = {
+  filter: {
+    q?: string
+    phases?: WorkflowPhase[]
+    workflow_kinds?: string[]
+    finished_before_hours?: number
+    environment?: Environment
+  }
+  action: BulkAction
+  dry_run: boolean
+  // in a real run the names from the dry run, so exactly these are processed
+  workflow_names?: string[]
+}
+
+export const BulkResultSchema = z.object({
   dry_run: z.boolean(),
-  workflows: z.array(
+  action: z.enum(BulkActions),
+  items: z.array(
     z.object({
       name: z.string(),
       job_id: optionalText,
+      workflow_kind: optionalText,
       phase: z.string(),
       finished_at: optionalTime,
+      applicable: z.boolean(),
+      result: z.enum(['done', 'skipped', 'failed']).nullish(),
+      error: optionalText,
     }),
   ),
 })
-export type CleanupResult = z.infer<typeof CleanupResultSchema>
+export type BulkResult = z.infer<typeof BulkResultSchema>
+export type BulkItem = BulkResult['items'][number]
 
 export type StatsFilter = {
   environment: Environment
@@ -313,6 +341,7 @@ export type StatsFilter = {
 export type JobQuery = StatsFilter & {
   status?: AdminJobStatus[]
   workflowKind?: string[]
+  workflowPhase?: WorkflowPhase[]
   q?: string
   limit?: number
   offset?: number
@@ -331,9 +360,10 @@ export interface AdminApi {
   retry(id: string): Promise<ActionResult>
   resubmit(id: string): Promise<ActionResult>
   stop(id: string): Promise<ActionResult>
+  resume(id: string): Promise<ActionResult>
   deleteJob(id: string, purgeData: boolean): Promise<DeleteResult>
-  workflows(environment: Environment, phases: WorkflowPhase[]): Promise<WorkflowItem[]>
-  cleanup(request: CleanupRequest): Promise<CleanupResult>
+  workflows(query: WorkflowQuery): Promise<WorkflowItem[]>
+  bulk(request: BulkRequest): Promise<BulkResult>
 }
 
 /**
@@ -447,6 +477,7 @@ class HttpAdminApi implements AdminApi {
         ...filterQuery(query),
         status: query.status,
         workflow_kind: query.workflowKind,
+        workflow_phase: query.workflowPhase,
         q: query.q,
         limit: query.limit,
         offset: query.offset,
@@ -463,7 +494,7 @@ class HttpAdminApi implements AdminApi {
     return toWorkflowLogs(await this.#request('GET', `/jobs/${encodeURIComponent(id)}/logs`))
   }
 
-  async #action(id: string, action: 'retry' | 'resubmit' | 'stop') {
+  async #action(id: string, action: 'retry' | 'resubmit' | 'stop' | 'resume') {
     const path = `/jobs/${encodeURIComponent(id)}/${action}`
     return ActionResultSchema.parse(await this.#request('POST', path))
   }
@@ -480,18 +511,28 @@ class HttpAdminApi implements AdminApi {
     return this.#action(id, 'stop')
   }
 
+  resume(id: string) {
+    return this.#action(id, 'resume')
+  }
+
   async deleteJob(id: string, purgeData: boolean) {
     const path = `/jobs/${encodeURIComponent(id)}` + queryString({ purge_data: purgeData })
     return DeleteResultSchema.parse(await this.#request('DELETE', path))
   }
 
-  async workflows(environment: Environment, phases: WorkflowPhase[]) {
-    const path = '/workflows' + queryString({ environment, phase: phases })
+  async workflows(query: WorkflowQuery) {
+    const path =
+      '/workflows' +
+      queryString({
+        environment: query.environment,
+        phase: query.phases,
+        orphans: query.orphans || undefined,
+      })
     return WorkflowListSchema.parse(await this.#request('GET', path)).items
   }
 
-  async cleanup(request: CleanupRequest) {
-    return CleanupResultSchema.parse(await this.#request('POST', '/cleanup', request))
+  async bulk(request: BulkRequest) {
+    return BulkResultSchema.parse(await this.#request('POST', '/workflows/bulk', request))
   }
 }
 

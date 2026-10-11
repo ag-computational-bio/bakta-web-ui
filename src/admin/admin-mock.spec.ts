@@ -56,4 +56,25 @@ describe('mock admin api', () => {
     const kinds = await api.runtimes(all, 'baktfold')
     expect(kinds.by_workflow_kind.map((k) => k.workflow_kind)).toEqual(['baktfold'])
   })
+
+  it('lists and runs bulk actions only on the previewed workflows', async () => {
+    const filter = { environment: 'all' as const, phases: ['Failed' as const, 'Error' as const] }
+    const preview = await api.bulk({ filter, action: 'retry', dry_run: true })
+    expect(preview.items.length).toBeGreaterThan(0)
+    const names = preview.items.filter((w) => w.applicable).map((w) => w.name)
+    const orphans = preview.items.filter((w) => !w.job_id)
+    expect(orphans.length).toBeGreaterThan(0)
+    const run = await api.bulk({ filter, action: 'retry', dry_run: false, workflow_names: names })
+    expect(run.items.map((w) => w.name)).toEqual(names)
+    const done = run.items.filter((w) => w.result === 'done').length
+    expect(done).toBe(names.length - orphans.length)
+    const after = await api.bulk({ filter, action: 'retry', dry_run: true })
+    expect(after.items.length).toBe(orphans.length)
+  })
+
+  it('lists workflows without a job record', async () => {
+    const orphans = await api.workflows({ environment: 'all', orphans: true })
+    expect(orphans.length).toBeGreaterThan(0)
+    expect(orphans.every((w) => !w.job_id)).toBe(true)
+  })
 })

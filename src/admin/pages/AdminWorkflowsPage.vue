@@ -96,8 +96,6 @@
     </div>
   </div>
 
-  <CleanupPanel @cleaned="load" />
-
   <ConfirmModal ref="confirmModal" v-bind="modal">
     <p class="mb-0">{{ modal.text }}</p>
   </ConfirmModal>
@@ -118,7 +116,6 @@ import { WorkflowPhases, type WorkflowItem, type WorkflowPhase } from '../admin-
 import { environments, filters } from '../admin-filters'
 import { handleAdminError, useAdminApi } from '../admin-session'
 import ChipGroup from '../components/ChipGroup.vue'
-import CleanupPanel from '../components/CleanupPanel.vue'
 import ConfirmModal from '../components/ConfirmModal.vue'
 import { formatCount, formatDateTime, phaseStatus } from '../format'
 
@@ -145,7 +142,7 @@ async function load() {
   loading.value = true
   error.value = undefined
   try {
-    const items = await api.workflows(filters.environment, phases.value)
+    const items = await api.workflows({ environment: filters.environment, phases: phases.value })
     if (current === request) workflows.value = items
   } catch (e) {
     if (current === request) error.value = handleAdminError(e)

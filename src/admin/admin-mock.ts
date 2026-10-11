@@ -4,7 +4,9 @@ import {
   type AdminApi,
   type AdminJobStatus,
   type Bucket,
-  type CleanupRequest,
+  type BulkAction,
+  type BulkItem,
+  type BulkRequest,
   type Environment,
   type GroupBy,
   type Interval,
@@ -15,6 +17,7 @@ import {
   type StatsFilter,
   type WorkflowItem,
   type WorkflowPhase,
+  type WorkflowQuery,
 } from './admin-api'
 import { createJobs, day, uuid } from './admin-mock-data'
 import { runtimeStats } from './admin-mock-stats'
@@ -62,6 +65,26 @@ function phaseOf(status: AdminJobStatus): WorkflowPhase {
   }
 }
 
+/**
+ * Whether a bulk action applies to a workflow, like on the server.
+ */
+export function bulkApplicable(action: BulkAction, phase: string, suspended: boolean): boolean {
+  switch (action) {
+    case 'stop':
+      return phase === 'Pending' || phase === 'Running'
+    case 'retry':
+      return phase === 'Failed' || phase === 'Error'
+    case 'resume':
+      return suspended
+    case 'resubmit':
+      return phase === 'Succeeded' || phase === 'Failed' || phase === 'Error'
+    case 'delete':
+      return true
+  }
+}
+
+const orphanNames = ['bakta-job-1.12.2-orphan', 'baktfold-job-0.3.0-orphan', 'bakta-job-1.11.0-old']
+
 function delay<T>(value: T): Promise<T> {
   return new Promise((resolve) => setTimeout(() => resolve(structuredClone(value)), 250))
 }
@@ -76,7 +99,32 @@ class MockAdminApi implements AdminApi {
       .map((j) => j.id),
   )
 
-  #orphanDeleted = false
+  // two running workflows wait at a suspend step
+  #suspended = new Set(
+    this.#jobs
+      .filter((j) => this.#workflows.has(j.id) && j.status === 'running')
+      .slice(0, 2)
+      .map((j) => j.id),
+  )
+
+  #orphans = new Map<string, WorkflowItem>(
+    orphanNames.map((name, i) => {
+      const finished = new Date(Date.now() - (3 + i * 5) * day).toISOString()
+      const item: WorkflowItem = {
+        name,
+        job_id: null,
+        workflow_kind: null,
+        phase: i === 1 ? 'Failed' : 'Error',
+        template: name.replace(/-(orphan|old)$/, ''),
+        environment: 'production',
+        started_at: finished,
+        finished_at: finished,
+        message: 'pod deleted',
+        suspended: false,
+      }
+      return [name, item]
+    }),
+  )
 
   #find(id: string): JobRecord {
     const job = this.#jobs.find((j) => j.id === id)
@@ -179,6 +227,11 @@ class MockAdminApi implements AdminApi {
       .filter((j) => !query.workflowKind?.length || query.workflowKind.includes(j.workflow_kind))
       .filter(
         (j) =>
+          !query.workflowPhase?.length ||
+          (this.#workflows.has(j.id) && query.workflowPhase.includes(phaseOf(j.status))),
+      )
+      .filter(
+        (j) =>
           !q ||
           j.id.startsWith(q) ||
           [j.genus, j.species, j.strain, j.name].some((t) => t?.toLowerCase().includes(q)),
@@ -198,6 +251,7 @@ class MockAdminApi implements AdminApi {
       items: jobs.slice(offset, offset + (query.limit ?? 50)).map((j) => ({
         ...j,
         organism: [j.genus, j.species, j.strain].filter(Boolean).join(' ') || null,
+        workflow_phase: this.#workflows.has(j.id) ? phaseOf(j.status) : null,
       })),
     })
   }
@@ -216,6 +270,7 @@ class MockAdminApi implements AdminApi {
       started_at: job.started_at,
       finished_at: job.finished_at,
       message: job.error_message,
+      suspended: this.#suspended.has(job.id),
       nodes: steps.map((step, i) => {
         const failedHere = (phase === 'Failed' || phase === 'Error') && i === 1
         const done = phase === 'Succeeded' || i === 0
@@ -257,6 +312,7 @@ class MockAdminApi implements AdminApi {
     job.status = status
     job.updated_at = new Date().toISOString()
     this.#workflows.add(id)
+    this.#suspended.delete(id)
     return delay({ workflow_name: job.workflow_name ?? '', phase: phaseOf(status) })
   }
 
@@ -273,10 +329,18 @@ class MockAdminApi implements AdminApi {
   }
 
   stop(id: string) {
-    if (this.#find(id).status !== 'running') {
+    if (!activeStatuses.includes(this.#find(id).status)) {
       return Promise.reject(new AdminApiError(409, 'workflow is not running'))
     }
     return this.#setPhase(id, 'failed', false)
+  }
+
+  resume(id: string) {
+    if (!this.#suspended.has(id)) {
+      return Promise.reject(new AdminApiError(409, 'workflow is not suspended'))
+    }
+    this.#suspended.delete(id)
+    return this.#setPhase(id, 'running', false)
   }
 
   deleteJob(id: string, purgeData: boolean) {
@@ -289,7 +353,6 @@ class MockAdminApi implements AdminApi {
   #workflowItems(environment: Environment): WorkflowItem[] {
     const items: WorkflowItem[] = this.#jobs
       .filter((j) => this.#workflows.has(j.id))
-      .filter((j) => environment === 'all' || j.environment === environment)
       .map((j) => ({
         name: j.workflow_name ?? '',
         job_id: j.id,
@@ -300,40 +363,82 @@ class MockAdminApi implements AdminApi {
         started_at: j.started_at,
         finished_at: j.finished_at,
         message: j.error_message,
+        suspended: this.#suspended.has(j.id),
       }))
-    if (this.#orphanDeleted) return items
-    const orphan = new Date(Date.now() - 3 * day).toISOString()
-    items.push({
-      name: 'bakta-job-1.12.2-orphan',
-      job_id: null,
-      workflow_kind: null,
-      phase: 'Error',
-      template: 'bakta-job-1.12.2',
-      environment: 'production',
-      started_at: orphan,
-      finished_at: orphan,
-      message: 'pod deleted',
-    })
-    return items
+    return [...items, ...this.#orphans.values()].filter(
+      (w) => environment === 'all' || w.environment === environment,
+    )
   }
 
-  workflows(environment: Environment, phases: WorkflowPhase[]) {
-    const items = this.#workflowItems(environment)
-    return delay(items.filter((w) => !phases.length || phases.includes(w.phase as WorkflowPhase)))
+  workflows(query: WorkflowQuery) {
+    const phases = query.phases ?? []
+    const items = this.#workflowItems(query.environment)
+      .filter((w) => !query.orphans || !w.job_id)
+      .filter((w) => !phases.length || phases.includes(w.phase as WorkflowPhase))
+    return delay(items)
   }
 
-  cleanup(request: CleanupRequest) {
-    const limit = Date.now() - request.older_than_hours * 3_600_000
-    const matches = this.#workflowItems(request.environment)
-      .filter((w) => request.phases.includes(w.phase as WorkflowPhase))
-      .filter((w) => w.finished_at && Date.parse(w.finished_at) < limit)
-    if (!request.dry_run) {
-      for (const w of matches) {
-        if (w.job_id) this.#workflows.delete(w.job_id)
-        else this.#orphanDeleted = true
-      }
+  #bulkMatches(request: BulkRequest): WorkflowItem[] {
+    const { q, phases, workflow_kinds, finished_before_hours, environment } = request.filter
+    const text = q?.trim().toLowerCase()
+    const limit =
+      finished_before_hours == null ? null : Date.now() - finished_before_hours * 3_600_000
+    return this.#workflowItems(environment ?? 'all')
+      .filter((w) => !text || w.name.includes(text) || w.job_id?.startsWith(text))
+      .filter((w) => !phases?.length || phases.includes(w.phase as WorkflowPhase))
+      .filter((w) => !workflow_kinds?.length || workflow_kinds.includes(w.workflow_kind ?? ''))
+      .filter((w) => limit == null || (!!w.finished_at && Date.parse(w.finished_at) < limit))
+  }
+
+  async #bulkRun(action: BulkAction, w: WorkflowItem) {
+    if (!w.job_id) {
+      if (action !== 'delete') throw new AdminApiError(409, 'the workflow has no job record')
+      this.#orphans.delete(w.name)
+      return
     }
-    return delay({ dry_run: request.dry_run, workflows: matches })
+    if (action === 'delete') this.#workflows.delete(w.job_id)
+    else await this[action](w.job_id)
+  }
+
+  async bulk(request: BulkRequest) {
+    const matches = this.#bulkMatches(request)
+    const item = (w: WorkflowItem): BulkItem => ({
+      name: w.name,
+      job_id: w.job_id,
+      workflow_kind: w.workflow_kind,
+      phase: w.phase,
+      finished_at: w.finished_at,
+      applicable: bulkApplicable(request.action, w.phase, !!w.suspended),
+      result: null,
+      error: null,
+    })
+    if (request.dry_run) {
+      return delay({ dry_run: true, action: request.action, items: matches.map(item) })
+    }
+    const names = request.workflow_names ?? matches.map((w) => w.name)
+    const items = await Promise.all(
+      names.map(async (name): Promise<BulkItem> => {
+        const w = matches.find((m) => m.name === name)
+        if (!w) {
+          return {
+            name,
+            phase: 'Unknown',
+            applicable: false,
+            result: 'failed',
+            error: 'workflow not found',
+          }
+        }
+        const result = item(w)
+        if (!result.applicable) return { ...result, result: 'skipped' }
+        try {
+          await this.#bulkRun(request.action, w)
+          return { ...result, result: 'done' }
+        } catch (e) {
+          return { ...result, result: 'failed', error: e instanceof Error ? e.message : String(e) }
+        }
+      }),
+    )
+    return delay({ dry_run: false, action: request.action, items })
   }
 }
 
