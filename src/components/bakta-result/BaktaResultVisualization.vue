@@ -25,9 +25,14 @@
     </li>
   </ul>
   <div class="card p-4 mt-3 mb-4">
-    <BaktaStats v-if="currentTab === 'job'" :data="bakta" :job="job" />
+    <BaktaStats
+      v-if="currentTab === 'job'"
+      :data="bakta"
+      :job="job"
+      @select:type="showFeatureType"
+    />
     <BaktaGenomeViewer v-if="currentTab === 'browser'" :data="bakta" />
-    <BaktaAnnotationTable v-if="currentTab === 'table'" :data="bakta" />
+    <BaktaAnnotationTable v-if="currentTab === 'table'" v-model:type="featureType" :data="bakta" />
     <FeaturePlotViewer v-if="currentTab === 'circular'" :bakta="bakta" />
     <BaktaDownloads v-if="currentTab === 'download'" :job="job" />
   </div>
@@ -106,6 +111,11 @@ const tabs = computed<TabDefinition[]>(() => {
   return tabs
 })
 const currentTab = ref<tabs>('job')
+const featureType = ref('')
+function showFeatureType(type: string) {
+  featureType.value = type
+  currentTab.value = 'table'
+}
 const toast = useTemplateRef('copyToast')
 function putLinkToClipboard() {
   window.navigator.clipboard.writeText(window.location.href)

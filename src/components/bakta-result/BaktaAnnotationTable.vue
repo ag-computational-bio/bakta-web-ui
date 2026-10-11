@@ -1,4 +1,13 @@
 <template>
+  <div class="d-flex align-items-center gap-2 mb-3">
+    <label for="feature-type-filter" class="text-secondary small">Feature type</label>
+    <select id="feature-type-filter" v-model="type" class="form-select form-select-sm w-auto">
+      <option value="">All ({{ data.features.length }})</option>
+      <option v-for="t in featureTypes" :key="t.type" :value="t.type">
+        {{ t.label }} ({{ t.count }})
+      </option>
+    </select>
+  </div>
   <DataTable
     class="table table-hover"
     :columns="columns"
@@ -9,6 +18,7 @@
 </template>
 
 <script setup lang="ts">
+import bakta from '@/bakta-helper'
 import type { Result } from '@/model/result-data'
 import DataTablesCore from 'datatables.net-bs5'
 import 'datatables.net-bs5/css/dataTables.bootstrap5.css'
@@ -19,6 +29,7 @@ DataTable.use(DataTablesCore)
 const props = defineProps<{
   data: Result
 }>()
+const type = defineModel<string>('type', { default: '' })
 
 const dataTableConfig = {
   scrollY: '70vh',
@@ -62,8 +73,18 @@ const columns = [
   { data: 'dbxrefs', title: 'DbXrefs' },
 ]
 
+const featureTypes = computed(() =>
+  Object.entries(bakta.featureCount(props.data))
+    .filter(([, count]) => count > 0)
+    .map(([type, count]) => ({ type, count, label: bakta.featureTypeLabel(type) }))
+    .sort((a, b) => a.label.localeCompare(b.label)),
+)
+
 const table = computed(() => {
-  return props.data.features.map((x) => ({
+  const features = type.value
+    ? props.data.features.filter((x) => x.type === type.value)
+    : props.data.features
+  return features.map((x) => ({
     contig: x.sequence || '',
     type: x.type || '',
     start: x.start || '',

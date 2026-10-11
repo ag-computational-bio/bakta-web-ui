@@ -33,23 +33,22 @@
   <section class="stat-panel">
     <h2 class="stat-title">Feature counts (Total: {{ data.features.length }})</h2>
     <div class="row">
-      <div class="col-md-4">
-        <display-tuple :break="6" label="tRNA" :value="featureCount['tRNA']" />
-        <display-tuple :break="6" label="tmRNA" :value="featureCount['tmRNA']" />
-        <display-tuple :break="6" label="rRNA" :value="featureCount['rRNA']" />
-        <display-tuple :break="6" label="ncRNA" :value="featureCount['ncRNA']" />
-      </div>
-      <div class="col-md-4">
-        <display-tuple :break="6" label="ncRNA regions" :value="featureCount['ncRNA-region']" />
-        <display-tuple :break="6" label="CRISPR" :value="featureCount['crispr']" />
-        <display-tuple :break="6" label="CDS" :value="featureCount['cds']" />
-        <display-tuple :break="6" label="sORF" :value="featureCount['sorf']" />
-      </div>
-      <div class="col-md-4">
-        <display-tuple :break="6" label="oriC" :value="featureCount['oriC']" />
-        <display-tuple :break="6" label="oriV" :value="featureCount['oriV']" />
-        <display-tuple :break="6" label="oriT" :value="featureCount['oriT']" />
-        <display-tuple :break="6" label="gap" :value="featureCount['gap']" />
+      <div v-for="(column, idx) in featureColumns" :key="idx" class="col-md-4">
+        <button
+          v-for="type in column"
+          :key="type"
+          type="button"
+          class="feature-count"
+          :disabled="!featureCount[type]"
+          :title="`Show all ${bakta.featureTypeLabel(type)} features in the annotation table`"
+          @click="emit('select:type', type)"
+        >
+          <display-tuple
+            :break="6"
+            :label="bakta.featureTypeLabel(type)"
+            :value="featureCount[type]"
+          />
+        </button>
       </div>
     </div>
   </section>
@@ -72,6 +71,15 @@ const props = withDefaults(
   }>(),
   {},
 )
+const emit = defineEmits<{
+  (e: 'select:type', type: string): void
+}>()
+
+const featureColumns = [
+  ['tRNA', 'tmRNA', 'rRNA', 'ncRNA'],
+  ['ncRNA-region', 'crispr', 'cds', 'sorf'],
+  ['oriC', 'oriV', 'oriT', 'gap'],
+]
 
 const name = computed(() => bakta.genomeName(props.data))
 const size = computed(() => bakta.formattedSize(props.data))
@@ -94,6 +102,22 @@ function formatDuration(from: string, to: string) {
 </script>
 
 <style scoped>
+.feature-count {
+  display: block;
+  width: 100%;
+  padding: 0 0.5rem;
+  border: 0;
+  border-radius: var(--bs-border-radius);
+  background: none;
+  color: inherit;
+  text-align: start;
+}
+.feature-count:not(:disabled):hover {
+  background-color: var(--bs-primary-bg-subtle);
+}
+.feature-count:disabled {
+  cursor: default;
+}
 .stat-panel {
   height: 100%;
   padding: 1rem 1.25rem;

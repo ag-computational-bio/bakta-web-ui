@@ -24,6 +24,25 @@ function formattedSize(bakta: Result) {
   return new Intl.NumberFormat('en-GB').format(bakta.stats.size) + ' bp'
 }
 
+const featureTypeLabels: Record<string, string> = {
+  tRNA: 'tRNA',
+  tmRNA: 'tmRNA',
+  rRNA: 'rRNA',
+  ncRNA: 'ncRNA',
+  'ncRNA-region': 'ncRNA regions',
+  crispr: 'CRISPR',
+  cds: 'CDS',
+  sorf: 'sORF',
+  oriC: 'oriC',
+  oriV: 'oriV',
+  oriT: 'oriT',
+  gap: 'gap',
+}
+
+function featureTypeLabel(type: string): string {
+  return featureTypeLabels[type] ?? type
+}
+
 function featureCount(bakta: Result) {
   const counts: Record<string, number> = {
     oriC: 0,
@@ -91,6 +110,7 @@ export default {
   genomeName,
   formattedSize,
   featureCount,
+  featureTypeLabel,
   sequencesCountString,
   lookupCogFunctionalCategories,
 }
