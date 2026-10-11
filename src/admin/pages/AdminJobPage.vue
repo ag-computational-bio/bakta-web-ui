@@ -93,7 +93,7 @@
 
     <p v-if="!job.data_available" class="small text-secondary mb-3">
       <i class="bi bi-info-circle me-1"></i>Input data, results and logs were deleted on
-      {{ formatDateTime(job.data_expires_at) }}, 30 days after the job.
+      {{ formatDateTime(job.data_expires_at) }}.
     </p>
 
     <div class="row g-3 mb-4">
