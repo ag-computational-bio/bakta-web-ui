@@ -68,6 +68,7 @@ export function bulkScope(list: JobListFilters): BulkScope {
 type Preview = { request: BulkRequest; items: BulkItem[] }
 
 const stillRunningReason = 'Still running, stop it first'
+const finishedPhases: WorkflowPhase[] = ['Succeeded', 'Failed', 'Error']
 
 /**
  * A delete never applies to a pending or running workflow, whatever the backend
@@ -162,7 +163,8 @@ export function useBulkPreview(
         }
       }
       const result = await api.bulk(req)
-      if (current === token) preview.value = { request: req, items: guardDelete(req.action, result.items) }
+      if (current === token)
+        preview.value = { request: req, items: guardDelete(req.action, result.items) }
     } catch (e) {
       if (current === token) error.value = handleError(e)
     } finally {
@@ -179,11 +181,20 @@ export function useBulkPreview(
     error.value = undefined
     // the result of the run is always kept, the settings cannot change meanwhile
     try {
-      const result = await api.bulk({
+      const request: BulkRequest = {
         ...shown.request,
         dry_run: false,
         workflow_names: applicable.value.map((w) => w.name),
-      })
+      }
+      // a workflow can start again between preview and run, a delete keeps only finished ones
+      if (request.action === 'delete') {
+        const phases = request.filter.phases?.length ? request.filter.phases : finishedPhases
+        request.filter = {
+          ...request.filter,
+          phases: phases.filter((p) => finishedPhases.includes(p)),
+        }
+      }
+      const result = await api.bulk(request)
       results.value = result.items
     } catch (e) {
       error.value = handleError(e)

@@ -55,6 +55,8 @@ describe('useBulkPreview', () => {
     expect(p.applicable.value.map((w) => w.name)).toEqual(['c'])
     await p.run()
     expect(bulk.mock.calls[1][0].workflow_names).toEqual(['c'])
+    // c may run again after the preview, so the run asks only for finished phases
+    expect(bulk.mock.calls[1][0].filter.phases).toEqual(['Succeeded', 'Failed', 'Error'])
   })
 
   it('runs the action of the shown preview on exactly its applicable workflows', async () => {
