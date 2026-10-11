@@ -156,8 +156,9 @@ const summary = ref<StatsSummary>()
 const previous = ref<StatsSummary>()
 // the active jobs right now, with the creation time of the oldest
 const active = ref<{ total: number; oldest?: string }>()
-// the jobs that are failed now, with the job list query of the request that counted them
-const failedNow = ref<{ total: number; query: LocationQueryRaw }>()
+// the jobs that are failed now, with the filters of the request that counted them
+const failedNow = ref<{ total: number; query: LocationQueryRaw; environment: string }>()
+const failedQuery = () => ({ ...filterQuery(), status: 'failed,error' })
 const orphans = ref(0)
 const grouped = ref<Timeseries>()
 const overall = ref<Timeseries>()
@@ -212,7 +213,11 @@ const longActiveSeconds = 2 * 3600
 const attention = computed(() => {
   const items: { text: string; icon: string; to: RouteLocationRaw }[] = []
   const f = failedNow.value
-  if (f?.total) {
+  // a count of other filters (still loading or failed to reload) is not shown
+  const current =
+    f?.environment === filters.environment &&
+    JSON.stringify(f.query) === JSON.stringify(failedQuery())
+  if (f?.total && current) {
     items.push({
       text: `${formatCount(f.total)} failed ${f.total === 1 ? 'job' : 'jobs'} in this range`,
       icon: 'bi-x-circle text-danger',
@@ -257,7 +262,7 @@ let request = 0
 async function load() {
   const current = ++request
   const filter = statsFilter()
-  const failedQuery = { ...filterQuery(), status: 'failed,error' }
+  const counted = { query: failedQuery(), environment: filters.environment }
   loading.value = true
   error.value = undefined
   try {
@@ -284,7 +289,7 @@ async function load() {
     summary.value = s
     previous.value = p
     active.value = { total: a.total, oldest: a.items[0]?.created_at }
-    failedNow.value = { total: f.total, query: failedQuery }
+    failedNow.value = { total: f.total, ...counted }
     orphans.value = o.length
     interval.value = chart.interval
     ;[grouped.value, overall.value] = chart.data
