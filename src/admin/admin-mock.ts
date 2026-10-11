@@ -20,7 +20,7 @@ import {
   type WorkflowQuery,
 } from './admin-api'
 import { createJobs, day, uuid } from './admin-mock-data'
-import { runtimeStats } from './admin-mock-stats'
+import { inputStats, runtimeStats } from './admin-mock-stats'
 import { percentile, truncDate } from './format'
 
 /*
@@ -183,6 +183,7 @@ class MockAdminApi implements AdminApi {
     const buckets: Bucket[] = [...groups.entries()].map(([key, jobs]) => {
       const [start, group] = key.split('|')
       const runtime = stats(jobs.filter(succeeded).map((j) => j.runtime_seconds))
+      const input = stats(jobs.map((j) => j.total_length))
       return {
         period_start: start.replace('.000Z', 'Z'),
         group: groupBy === 'none' ? null : group,
@@ -194,6 +195,8 @@ class MockAdminApi implements AdminApi {
         runtime_p90: runtime.p90,
         runtime_avg: runtime.avg,
         total_input_bp: jobs.reduce((sum, j) => sum + (j.total_length ?? 0), 0),
+        input_p50_bp: input.p50,
+        input_avg_bp: input.avg,
       }
     })
     buckets.sort((a, b) => a.period_start.localeCompare(b.period_start))
@@ -223,6 +226,13 @@ class MockAdminApi implements AdminApi {
       (j) => !workflowKind || j.workflow_kind === workflowKind,
     )
     return delay(runtimeStats(jobs))
+  }
+
+  inputs(filter: StatsFilter, workflowKind?: string) {
+    const jobs = this.#filtered(filter).filter(
+      (j) => !workflowKind || j.workflow_kind === workflowKind,
+    )
+    return delay(inputStats(jobs))
   }
 
   jobs(query: JobQuery) {

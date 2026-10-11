@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   JobDetailSchema,
+  InputStatsSchema,
   JobPageSchema,
   RuntimeStatsSchema,
   StatsSummarySchema,
@@ -18,6 +19,7 @@ describe('mock admin api', () => {
     TimeseriesSchema.parse(await api.timeseries(all, 'week', 'status'))
     VersionStatsSchema.parse(await api.versions(all))
     RuntimeStatsSchema.parse(await api.runtimes(all, 'bakta'))
+    InputStatsSchema.parse(await api.inputs(all))
     const page = JobPageSchema.parse(await api.jobs({ ...all, limit: 10 }))
     JobDetailSchema.parse(await api.job(page.items[0].id))
   })
@@ -74,5 +76,14 @@ describe('mock admin api', () => {
     const orphans = await api.workflows({ environment: 'all', orphans: true })
     expect(orphans.length).toBeGreaterThan(0)
     expect(orphans.every((w) => !w.job_id)).toBe(true)
+  })
+
+  it('has fixed input buckets that count all jobs with a length', async () => {
+    const stats = await api.inputs(all)
+    expect(stats.size_histogram).toHaveLength(7)
+    expect(stats.sequence_histogram).toHaveLength(7)
+    expect(stats.sequence_histogram[0]).toMatchObject({ min_sequences: 1, max_sequences: 1 })
+    expect(stats.size_histogram.reduce((sum, b) => sum + b.jobs, 0)).toBe(stats.jobs)
+    expect(stats.largest).toHaveLength(10)
   })
 })

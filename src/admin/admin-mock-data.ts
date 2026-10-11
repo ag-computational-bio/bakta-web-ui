@@ -43,6 +43,9 @@ const organisms: [string, string, string | null, number, number][] = [
   ['Salmonella', 'enterica', 'LT2', 4_951_383, 2],
   ['Acinetobacter', 'baumannii', null, 3_936_291, 84],
   ['Enterococcus', 'faecium', null, 2_998_039, 112],
+  ['Streptomyces', 'coelicolor', 'A3(2)', 8_667_507, 1],
+  ['Sorangium', 'cellulosum', 'So ce56', 13_033_779, 1],
+  ['Escherichia', 'coli', 'plasmid pOLA52', 51_602, 1],
 ]
 
 const versionHistory = [
@@ -90,6 +93,13 @@ function createJob(createdMs: number, now: number): JobRecord {
   const [genus, species, strain, length, contigs] = pick(organisms.map((o) => [o, 1]))
   const fromFasta = kind === 'bakta' || kind === 'bakta_baktfold'
   const totalLength = Math.round(length * (0.95 + rnd() * 0.1))
+  // complete genomes keep one sequence, drafts vary and a few are very fragmented
+  const sequences =
+    contigs === 1
+      ? 1
+      : rnd() < 0.08
+        ? Math.round(500 + rnd() * 3000)
+        : Math.max(2, Math.round(contigs * (0.3 + rnd() * 2)))
   const status = now - createdMs < 3_600_000 ? activeStatus() : finalStatus()
   // expired and deleted jobs keep the result they had before
   const outcome =
@@ -124,7 +134,7 @@ function createJob(createdMs: number, now: number): JobRecord {
     genus: fromFasta ? genus : null,
     species: fromFasta ? species : null,
     strain: fromFasta ? strain : null,
-    sequence_count: fromFasta ? contigs : null,
+    sequence_count: fromFasta ? sequences : null,
     total_length: fromFasta ? totalLength : null,
     config: fromFasta ? mockConfig(genus, species, strain, contigs === 1) : null,
     bakta_version: kind === 'baktfold' ? null : version.bakta,

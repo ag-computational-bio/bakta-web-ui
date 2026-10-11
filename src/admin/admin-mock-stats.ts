@@ -1,4 +1,4 @@
-import type { JobRecord, RuntimeStats } from './admin-api'
+import type { InputStats, JobRecord, RuntimeStats } from './admin-api'
 import { percentile } from './format'
 
 /*
@@ -8,12 +8,14 @@ import { percentile } from './format'
 
 const runtimeEdges = [0, 120, 300, 600, 1200, 1800, 3600, 7200, 14400]
 export const sizeEdges = [0, 1e6, 2e6, 4e6, 6e6, 8e6, 12e6]
+// lower edges of the sequence count buckets, the upper edges are inclusive
+const sequenceEdges = [1, 2, 6, 21, 101, 501, 2001]
 
 function sorted(values: (number | null | undefined)[]): number[] {
   return values.filter((v): v is number => v != null).sort((a, b) => a - b)
 }
 
-function avg(values: number[]): number | null {
+export function avg(values: number[]): number | null {
   return values.length ? values.reduce((a, b) => a + b, 0) / values.length : null
 }
 
@@ -111,6 +113,77 @@ export function runtimeStats(jobs: JobRecord[]): RuntimeStats {
         organism: organism(j),
         total_length: j.total_length,
         runtime_seconds: runtime(j),
+        created_at: j.created_at,
+      })),
+  }
+}
+
+/**
+ * The input statistics of the given jobs, over jobs with a total length.
+ */
+export function inputStats(jobs: JobRecord[]): InputStats {
+  const withLength = jobs.filter((j) => j.total_length != null)
+  const length = (j: JobRecord) => j.total_length ?? 0
+  const sizes = sorted(withLength.map(length))
+  const withCount = withLength.filter((j) => j.sequence_count != null)
+  const counts = sorted(withCount.map((j) => j.sequence_count))
+  const kinds = [...new Set(withLength.map((j) => j.workflow_kind))].sort()
+  return {
+    jobs: withLength.length,
+    total_bp: sizes.reduce((a, b) => a + b, 0),
+    total_length: {
+      min: sizes[0] ?? null,
+      p10: percentile(sizes, 0.1),
+      p25: percentile(sizes, 0.25),
+      p50: percentile(sizes, 0.5),
+      p75: percentile(sizes, 0.75),
+      p90: percentile(sizes, 0.9),
+      p99: percentile(sizes, 0.99),
+      max: sizes[sizes.length - 1] ?? null,
+      avg: avg(sizes),
+    },
+    sequence_count: {
+      min: counts[0] ?? null,
+      p50: percentile(counts, 0.5),
+      p90: percentile(counts, 0.9),
+      p99: percentile(counts, 0.99),
+      max: counts[counts.length - 1] ?? null,
+      avg: avg(counts),
+    },
+    size_histogram: buckets(sizeEdges, withLength, length).map((b) => ({
+      min_bp: b.min,
+      max_bp: b.max,
+      jobs: b.items.length,
+    })),
+    sequence_histogram: buckets(sequenceEdges, withCount, (j) => j.sequence_count ?? 0).map(
+      (b) => ({
+        min_sequences: b.min,
+        max_sequences: b.max == null ? null : b.max - 1,
+        jobs: b.items.length,
+      }),
+    ),
+    by_workflow_kind: kinds.map((kind) => {
+      const ofKind = withLength.filter((j) => j.workflow_kind === kind)
+      const values = sorted(ofKind.map(length))
+      return {
+        workflow_kind: kind,
+        jobs: values.length,
+        total_bp: values.reduce((a, b) => a + b, 0),
+        p50_bp: percentile(values, 0.5),
+        avg_bp: avg(values),
+        p50_sequences: percentile(sorted(ofKind.map((j) => j.sequence_count)), 0.5),
+      }
+    }),
+    largest: [...withLength]
+      .sort((a, b) => length(b) - length(a))
+      .slice(0, 10)
+      .map((j) => ({
+        id: j.id,
+        workflow_kind: j.workflow_kind,
+        organism: organism(j),
+        total_length: length(j),
+        sequence_count: j.sequence_count,
+        status: j.status,
         created_at: j.created_at,
       })),
   }

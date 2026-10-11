@@ -100,6 +100,8 @@ const BucketSchema = z.object({
   runtime_p90: optionalNumber,
   runtime_avg: optionalNumber,
   total_input_bp: optionalNumber,
+  input_p50_bp: optionalNumber,
+  input_avg_bp: optionalNumber,
 })
 export type Bucket = z.infer<typeof BucketSchema>
 
@@ -162,6 +164,58 @@ export const RuntimeStatsSchema = z.object({
   ),
 })
 export type RuntimeStats = z.infer<typeof RuntimeStatsSchema>
+
+export const InputStatsSchema = z.object({
+  jobs: z.number(),
+  total_bp: optionalNumber,
+  total_length: z.object({
+    min: optionalNumber,
+    p10: optionalNumber,
+    p25: optionalNumber,
+    p50: optionalNumber,
+    p75: optionalNumber,
+    p90: optionalNumber,
+    p99: optionalNumber,
+    max: optionalNumber,
+    avg: optionalNumber,
+  }),
+  sequence_count: z.object({
+    min: optionalNumber,
+    p50: optionalNumber,
+    p90: optionalNumber,
+    p99: optionalNumber,
+    max: optionalNumber,
+    avg: optionalNumber,
+  }),
+  size_histogram: z.array(
+    z.object({ min_bp: z.number(), max_bp: optionalNumber, jobs: z.number() }),
+  ),
+  sequence_histogram: z.array(
+    z.object({ min_sequences: z.number(), max_sequences: optionalNumber, jobs: z.number() }),
+  ),
+  by_workflow_kind: z.array(
+    z.object({
+      workflow_kind: z.string(),
+      jobs: z.number(),
+      total_bp: optionalNumber,
+      p50_bp: optionalNumber,
+      avg_bp: optionalNumber,
+      p50_sequences: optionalNumber,
+    }),
+  ),
+  largest: z.array(
+    z.object({
+      id: z.string(),
+      workflow_kind: z.string(),
+      organism: optionalText,
+      total_length: z.number(),
+      sequence_count: optionalNumber,
+      status: AdminJobStatusSchema,
+      created_at: time,
+    }),
+  ),
+})
+export type InputStats = z.infer<typeof InputStatsSchema>
 
 export const VersionStatsSchema = z.object({
   items: z.array(
@@ -360,6 +414,7 @@ export interface AdminApi {
   timeseries(filter: StatsFilter, interval: Interval, groupBy: GroupBy): Promise<Timeseries>
   versions(filter: StatsFilter): Promise<VersionStats>
   runtimes(filter: StatsFilter, workflowKind?: string): Promise<RuntimeStats>
+  inputs(filter: StatsFilter, workflowKind?: string): Promise<InputStats>
   jobs(query: JobQuery): Promise<JobPage>
   job(id: string): Promise<JobDetail>
   jobLogs(id: string): Promise<WorkflowLogs>
@@ -474,6 +529,12 @@ class HttpAdminApi implements AdminApi {
     const query = { ...filterQuery(filter), workflow_kind: workflowKind }
     const path = '/stats/runtimes' + queryString(query)
     return RuntimeStatsSchema.parse(await this.#request('GET', path))
+  }
+
+  async inputs(filter: StatsFilter, workflowKind?: string) {
+    const query = { ...filterQuery(filter), workflow_kind: workflowKind }
+    const path = '/stats/inputs' + queryString(query)
+    return InputStatsSchema.parse(await this.#request('GET', path))
   }
 
   async jobs(query: JobQuery) {
