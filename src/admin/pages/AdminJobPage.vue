@@ -104,7 +104,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="node in workflow.nodes" :key="node.name">
+              <tr v-for="node in nodePage" :key="node.name">
                 <td>{{ node.display_name }}</td>
                 <td>{{ node.type }}</td>
                 <td><StatusBadge :status="phaseStatus(node.phase)" /></td>
@@ -118,6 +118,12 @@
             </tbody>
           </table>
         </div>
+        <ListPagination
+          v-model:page="nodePageNumber"
+          v-model:page-size="nodePageSize"
+          :total="workflow.nodes.length"
+          label="steps"
+        />
       </template>
     </div>
 
@@ -153,6 +159,7 @@ import { useRoute } from 'vue-router'
 import type { JobDetail } from '../admin-api'
 import { handleAdminError, useAdminApi } from '../admin-session'
 import ConfirmModal from '../components/ConfirmModal.vue'
+import ListPagination from '../components/ListPagination.vue'
 import {
   configEntries,
   formatBp,
@@ -161,6 +168,7 @@ import {
   formatDuration,
   phaseStatus,
 } from '../format'
+import { useClientPages } from '../pagination'
 
 type Action = 'retry' | 'resubmit' | 'stop'
 
@@ -181,6 +189,11 @@ const job = computed(() => detail.value!.job)
 const workflow = computed(() => detail.value?.workflow)
 const canRetry = computed(() => ['Failed', 'Error'].includes(workflow.value?.phase ?? ''))
 const canStop = computed(() => workflow.value?.phase === 'Running')
+const {
+  page: nodePageNumber,
+  pageSize: nodePageSize,
+  pageItems: nodePage,
+} = useClientPages(computed(() => workflow.value?.nodes ?? []))
 const options = computed(() => configEntries(job.value.config ?? {}))
 
 function seconds(from?: string | null, to?: string | null): number | null {

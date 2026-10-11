@@ -90,7 +90,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="(row, i) in versions" :key="i">
+              <tr v-for="(row, i) in versionPage" :key="i">
                 <td>{{ row.bakta_version ?? '-' }}</td>
                 <td>{{ row.bakta_db_version ?? '-' }}</td>
                 <td>{{ row.baktfold_version ?? '-' }}</td>
@@ -102,6 +102,12 @@
             </tbody>
           </table>
         </div>
+        <ListPagination
+          v-model:page="versionPageNumber"
+          v-model:page-size="versionPageSize"
+          :total="versions.length"
+          label="versions"
+        />
       </div>
     </div>
   </div>
@@ -118,9 +124,11 @@ import { groupSeries } from '../chart-colors'
 import { bucketValues, chartPeriods } from '../chart-data'
 import AdminFilterBar from '../components/AdminFilterBar.vue'
 import ChipGroup from '../components/ChipGroup.vue'
+import ListPagination from '../components/ListPagination.vue'
 import StatTile from '../components/StatTile.vue'
 import TimeChart from '../components/TimeChart.vue'
 import { formatBp, formatCount, formatDateTime, formatDuration, formatPercent } from '../format'
+import { useClientPages } from '../pagination'
 
 const intervalOptions: { value: Interval; label: string }[] = [
   { value: 'day', label: 'Day' },
@@ -141,6 +149,11 @@ const grouped = ref<Timeseries>()
 const overall = ref<Timeseries>()
 const versions = ref<VersionStats['items']>([])
 const error = ref<string>()
+const {
+  page: versionPageNumber,
+  pageSize: versionPageSize,
+  pageItems: versionPage,
+} = useClientPages(versions, 10)
 const loading = ref(false)
 
 // a matching interval for the time range, so the chart has a useful number of bars
