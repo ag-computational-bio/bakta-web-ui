@@ -2,14 +2,11 @@
   <div class="py-4">
     <div class="border rounded-3 p-4">
       <div class="d-flex align-items-center gap-3 mb-3">
-        <i class="bi bi-hourglass-split fs-4" :class="`text-${jobStatusClass}`"></i>
         <div class="flex-grow-1">
           <div class="fw-semibold">Your job is not finished yet.</div>
           <div class="text-secondary small">
             Status:
-            <span class="badge" :class="`text-bg-${jobStatusClass}`">{{
-              jobStatus ?? 'INIT'
-            }}</span>
+            <span class="badge" :class="`text-bg-${jobStatusClass}`">{{ displayStatus }}</span>
           </div>
         </div>
         <button
@@ -119,8 +116,15 @@ function toggleLogs(stage: string) {
   openLogs.value = open
 }
 
+// a running step means the workflow runs, even if the job status lags behind
+const displayStatus = computed(() =>
+  props.stages.some((stage) => stage.status === 'running')
+    ? 'RUNNING'
+    : (props.jobStatus ?? 'INIT'),
+)
+
 const jobStatusClass = computed(() => {
-  if (props.jobStatus === 'RUNNING') return 'success'
+  if (displayStatus.value === 'RUNNING') return 'success'
   if (props.jobStatus) return 'warning'
   return 'secondary'
 })
