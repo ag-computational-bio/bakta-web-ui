@@ -108,4 +108,27 @@ describe('useBulkPreview', () => {
     expect(bulk).not.toHaveBeenCalled()
     expect(p.preview.value?.items).toEqual([])
   })
+
+  it('locks the settings during a run and keeps its result', async () => {
+    const real = deferred()
+    const bulk = vi.fn(async (r: BulkRequest) =>
+      r.dry_run ? { action: r.action, dry_run: true, items: [item('a')] } : real.promise,
+    )
+    const p = useBulkPreview({ bulk }, String)
+    p.scope.value = bulkScope(list)
+    await p.load()
+    const first = p.run()
+    expect(p.running.value).toBe(true)
+    // neither a second run, a new preview nor changed settings stop the first run
+    await p.run()
+    p.hours.value = 5
+    await p.load()
+    p.scope.value = undefined
+    expect(p.busy.value).toBe(true)
+    expect(bulk).toHaveBeenCalledTimes(2)
+    real.resolve({ action: 'delete', dry_run: false, items: [{ ...item('a'), result: 'done' }] })
+    await first
+    expect(p.running.value).toBe(false)
+    expect(p.results.value?.map((w) => w.result)).toEqual(['done'])
+  })
 })

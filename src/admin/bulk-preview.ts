@@ -75,6 +75,8 @@ export function useBulkPreview(api: Pick<AdminApi, 'bulk'>, handleError: (e: unk
   const preview = shallowRef<Preview>()
   const results = shallowRef<BulkItem[]>()
   const busy = ref(false)
+  // a real run is on its way: the settings are locked and no second run starts
+  const running = ref(false)
   const error = ref<string>()
   const applicable = computed(() => (preview.value?.items ?? []).filter((w) => w.applicable))
 
@@ -99,6 +101,7 @@ export function useBulkPreview(api: Pick<AdminApi, 'bulk'>, handleError: (e: unk
   }
 
   async function load() {
+    if (running.value) return
     const current = ++token
     preview.value = undefined
     results.value = undefined
@@ -123,28 +126,32 @@ export function useBulkPreview(api: Pick<AdminApi, 'bulk'>, handleError: (e: unk
   /** Runs the action of the shown preview on exactly its applicable workflows. */
   async function run() {
     const shown = preview.value
-    if (!shown || !applicable.value.length) return
-    const current = ++token
+    if (running.value || !shown || !applicable.value.length) return
+    running.value = true
     busy.value = true
     error.value = undefined
+    // the result of the run is always kept, the settings cannot change meanwhile
     try {
       const result = await api.bulk({
         ...shown.request,
         dry_run: false,
         workflow_names: applicable.value.map((w) => w.name),
       })
-      if (current === token) results.value = result.items
+      results.value = result.items
     } catch (e) {
-      if (current === token) error.value = handleError(e)
+      error.value = handleError(e)
     } finally {
-      if (current === token) busy.value = false
+      busy.value = false
+      running.value = false
     }
   }
 
-  // other settings make the shown preview invalid, at once and not after a tick
+  // other settings make the shown preview invalid, at once and not after a tick;
+  // during a run they are locked, so the run and its result stay
   watch(
     [action, scope, hours],
     () => {
+      if (running.value) return
       token++
       preview.value = undefined
       results.value = undefined
@@ -153,5 +160,5 @@ export function useBulkPreview(api: Pick<AdminApi, 'bulk'>, handleError: (e: unk
     { flush: 'sync' },
   )
 
-  return { action, scope, hours, preview, results, applicable, busy, error, load, run }
+  return { action, scope, hours, preview, results, applicable, busy, running, error, load, run }
 }

@@ -35,7 +35,7 @@
               min="0"
               class="form-control form-control-sm hours"
               placeholder="any"
-              :disabled="!!results"
+              :disabled="!!results || running"
             />
             <span class="text-secondary text-nowrap">hours ago</span>
             <span v-if="busy" class="spinner-border spinner-border-sm text-secondary"></span>
@@ -115,7 +115,7 @@
             type="button"
             class="btn"
             :class="text.danger ? 'btn-danger' : 'btn-primary'"
-            :disabled="busy"
+            :disabled="busy || running"
             @click="confirm"
           >
             <i class="bi me-1" :class="text.icon"></i>{{ runLabel }}
@@ -205,7 +205,7 @@ const resultClasses = {
   failed: 'bg-danger-subtle text-danger-emphasis',
 }
 
-const { action, scope, hours, preview, results, applicable, busy, error, load, run } =
+const { action, scope, hours, preview, results, applicable, busy, running, error, load, run } =
   useBulkPreview(useAdminApi(), handleAdminError)
 const text = computed(() => texts[action.value])
 const items = computed(() => results.value ?? preview.value?.items)
@@ -288,11 +288,18 @@ let modal: Modal | undefined
 let ran = false
 
 function open(a: BulkAction, s: BulkScope) {
+  // a run is still on its way: show it again instead of starting anew
+  if (running.value) {
+    visible = true
+    modal?.show()
+    return
+  }
   action.value = a
   scope.value = s
   hours.value = ''
   confirming.value = false
   window.clearTimeout(timer)
+  visible = true
   modal?.show()
   load()
 }
@@ -301,9 +308,18 @@ function hide() {
   modal?.hide()
 }
 
-// results change the job list, so it reloads when the modal closes
-watch(results, (r) => r && (ran = true))
+// results change the job list, so it reloads when the modal closes, or at
+// once when a run ends while the modal is closed
+let visible = false
+watch(results, (r) => {
+  if (!r) return
+  ran = true
+  if (!visible) onHidden()
+})
 function onHidden() {
+  visible = false
+  // a run keeps its settings, so its result is still shown when the modal opens again
+  if (running.value) return
   scope.value = undefined
   if (ran) emit('done')
   ran = false
