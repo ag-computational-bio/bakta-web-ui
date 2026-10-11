@@ -337,8 +337,9 @@ let modal: Modal | undefined
 let ran = false
 
 function open(a: BulkAction, s: BulkScope) {
-  // a run is still on its way: show it again instead of starting anew
-  if (running.value) {
+  // a run is still on its way, or its result was not shown yet: show it instead of starting anew
+  if (running.value || unseen) {
+    unseen = false
     visible = true
     modal?.show()
     return
@@ -360,15 +361,25 @@ function hide() {
 // results change the job list, so it reloads when the modal closes, or at
 // once when a run ends while the modal is closed
 let visible = false
+// a result that came while the modal was closed, it is kept until the modal shows it
+let unseen = false
 watch(results, (r) => {
   if (!r) return
-  ran = true
-  if (!visible) onHidden()
+  if (visible) {
+    ran = true
+    return
+  }
+  unseen = true
+  emit('done')
 })
+// the modal counts as closed as soon as it starts to hide
+function onHide() {
+  visible = false
+}
 function onHidden() {
   visible = false
   // a run keeps its settings, so its result is still shown when the modal opens again
-  if (running.value) return
+  if (running.value || unseen) return
   scope.value = undefined
   if (ran) emit('done')
   ran = false
@@ -377,10 +388,12 @@ function onHidden() {
 onMounted(() => {
   if (!element.value) return
   modal = new Modal(element.value)
+  element.value.addEventListener('hide.bs.modal', onHide)
   element.value.addEventListener('hidden.bs.modal', onHidden)
 })
 onUnmounted(() => {
   window.clearTimeout(timer)
+  element.value?.removeEventListener('hide.bs.modal', onHide)
   element.value?.removeEventListener('hidden.bs.modal', onHidden)
   modal?.dispose()
 })
