@@ -28,6 +28,7 @@
           :series="histogramSeries"
           :values="{ jobs: stats.histogram.map((b) => b.jobs) }"
           :format="formatCount"
+          y-title="Jobs"
         />
         <p v-else class="text-secondary mb-0">No succeeded jobs in this time range.</p>
       </div>
@@ -37,15 +38,18 @@
         <h3 class="section-title">Runtime by input size</h3>
         <SeriesChart
           v-if="stats?.jobs"
-          kind="dots"
+          kind="ranges"
           label="Runtime by input size"
           :labels="sizeLabels.map((l) => l.label)"
           :tick-labels="sizeLabels.map((l) => l.tick)"
+          :sub-labels="stats.by_input_size.map((b) => `n = ${formatCount(b.jobs)}`)"
+          :counts="stats.by_input_size.map((b) => b.jobs)"
           :notes="stats.by_input_size.map((b) => `${formatCount(b.jobs)} jobs`)"
           :series="sizeSeries"
           :values="sizeValues"
           :format="formatMinutes"
           :axis-format="(minutes) => `${minutes} min`"
+          y-title="Runtime"
         />
         <p v-else class="text-secondary mb-0">No succeeded jobs in this time range.</p>
       </div>
@@ -65,8 +69,10 @@
       :tick-labels="periodLabels.map((l) => l.replace('Week of ', ''))"
       :series="timeSeries"
       :values="timeValues"
+      :counts="timeCounts"
       :format="formatMinutes"
       :axis-format="(minutes) => `${minutes} min`"
+      y-title="Runtime"
     />
     <p v-else class="text-secondary mb-0">No jobs in this time range.</p>
   </div>
@@ -164,7 +170,7 @@ import {
   statsFilter,
 } from '../admin-filters'
 import { handleAdminError, useAdminApi } from '../admin-session'
-import { lightColor } from '../chart-colors'
+import { lightColor, statColors } from '../chart-colors'
 import { bucketValues, chartPeriods } from '../chart-data'
 import AdminFilterBar from '../components/AdminFilterBar.vue'
 import AdminSelect from '../components/AdminSelect.vue'
@@ -198,13 +204,13 @@ const kindColumns: { key: Exclude<keyof KindRow, 'workflow_kind' | 'jobs'>; labe
 ]
 const histogramSeries = [{ key: 'jobs', label: 'Jobs', ...lightColor('primary') }]
 const sizeSeries = [
-  { key: 'p50', label: 'Median', color: 'var(--bs-primary)' },
-  { key: 'p90', label: 'p90', color: 'var(--bs-warning-text-emphasis)' },
+  { key: 'p50', label: 'Median', color: statColors.p50 },
+  { key: 'p90', label: 'p90', color: statColors.p90 },
 ]
 const timeSeries = [
-  { key: 'p50', label: 'Median', color: 'var(--bs-primary)' },
-  { key: 'p90', label: 'p90', color: 'var(--bs-warning-text-emphasis)' },
-  { key: 'avg', label: 'Average', color: 'var(--bs-info)' },
+  { key: 'p50', label: 'Median', color: statColors.p50 },
+  { key: 'p90', label: 'p90', color: statColors.p90 },
+  { key: 'avg', label: 'Average', color: statColors.avg },
 ]
 
 const api = useAdminApi()
@@ -282,6 +288,12 @@ const timeValues = computed(() => {
     minutes(bucketValues(buckets, periods.value, name)[kind.value])
   return { p50: field('runtime_p50'), p90: field('runtime_p90'), avg: field('runtime_avg') }
 })
+
+// the succeeded jobs behind each runtime value
+const timeCounts = computed(
+  () =>
+    bucketValues(series.value?.buckets ?? [], periods.value, 'jobs_succeeded')[kind.value] ?? [],
+)
 
 let request = 0
 async function load() {

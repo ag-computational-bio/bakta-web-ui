@@ -73,3 +73,10 @@ export function groupSeries(groupBy: GroupBy, groups: string[]): ChartSeries[] {
     .map((key) => ({ key, label: key || 'Unknown', ...otherColor }))
   return [...known.filter((s) => groups.includes(s.key)), ...others]
 }
+
+// median, p90 and average have the same strong colors in every chart
+export const statColors = {
+  p50: 'var(--bs-primary)',
+  p90: 'var(--bs-warning-text-emphasis)',
+  avg: 'var(--bs-info)',
+}

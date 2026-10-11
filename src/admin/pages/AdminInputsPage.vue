@@ -28,6 +28,7 @@
           :series="sizeSeries"
           :values="{ jobs: stats.size_histogram.map((b) => b.jobs) }"
           :format="formatCount"
+          y-title="Inputs"
         />
         <p v-else class="text-secondary mb-0">No inputs in this time range.</p>
       </div>
@@ -44,6 +45,7 @@
           :series="sequenceSeries"
           :values="sequenceValues"
           :format="formatCount"
+          y-title="Inputs"
         />
         <p v-else class="text-secondary mb-0">No inputs in this time range.</p>
       </div>
@@ -63,8 +65,10 @@
       :tick-labels="periodLabels.map((l) => l.replace('Week of ', ''))"
       :series="timeSeries"
       :values="timeValues"
+      :counts="timeCounts"
       :format="(mbp) => formatBp(mbp == null ? null : mbp * 1e6)"
       :axis-format="(mbp) => `${mbp} Mbp`"
+      y-title="Input size"
     />
     <p v-else class="text-secondary mb-0">No jobs in this time range.</p>
   </div>
@@ -171,7 +175,7 @@ import {
   statsFilter,
 } from '../admin-filters'
 import { handleAdminError, useAdminApi } from '../admin-session'
-import { lightColor } from '../chart-colors'
+import { lightColor, statColors } from '../chart-colors'
 import { bucketValues, chartPeriods } from '../chart-data'
 import AdminFilterBar from '../components/AdminFilterBar.vue'
 import AdminSelect from '../components/AdminSelect.vue'
@@ -195,8 +199,8 @@ const sequenceSeries = [
   { key: 'several', label: 'Several sequences, like draft assemblies', ...lightColor('primary') },
 ]
 const timeSeries = [
-  { key: 'p50', label: 'Median', color: 'var(--bs-primary)' },
-  { key: 'avg', label: 'Average', color: 'var(--bs-info)' },
+  { key: 'p50', label: 'Median', color: statColors.p50 },
+  { key: 'avg', label: 'Average', color: statColors.avg },
 ]
 
 const api = useAdminApi()
@@ -264,6 +268,11 @@ const timeValues = computed(() => {
     )
   return { p50: field('input_p50_bp'), avg: field('input_avg_bp') }
 })
+
+// the jobs behind each input value
+const timeCounts = computed(
+  () => bucketValues(series.value?.buckets ?? [], periods.value, 'jobs_total')[kind.value] ?? [],
+)
 
 let request = 0
 async function load() {

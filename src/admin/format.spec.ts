@@ -8,6 +8,7 @@ import {
   formatPercent,
   outcomeText,
   percentile,
+  periodRange,
   successRate,
   periods,
   phaseStatus,
@@ -147,5 +148,16 @@ describe('changeText', () => {
     expect(changeText(0.95, 0.9, 'previous 30 days', true)).toBe('+5 points vs previous 30 days')
     expect(changeText(3, 0, 'previous 30 days')).toBe('')
     expect(changeText(3, undefined, 'previous 30 days')).toBe('')
+  })
+})
+
+describe('periodRange', () => {
+  it('names the days of a bucket', () => {
+    const utc = (d: string) => new Date(`${d}T00:00:00Z`)
+    expect(periodRange(utc('2026-10-11'), 'day')).toBe('11 Oct 2026')
+    expect(periodRange(utc('2026-10-05'), 'week')).toBe('5 Oct to 11 Oct 2026')
+    expect(periodRange(utc('2025-12-29'), 'week')).toBe('29 Dec 2025 to 4 Jan 2026')
+    expect(periodRange(utc('2026-02-01'), 'month')).toBe('1 Feb to 28 Feb 2026')
+    expect(periodRange(utc('2026-01-01'), 'year')).toBe('1 Jan to 31 Dec 2026')
   })
 })

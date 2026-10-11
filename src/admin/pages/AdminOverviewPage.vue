@@ -33,6 +33,7 @@
       :series="jobSeries"
       :values="jobValues"
       :format="formatCount"
+      y-title="Jobs"
     />
     <p v-else class="text-secondary mb-0">No jobs in this time range.</p>
   </div>
@@ -138,6 +139,7 @@ import {
   formatPercent,
   successRate,
   formatPeriod,
+  periodRange,
 } from '../format'
 import { useClientPages } from '../pagination'
 
@@ -241,8 +243,11 @@ const attention = computed(() => {
 const periods = computed(() =>
   overall.value ? chartPeriods(overall.value.buckets, statsFilter(), interval.value) : [],
 )
-const periodLabels = computed(() => periods.value.map((p) => formatPeriod(p, interval.value)))
-const periodTicks = computed(() => periodLabels.value.map((l) => l.replace('Week of ', '')))
+// the tooltip names the days of a bar, the axis the start
+const periodLabels = computed(() => periods.value.map((p) => periodRange(p, interval.value)))
+const periodTicks = computed(() =>
+  periods.value.map((p) => formatPeriod(p, interval.value).replace('Week of ', '')),
+)
 const jobValues = computed(() =>
   grouped.value ? bucketValues(grouped.value.buckets, periods.value, 'jobs_total') : {},
 )

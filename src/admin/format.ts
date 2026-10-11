@@ -72,6 +72,24 @@ export function formatPeriod(date: Date, interval: Interval): string {
 }
 
 /**
+ * The days of a time series bucket, like "5 Oct to 11 Oct 2026", for tooltips.
+ * A day bucket is the day itself.
+ */
+export function periodRange(date: Date, interval: Interval): string {
+  const day = (d: Date, year: boolean) =>
+    new Intl.DateTimeFormat('en-GB', {
+      timeZone: 'UTC',
+      day: 'numeric',
+      month: 'short',
+      year: year ? 'numeric' : undefined,
+    }).format(d)
+  if (interval === 'day') return day(date, true)
+  const last = new Date(nextPeriod(date, interval).getTime() - 86_400_000)
+  const sameYear = last.getUTCFullYear() === date.getUTCFullYear()
+  return `${day(date, !sameYear)} to ${day(last, true)}`
+}
+
+/**
  * The start of the bucket a date falls into, like date_trunc in Postgres (UTC, weeks start on Monday).
  */
 export function truncDate(date: Date, interval: Interval): Date {

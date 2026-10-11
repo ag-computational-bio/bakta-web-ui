@@ -47,6 +47,11 @@ describe('bucketValues', () => {
     })
   })
 
+  it('keeps input sizes of buckets without sizes empty instead of zero', () => {
+    const proteinsOnly = { ...bucket('2026-04-01T00:00:00Z', null, 2), input_p50_bp: null }
+    expect(bucketValues([proteinsOnly], list, 'input_p50_bp')).toEqual({ '': [null, null, null] })
+  })
+
   it('leaves missing durations empty', () => {
     expect(bucketValues(buckets, list, 'runtime_p50').bakta).toEqual([400, null, 300])
   })

@@ -3,6 +3,7 @@ import { periods } from './format'
 
 type BucketField =
   | 'jobs_total'
+  | 'jobs_succeeded'
   | 'runtime_p50'
   | 'runtime_p90'
   | 'runtime_avg'
@@ -40,7 +41,7 @@ export function bucketValues(
   field: BucketField,
 ): Record<string, (number | null)[]> {
   const index = new Map(chartPeriods.map((p, i) => [p.getTime(), i]))
-  const empty = field === 'jobs_total' ? 0 : null
+  const empty = field === 'jobs_total' || field === 'jobs_succeeded' ? 0 : null
   const values: Record<string, (number | null)[]> = {}
   for (const bucket of buckets) {
     const i = index.get(new Date(bucket.period_start).getTime())
