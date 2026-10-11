@@ -22,7 +22,8 @@
       <ul class="nav nav-tabs flex-nowrap overflow-x-auto overflow-y-hidden mb-4">
         <li v-for="tab in tabs" :key="tab.label" class="nav-item text-nowrap">
           <RouterLink :to="tab.to" class="nav-link" :class="{ active: tab.active }">
-            {{ tab.label }}
+            <span :class="{ 'd-none d-sm-inline': tab.short }">{{ tab.label }}</span>
+            <span v-if="tab.short" class="d-sm-none">{{ tab.short }}</span>
           </RouterLink>
         </li>
       </ul>
@@ -106,6 +107,8 @@ const tabs = computed(() => [
   },
   {
     label: 'Input sizes',
+    // a shorter label on small screens, so all tabs fit
+    short: 'Inputs',
     to: { path: '/admin/inputs', query: filterQuery() },
     active: route.name === 'AdminInputs',
   },

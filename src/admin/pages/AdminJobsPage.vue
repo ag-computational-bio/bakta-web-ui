@@ -121,6 +121,7 @@
             class="btn btn-outline-secondary btn-sm admin-toggle"
             data-bs-toggle="dropdown"
             aria-expanded="false"
+            :disabled="total === 0"
           >
             <span class="toggle-value">Bulk actions</span>
             <i class="bi bi-chevron-down toggle-chevron" aria-hidden="true"></i>
@@ -180,6 +181,9 @@
       </li>
       <li v-if="!loading && jobs.length === 0" class="text-center text-secondary py-4">
         No jobs found.
+        <button v-if="search" type="button" class="btn btn-link btn-sm" @click="search = ''">
+          Clear search
+        </button>
       </li>
     </ul>
 
@@ -221,10 +225,11 @@
               </Shield>
             </td>
             <td>
-              <StatusBadge :status="job.status" />
-              <div v-if="outcomeText(job)" class="small text-secondary text-nowrap">
-                {{ outcomeText(job) }}
-              </div>
+              <!-- deleted and expired jobs: one grey line with their result -->
+              <span v-if="job.outcome && outcomeText(job)" class="text-secondary text-nowrap">
+                {{ formatStatus(job.status) }} ({{ job.outcome }})
+              </span>
+              <StatusBadge v-else :status="job.status" />
               <div
                 v-if="argoNote(job.status, job.workflow_phase)"
                 class="small text-secondary text-nowrap"
@@ -254,7 +259,12 @@
             </td>
           </tr>
           <tr v-if="!loading && jobs.length === 0">
-            <td colspan="8" class="text-center text-secondary py-4">No jobs found.</td>
+            <td colspan="8" class="text-center text-secondary py-4">
+              No jobs found.
+              <button v-if="search" type="button" class="btn btn-link btn-sm" @click="search = ''">
+                Clear search
+              </button>
+            </td>
           </tr>
         </tbody>
       </table>

@@ -50,7 +50,7 @@
               <td class="text-secondary">{{ w.message ?? '' }}</td>
               <td class="text-end">
                 <button
-                  class="btn btn-sm btn-outline-danger"
+                  class="btn btn-sm btn-icon danger-hover"
                   title="Delete"
                   :aria-label="`Delete workflow ${w.name}`"
                   :disabled="busy"
@@ -87,6 +87,7 @@ import { filters } from '../admin-filters'
 import { handleAdminError, useAdminApi } from '../admin-session'
 import { formatDateTime, phaseStatus } from '../format'
 import { useClientPages } from '../pagination'
+import '../admin-menu.css'
 import ConfirmModal from './ConfirmModal.vue'
 import ListPagination from './ListPagination.vue'
 

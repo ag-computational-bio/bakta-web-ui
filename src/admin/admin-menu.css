@@ -124,3 +124,13 @@
   margin-bottom: 0.25rem;
   font-size: var(--bakta-font-size-xs);
 }
+
+/* quiet icon buttons of a row that only turn red on hover, like a delete */
+.btn-icon.danger-hover {
+  --bs-btn-hover-color: var(--bs-danger-text-emphasis);
+  --bs-btn-hover-bg: var(--bs-danger-bg-subtle);
+  --bs-btn-hover-border-color: var(--bs-danger-bg-subtle);
+  --bs-btn-active-color: var(--bs-danger-text-emphasis);
+  --bs-btn-active-bg: var(--bs-danger-border-subtle);
+  --bs-btn-active-border-color: var(--bs-danger-border-subtle);
+}
