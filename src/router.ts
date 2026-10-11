@@ -76,6 +76,16 @@ const routes = [
         name: 'AdminOverview',
         component: () => import('@/admin/pages/AdminOverviewPage.vue'),
       },
+      {
+        path: 'jobs',
+        name: 'AdminJobs',
+        component: () => import('@/admin/pages/AdminJobsPage.vue'),
+      },
+      {
+        path: 'jobs/:id',
+        name: 'AdminJob',
+        component: () => import('@/admin/pages/AdminJobPage.vue'),
+      },
     ],
   },
   {
