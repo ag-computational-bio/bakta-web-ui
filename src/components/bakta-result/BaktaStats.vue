@@ -137,7 +137,7 @@ a.feature-row:hover .feature-label {
 }
 .stat-title {
   margin-bottom: 0.5rem;
-  font-size: 0.8rem;
+  font-size: var(--bakta-font-size-sm);
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;

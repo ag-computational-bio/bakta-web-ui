@@ -102,7 +102,7 @@ const inputField = ref<HTMLInputElement>()
   padding: 0;
 
   &:focus-within {
-    border-color: #7fa2cc;
+    border-color: var(--bakta-focus-border);
     box-shadow: 0 0 0 0.2rem var(--bs-focus-ring-color);
   }
   input:focus {
@@ -121,7 +121,7 @@ const inputField = ref<HTMLInputElement>()
     width: 100%;
     div {
       padding-left: 0.75rem;
-      background-color: white;
+      background-color: var(--bs-body-bg);
     }
     .active {
       background-color: var(--bs-primary-bg-subtle);

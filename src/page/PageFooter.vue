@@ -56,7 +56,7 @@
 <style scoped>
 .site-footer {
   background-color: var(--bakta-surface);
-  font-size: 0.875rem;
+  font-size: var(--bakta-font-size-md);
   color: var(--bs-secondary-color);
 }
 .footer-top {

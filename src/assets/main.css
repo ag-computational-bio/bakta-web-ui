@@ -27,6 +27,15 @@
 
   --bakta-surface: #f5f7fa;
   --bakta-shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
+  --bakta-primary-hover: var(--bakta-primary-hover);
+  --bakta-primary-active: var(--bakta-primary-active);
+  --bakta-focus-border: #7fa2cc;
+  --bakta-tooltip-bg: #2b3544;
+
+  /* small text sizes, from labels and counts up to dense tables */
+  --bakta-font-size-xs: 0.75rem;
+  --bakta-font-size-sm: 0.8125rem;
+  --bakta-font-size-md: 0.875rem;
 }
 
 html,
@@ -92,10 +101,10 @@ a {
 .btn-primary {
   --bs-btn-bg: var(--bs-primary);
   --bs-btn-border-color: var(--bs-primary);
-  --bs-btn-hover-bg: #2c5384;
-  --bs-btn-hover-border-color: #2c5384;
-  --bs-btn-active-bg: #264873;
-  --bs-btn-active-border-color: #264873;
+  --bs-btn-hover-bg: var(--bakta-primary-hover);
+  --bs-btn-hover-border-color: var(--bakta-primary-hover);
+  --bs-btn-active-bg: var(--bakta-primary-active);
+  --bs-btn-active-border-color: var(--bakta-primary-active);
   --bs-btn-disabled-bg: var(--bs-primary);
   --bs-btn-disabled-border-color: var(--bs-primary);
   --bs-btn-focus-shadow-rgb: 53, 98, 155;
@@ -105,8 +114,8 @@ a {
   --bs-btn-border-color: var(--bs-primary);
   --bs-btn-hover-bg: var(--bs-primary);
   --bs-btn-hover-border-color: var(--bs-primary);
-  --bs-btn-active-bg: #264873;
-  --bs-btn-active-border-color: #264873;
+  --bs-btn-active-bg: var(--bakta-primary-active);
+  --bs-btn-active-border-color: var(--bakta-primary-active);
   --bs-btn-disabled-color: var(--bs-primary);
   --bs-btn-disabled-border-color: var(--bs-primary);
   --bs-btn-focus-shadow-rgb: 53, 98, 155;
@@ -125,7 +134,7 @@ a {
 .form-control:focus,
 .form-select:focus,
 .form-check-input:focus {
-  border-color: #7fa2cc;
+  border-color: var(--bakta-focus-border);
   box-shadow: 0 0 0 0.2rem var(--bs-focus-ring-color);
 }
 .form-check-input:checked {
@@ -192,9 +201,10 @@ a {
 /* Tables */
 .table {
   --bs-table-border-color: var(--bs-border-color);
+  --bs-table-striped-bg: var(--bakta-surface);
 }
 .table > thead > tr > th {
-  font-size: 0.8rem;
+  font-size: var(--bakta-font-size-sm);
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -215,7 +225,7 @@ a {
 /* Progress */
 .progress {
   --bs-progress-bar-bg: var(--bs-primary);
-  --bs-progress-border-radius: 999px;
+  --bs-progress-border-radius: var(--bs-border-radius-pill);
 }
 
 /* Section titles inside form cards and panels */
@@ -229,8 +239,8 @@ a {
   --bs-tooltip-max-width: 18rem;
   --bs-tooltip-padding-x: 0.75rem;
   --bs-tooltip-padding-y: 0.5rem;
-  --bs-tooltip-font-size: 0.8125rem;
-  --bs-tooltip-bg: #2b3544;
+  --bs-tooltip-font-size: var(--bakta-font-size-sm);
+  --bs-tooltip-bg: var(--bakta-tooltip-bg);
 }
 .tooltip-inner {
   text-align: left;

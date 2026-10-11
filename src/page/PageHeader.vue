@@ -32,7 +32,7 @@ withDefaults(
   top: calc(100% + 0.5rem);
   right: calc(var(--bs-gutter-x) * 0.5);
   margin: 0;
-  font-size: 0.75rem;
+  font-size: var(--bakta-font-size-xs);
   line-height: 1.2;
   font-variant-numeric: tabular-nums;
   color: var(--bs-secondary-color);

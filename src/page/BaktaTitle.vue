@@ -19,7 +19,7 @@
 }
 .tagline {
   margin: 0.25rem 0 0;
-  font-size: 0.875rem;
+  font-size: var(--bakta-font-size-md);
   line-height: 1.3;
   color: var(--bs-secondary-color);
 }

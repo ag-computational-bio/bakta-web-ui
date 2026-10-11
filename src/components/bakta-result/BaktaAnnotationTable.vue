@@ -130,10 +130,10 @@ const table = computed(() => {
   gap: 0.4rem;
   padding: 0.25rem 0.4rem 0.25rem 0.75rem;
   border: 1px solid var(--bs-border-color);
-  border-radius: 999px;
+  border-radius: var(--bs-border-radius-pill);
   background-color: var(--bs-body-bg);
   color: var(--bs-body-color);
-  font-size: 0.875rem;
+  font-size: var(--bakta-font-size-md);
 }
 .feature-chip:hover {
   border-color: var(--bs-primary-border-subtle);
@@ -141,25 +141,25 @@ const table = computed(() => {
 }
 .feature-chip .count {
   padding: 0 0.45rem;
-  border-radius: 999px;
+  border-radius: var(--bs-border-radius-pill);
   background-color: var(--bakta-surface);
   color: var(--bs-secondary-color);
-  font-size: 0.75rem;
+  font-size: var(--bakta-font-size-xs);
   font-variant-numeric: tabular-nums;
 }
 .feature-chip.active {
   border-color: var(--bs-primary);
   background-color: var(--bs-primary);
-  color: #fff;
+  color: var(--bs-white);
 }
 .feature-chip.active .count {
-  background-color: rgba(255, 255, 255, 0.2);
-  color: #fff;
+  background-color: rgba(var(--bs-white-rgb), 0.2);
+  color: var(--bs-white);
 }
 </style>
 <style>
 .annotation-table .table {
-  font-size: 0.875rem;
+  font-size: var(--bakta-font-size-md);
 }
 /* plain row colors instead of the per cell shadow, which shows thin lines between cells */
 .annotation-table table.table.dataTable.table-striped > tbody > tr > * {
@@ -169,7 +169,7 @@ const table = computed(() => {
   background-color: var(--bakta-surface);
 }
 .annotation-table .table > thead > tr > th {
-  font-size: 0.8125rem;
+  font-size: var(--bakta-font-size-sm);
   letter-spacing: normal;
   text-transform: none;
   color: var(--bs-body-color);
@@ -179,15 +179,15 @@ const table = computed(() => {
 }
 .annotation-table td.locus {
   font-family: var(--bs-font-monospace);
-  font-size: 0.8125rem;
+  font-size: var(--bakta-font-size-sm);
 }
 .dbxref {
   display: inline-block;
   margin: 0 0.25rem 0.25rem 0;
   padding: 0 0.4rem;
-  border-radius: var(--bs-border-radius-sm);
+  border-radius: var(--bs-border-radius-pill);
   background-color: var(--bs-primary-bg-subtle);
-  font-size: 0.8rem;
+  font-size: var(--bakta-font-size-sm);
   text-decoration: none;
 }
 .dbxref:hover {

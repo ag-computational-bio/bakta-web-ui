@@ -731,7 +731,7 @@ function updateSkipOption(key: SkipOptionKey, evt: Event) {
   min-height: 100%;
   padding: 0.6rem 0.75rem;
   border: 1px solid var(--bs-border-color);
-  border-radius: 0.5rem;
+  border-radius: var(--bs-border-radius);
   background: var(--bs-body-bg);
 }
 
@@ -740,7 +740,7 @@ function updateSkipOption(key: SkipOptionKey, evt: Event) {
   margin-inline: -0.5rem;
   padding: 0.3rem 0.5rem 0.3rem 2rem;
   border-radius: var(--bs-border-radius);
-  background-color: rgba(var(--bs-primary-rgb), 0.09);
+  background-color: var(--bs-primary-bg-subtle);
 }
 
 .skip-wrap {

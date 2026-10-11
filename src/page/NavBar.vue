@@ -126,7 +126,7 @@ const nav = computed(() => {
     bottom: 0;
     left: 0.75rem;
     height: 2px;
-    border-radius: 2px;
+    border-radius: var(--bs-border-radius-pill);
     background-color: currentColor;
   }
 }
