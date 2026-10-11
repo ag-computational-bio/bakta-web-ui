@@ -17,6 +17,7 @@ import {
   type WorkflowPhase,
 } from './admin-api'
 import { createJobs, day, uuid } from './admin-mock-data'
+import { runtimeStats } from './admin-mock-stats'
 import { percentile, truncDate } from './format'
 
 /*
@@ -137,6 +138,7 @@ class MockAdminApi implements AdminApi {
         jobs_succeeded: jobs.filter((j) => j.status === 'succeeded').length,
         jobs_failed: jobs.filter((j) => j.status === 'failed' || j.status === 'error').length,
         runtime_p50: runtime.p50,
+        runtime_p90: runtime.p90,
         runtime_avg: runtime.avg,
         total_input_bp: jobs.reduce((sum, j) => sum + (j.total_length ?? 0), 0),
       }
@@ -161,6 +163,13 @@ class MockAdminApi implements AdminApi {
         last_seen: jobs[0].created_at,
       })),
     })
+  }
+
+  runtimes(filter: StatsFilter, workflowKind?: string) {
+    const jobs = this.#filtered(filter).filter(
+      (j) => !workflowKind || j.workflow_kind === workflowKind,
+    )
+    return delay(runtimeStats(jobs))
   }
 
   jobs(query: JobQuery) {

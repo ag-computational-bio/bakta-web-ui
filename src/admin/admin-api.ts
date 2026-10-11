@@ -93,6 +93,7 @@ const BucketSchema = z.object({
   jobs_succeeded: z.number(),
   jobs_failed: z.number(),
   runtime_p50: optionalNumber,
+  runtime_p90: optionalNumber,
   runtime_avg: optionalNumber,
   total_input_bp: optionalNumber,
 })
@@ -104,6 +105,59 @@ export const TimeseriesSchema = z.object({
   buckets: z.array(BucketSchema),
 })
 export type Timeseries = z.infer<typeof TimeseriesSchema>
+
+export const RuntimeStatsSchema = z.object({
+  jobs: z.number(),
+  by_workflow_kind: z.array(
+    z.object({
+      workflow_kind: z.string(),
+      jobs: z.number(),
+      min: optionalNumber,
+      p10: optionalNumber,
+      p25: optionalNumber,
+      p50: optionalNumber,
+      p75: optionalNumber,
+      p90: optionalNumber,
+      p95: optionalNumber,
+      p99: optionalNumber,
+      max: optionalNumber,
+      avg: optionalNumber,
+      stddev: optionalNumber,
+    }),
+  ),
+  histogram: z.array(
+    z.object({ min_seconds: z.number(), max_seconds: optionalNumber, jobs: z.number() }),
+  ),
+  by_input_size: z.array(
+    z.object({
+      min_bp: z.number(),
+      max_bp: optionalNumber,
+      jobs: z.number(),
+      runtime_p50: optionalNumber,
+      runtime_p90: optionalNumber,
+      runtime_avg: optionalNumber,
+    }),
+  ),
+  seconds_per_mbp: z.object({ p50: optionalNumber, avg: optionalNumber }),
+  queue_seconds: z.object({
+    avg: optionalNumber,
+    p50: optionalNumber,
+    p90: optionalNumber,
+    p99: optionalNumber,
+    max: optionalNumber,
+  }),
+  slowest: z.array(
+    z.object({
+      id: z.string(),
+      workflow_kind: z.string(),
+      organism: optionalText,
+      total_length: optionalNumber,
+      runtime_seconds: z.number(),
+      created_at: time,
+    }),
+  ),
+})
+export type RuntimeStats = z.infer<typeof RuntimeStatsSchema>
 
 export const VersionStatsSchema = z.object({
   items: z.array(
@@ -270,6 +324,7 @@ export interface AdminApi {
   summary(filter: StatsFilter): Promise<StatsSummary>
   timeseries(filter: StatsFilter, interval: Interval, groupBy: GroupBy): Promise<Timeseries>
   versions(filter: StatsFilter): Promise<VersionStats>
+  runtimes(filter: StatsFilter, workflowKind?: string): Promise<RuntimeStats>
   jobs(query: JobQuery): Promise<JobPage>
   job(id: string): Promise<JobDetail>
   jobLogs(id: string): Promise<WorkflowLogs>
@@ -377,6 +432,12 @@ class HttpAdminApi implements AdminApi {
   async versions(filter: StatsFilter) {
     const path = '/stats/versions' + queryString(filterQuery(filter))
     return VersionStatsSchema.parse(await this.#request('GET', path))
+  }
+
+  async runtimes(filter: StatsFilter, workflowKind?: string) {
+    const query = { ...filterQuery(filter), workflow_kind: workflowKind }
+    const path = '/stats/runtimes' + queryString(query)
+    return RuntimeStatsSchema.parse(await this.#request('GET', path))
   }
 
   async jobs(query: JobQuery) {

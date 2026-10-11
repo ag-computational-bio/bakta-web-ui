@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   JobDetailSchema,
   JobPageSchema,
+  RuntimeStatsSchema,
   StatsSummarySchema,
   TimeseriesSchema,
   VersionStatsSchema,
@@ -16,6 +17,7 @@ describe('mock admin api', () => {
     StatsSummarySchema.parse(await api.summary(all))
     TimeseriesSchema.parse(await api.timeseries(all, 'week', 'status'))
     VersionStatsSchema.parse(await api.versions(all))
+    RuntimeStatsSchema.parse(await api.runtimes(all, 'bakta'))
     const page = JobPageSchema.parse(await api.jobs({ ...all, limit: 10 }))
     JobDetailSchema.parse(await api.job(page.items[0].id))
   })
@@ -42,5 +44,16 @@ describe('mock admin api', () => {
     const series = await api.timeseries(all, 'month', 'workflow_kind')
     const total = series.buckets.reduce((sum, b) => sum + b.jobs_total, 0)
     expect(total).toBe(summary.jobs_total)
+  })
+
+  it('has fixed runtime buckets that count all succeeded jobs', async () => {
+    const stats = await api.runtimes(all)
+    expect(stats.histogram).toHaveLength(9)
+    expect(stats.by_input_size).toHaveLength(7)
+    expect(stats.histogram[8].max_seconds).toBeNull()
+    expect(stats.histogram.reduce((sum, b) => sum + b.jobs, 0)).toBe(stats.jobs)
+    expect(stats.slowest).toHaveLength(10)
+    const kinds = await api.runtimes(all, 'baktfold')
+    expect(kinds.by_workflow_kind.map((k) => k.workflow_kind)).toEqual(['baktfold'])
   })
 })
