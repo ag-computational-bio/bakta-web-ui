@@ -14,7 +14,7 @@
       </thead>
       <tbody>
         <tr v-for="item in jobs" :key="item.jobID">
-          <td class="font-monospace">
+          <td>
             <router-link :to="{ name: routeName(item.workflowKind), params: { id: item.key } }">
               {{ item.jobID }}
             </router-link>

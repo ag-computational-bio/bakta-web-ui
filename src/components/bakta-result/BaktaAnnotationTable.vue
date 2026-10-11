@@ -65,7 +65,6 @@ const columns = [
   {
     data: 'locus',
     title: 'Locus tag',
-    className: 'locus',
     render: DataTablesCore.render.text(),
   },
   {
@@ -167,10 +166,6 @@ const table = computed(() => {
 }
 .annotation-table .table td {
   font-variant-numeric: tabular-nums;
-}
-.annotation-table td.locus {
-  font-family: var(--bs-font-monospace);
-  font-size: var(--bakta-font-size-sm);
 }
 .dbxref {
   display: inline-block;
