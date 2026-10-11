@@ -21,7 +21,7 @@
         </div>
         <button
           v-if="showShareButton"
-          class="btn btn-outline-secondary btn-sm"
+          class="btn btn-icon btn-sm"
           type="button"
           title="Copy link to clipboard"
           @click="emit('share')"

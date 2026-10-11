@@ -9,16 +9,26 @@
         {{ e.label }}
       </button>
     </li>
-    <li v-if="showShareButton" class="nav-item ms-auto">
-      <button class="nav-link" @click="putLinkToClipboard" title="Copy link to clipboard">
+    <li v-if="showShareButton" class="nav-item ms-auto d-flex align-items-center">
+      <button
+        class="btn btn-icon btn-sm"
+        type="button"
+        @click="putLinkToClipboard"
+        title="Copy link to clipboard"
+      >
         <i class="bi bi-share"></i>
       </button>
     </li>
-    <li v-if="showAddJobButton" class="nav-item">
+    <li
+      v-if="showAddJobButton"
+      class="nav-item d-flex align-items-center"
+      :class="{ 'ms-auto': !showShareButton }"
+    >
       <button
-        class="nav-link text-secondary"
+        class="btn btn-icon btn-sm ms-1"
+        type="button"
         @click="addJobToJoblist"
-        title="Add this job your joblist"
+        title="Add this job to your job list"
       >
         <i class="bi bi-save2"></i>
       </button>
@@ -39,7 +49,7 @@
   <div
     v-if="showShareButton"
     ref="copyToast"
-    class="text-bg-secondary toast position-absolute px-2 py-1 bottom-0 end-0"
+    class="bg-primary-subtle text-primary-emphasis toast position-absolute px-2 py-1 bottom-0 end-0"
     role="alert"
     aria-live="assertive"
     aria-atomic="true"
@@ -48,7 +58,7 @@
   </div>
   <div
     ref="addedToast"
-    class="text-bg-secondary toast position-absolute px-2 py-1 bottom-0 end-0"
+    class="bg-primary-subtle text-primary-emphasis toast position-absolute px-2 py-1 bottom-0 end-0"
     role="alert"
     aria-live="assertive"
     aria-atomic="true"
