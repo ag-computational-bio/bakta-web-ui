@@ -9,6 +9,7 @@ const api = { job: vi.fn(), jobLogs: vi.fn(), deleteJob: vi.fn() }
 
 vi.mock('vue-router', () => ({
   useRoute: () => route,
+  useRouter: () => ({ back: vi.fn() }),
   RouterLink: { template: '<a><slot /></a>' },
 }))
 vi.mock('../admin-session', () => ({ useAdminApi: () => api, handleAdminError: String }))
@@ -117,5 +118,18 @@ describe('AdminJobPage', () => {
     await flushPromises()
     expect(wrapper.text()).toContain('The logs were deleted after the retention period.')
     expect(wrapper.text()).not.toContain('No logs available')
+  })
+
+  it('shows only the actions that apply and the error under the title', async () => {
+    const failed = detail('a')
+    Object.assign(failed.job, { status: 'failed', error_message: 'bakta exited with code 1' })
+    api.job.mockResolvedValue(failed)
+    const wrapper = mount(AdminJobPage, { global: { stubs } })
+    await flushPromises()
+    const labels = wrapper.findAll('button').map((b) => b.text())
+    expect(labels).toEqual(expect.arrayContaining(['Resubmit', 'Delete']))
+    expect(labels).not.toContain('Retry')
+    expect(labels).not.toContain('Stop')
+    expect(wrapper.find('.alert-danger').text()).toContain('bakta exited with code 1')
   })
 })

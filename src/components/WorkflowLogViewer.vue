@@ -5,6 +5,7 @@
   <div v-else class="d-flex flex-column gap-3">
     <section
       v-for="stage in logs.stages"
+      :id="`log-${stage.stage}`"
       :key="stage.stage"
       class="border rounded-3 overflow-hidden"
     >

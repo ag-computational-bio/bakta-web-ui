@@ -268,7 +268,7 @@ import {
   type JobSort,
   type WorkflowPhase,
 } from '../admin-api'
-import { filterQuery, filters, statsFilter } from '../admin-filters'
+import { filterQuery, filters, lastJobListQuery, statsFilter } from '../admin-filters'
 import { handleAdminError, useAdminApi } from '../admin-session'
 import { bulkScope } from '../bulk-preview'
 import '../admin-menu.css'
@@ -362,20 +362,19 @@ async function load() {
   const current = ++request
   loading.value = true
   error.value = undefined
+  const query = {
+    ...filterQuery(),
+    q: search.value || undefined,
+    sort: sort.value === 'created_at' ? undefined : sort.value,
+    status: statuses.value.join(',') || undefined,
+    kind: kinds.value.join(',') || undefined,
+    phase: phases.value.join(',') || undefined,
+    page: page.value > 1 ? String(page.value) : undefined,
+    size: pageSize.value === 50 ? undefined : String(pageSize.value),
+  }
+  lastJobListQuery.value = query
   // the hash stays, it can point to the workflows section
-  router.replace({
-    hash: route.hash,
-    query: {
-      ...filterQuery(),
-      q: search.value || undefined,
-      sort: sort.value === 'created_at' ? undefined : sort.value,
-      status: statuses.value.join(',') || undefined,
-      kind: kinds.value.join(',') || undefined,
-      phase: phases.value.join(',') || undefined,
-      page: page.value > 1 ? page.value : undefined,
-      size: pageSize.value === 50 ? undefined : pageSize.value,
-    },
-  })
+  router.replace({ hash: route.hash, query })
   try {
     const result = await api.jobs({
       ...statsFilter(),

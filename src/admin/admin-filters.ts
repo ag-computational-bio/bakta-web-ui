@@ -1,5 +1,5 @@
 import { formatWorkflowKind, WorkflowKinds } from '@/model/job'
-import { reactive } from 'vue'
+import { reactive, ref } from 'vue'
 import type { Environment, Interval, StatsFilter } from './admin-api'
 
 /*
@@ -31,6 +31,9 @@ export const kindFilterOptions = [
 ]
 
 const day = 86_400_000
+
+// the query of the job list when it was left, so "All jobs" returns to the same list
+export const lastJobListQuery = ref<Record<string, string | undefined>>()
 
 export const filters = reactive({
   environment: 'production' as Environment,

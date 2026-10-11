@@ -1,5 +1,5 @@
 <template>
-  <RouterLink :to="{ path: '/admin/jobs', query: filterQuery() }" class="small d-inline-block mb-3">
+  <RouterLink :to="listLink" class="small d-inline-block mb-3" @click="backToList">
     <i class="bi bi-arrow-left me-1"></i>All jobs
   </RouterLink>
   <Notification v-if="error" class="mb-3" type="danger" :message="error" />
@@ -13,6 +13,15 @@
     <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
       <div class="d-flex flex-wrap align-items-center gap-2">
         <h3 class="section-title mb-0">{{ job.id }}</h3>
+        <button
+          type="button"
+          class="btn btn-icon btn-sm"
+          :title="copied ? 'Copied' : 'Copy the job ID'"
+          :aria-label="copied ? 'Job ID copied' : 'Copy the job ID'"
+          @click="copyId"
+        >
+          <i class="bi" :class="copied ? 'bi-check2' : 'bi-clipboard'"></i>
+        </button>
         <StatusBadge :status="job.status" />
         <span v-if="outcomeText(job)" class="text-secondary">{{ outcomeText(job) }}</span>
         <Shield v-bind="workflowShieldProps(job.workflow_kind)">
@@ -20,14 +29,21 @@
         </Shield>
       </div>
       <div class="d-flex flex-wrap gap-2">
-        <button class="btn btn-icon btn-sm" title="Reload" :disabled="busy" @click="load()">
+        <button
+          class="btn btn-icon btn-sm"
+          title="Reload"
+          aria-label="Reload the job"
+          :disabled="busy"
+          @click="load()"
+        >
           <i class="bi bi-arrow-clockwise"></i>
         </button>
-        <!-- retry and resubmit need the input data -->
+        <!-- only the actions that apply; retry and resubmit need the input data -->
         <button
-          v-if="job.data_available"
+          v-if="job.data_available && canRetry"
           class="btn btn-outline-secondary btn-sm"
-          :disabled="busy || !canRetry"
+          title="Run the failed steps again"
+          :disabled="busy"
           @click="runAction('retry')"
         >
           <i class="bi bi-arrow-repeat me-1"></i>Retry
@@ -41,28 +57,36 @@
           <i class="bi bi-play-circle me-1"></i>Resume
         </button>
         <button
-          v-if="job.data_available"
+          v-if="job.data_available && job.status !== 'deleted'"
           class="btn btn-outline-secondary btn-sm"
-          :disabled="busy || job.status === 'deleted'"
+          title="Start a new workflow with the same parameters"
+          :disabled="busy"
           @click="runAction('resubmit')"
         >
           <i class="bi bi-send me-1"></i>Resubmit
         </button>
         <button
+          v-if="canStop"
           class="btn btn-outline-danger btn-sm"
-          :disabled="busy || !canStop"
+          :disabled="busy"
           @click="runAction('stop')"
         >
           <i class="bi bi-stop-circle me-1"></i>Stop
         </button>
         <button
+          v-if="job.status !== 'deleted'"
           class="btn btn-outline-danger btn-sm"
-          :disabled="busy || job.status === 'deleted'"
+          :disabled="busy"
           @click="runDelete"
         >
           <i class="bi bi-trash me-1"></i>Delete
         </button>
       </div>
+    </div>
+
+    <div v-if="job.error_message" class="alert alert-danger d-flex flex-wrap gap-2 mb-3">
+      <span class="flex-grow-1"><i class="bi bi-x-circle me-1"></i>{{ job.error_message }}</span>
+      <a v-if="logs" href="#job-logs" class="alert-link" @click.prevent="showLog">Show log</a>
     </div>
 
     <p v-if="!job.data_available" class="small text-secondary mb-3">
@@ -82,10 +106,6 @@
           />
         </section>
       </div>
-    </div>
-
-    <div v-if="job.error_message" class="alert alert-danger mb-4">
-      <i class="bi bi-x-circle me-1"></i>{{ job.error_message }}
     </div>
 
     <div class="card p-4 mb-4">
@@ -108,7 +128,13 @@
           <span v-if="workflow.suspended" class="badge bg-info-subtle text-info-emphasis fw-medium">
             <i class="bi bi-pause-circle me-1"></i>Suspended
           </span>
-          <span v-if="workflow.message" class="text-secondary">{{ workflow.message }}</span>
+          <!-- the job error above often says the same -->
+          <span
+            v-if="workflow.message && workflow.message !== job.error_message"
+            class="text-secondary"
+          >
+            {{ workflow.message }}
+          </span>
         </div>
         <div class="table-responsive">
           <table class="table table-striped align-middle mb-0">
@@ -147,7 +173,7 @@
       </template>
     </div>
 
-    <div class="card p-4">
+    <div id="job-logs" class="card p-4">
       <h3 class="section-title">Logs</h3>
       <WorkflowLogViewer v-if="logs" :logs="logs" />
       <p v-else-if="logsDeleted" class="text-secondary mb-0">
@@ -178,9 +204,9 @@ import WorkflowLogViewer from '@/components/WorkflowLogViewer.vue'
 import { formatWorkflowKind, workflowShieldProps } from '@/model/job'
 import type { WorkflowLogs } from '@/model/submit'
 import { computed, ref, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { AdminApiError, type JobDetail } from '../admin-api'
-import { filterQuery } from '../admin-filters'
+import { filterQuery, lastJobListQuery } from '../admin-filters'
 import { handleAdminError, useAdminApi } from '../admin-session'
 import ConfirmModal from '../components/ConfirmModal.vue'
 import ListPagination from '../components/ListPagination.vue'
@@ -199,6 +225,7 @@ type Action = 'retry' | 'resubmit' | 'stop' | 'resume'
 
 const api = useAdminApi()
 const route = useRoute()
+const router = useRouter()
 const detail = ref<JobDetail>()
 const logs = ref<WorkflowLogs>()
 const logsError = ref<string>()
@@ -221,6 +248,36 @@ const {
   pageItems: nodePage,
 } = useClientPages(computed(() => workflow.value?.nodes ?? []))
 const options = computed(() => configEntries(job.value.config ?? {}))
+
+// back to the list with its last search and filters
+const listLink = computed(() => ({
+  path: '/admin/jobs',
+  query: lastJobListQuery.value ?? filterQuery(),
+}))
+function backToList(event: MouseEvent) {
+  // coming from the list, the browser history has the list with its scroll position
+  const back = window.history.state?.back
+  if (typeof back === 'string' && back.split('?')[0] === '/admin/jobs') {
+    event.preventDefault()
+    router.back()
+  }
+}
+
+const copied = ref(false)
+async function copyId() {
+  await navigator.clipboard?.writeText(job.value.id)
+  copied.value = true
+  window.setTimeout(() => (copied.value = false), 1500)
+}
+
+// scrolls to the log of the failed step, or to the logs
+function showLog() {
+  const failed = logs.value?.stages.find((s) => s.status === 'failed')
+  const target =
+    (failed && document.getElementById(`log-${failed.stage}`)) ||
+    document.getElementById('job-logs')
+  target?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+}
 
 function seconds(from?: string | null, to?: string | null): number | null {
   if (!from || !to) return null
