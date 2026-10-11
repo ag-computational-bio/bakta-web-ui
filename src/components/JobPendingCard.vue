@@ -21,7 +21,7 @@
         </div>
         <button
           v-if="showShareButton"
-          class="btn btn-outline-secondary btn-sm border-0"
+          class="btn btn-outline-secondary btn-sm"
           type="button"
           title="Copy link to clipboard"
           @click="emit('share')"
@@ -57,7 +57,7 @@
               <span class="flex-grow-1 text-capitalize">{{ formatStage(stage.stage) }}</span>
               <button
                 v-if="stage.status === 'running'"
-                class="btn btn-link btn-sm py-0 text-decoration-none"
+                class="btn btn-link btn-sm py-0 px-1"
                 type="button"
                 @click="toggleLogs(stage.stage)"
               >

@@ -1,6 +1,6 @@
 <template>
   <div class="table-responsive">
-    <table class="table table-hover align-middle mb-0">
+    <table class="table align-middle mb-0">
       <thead>
         <tr>
           <th>Id</th>
@@ -32,29 +32,31 @@
           </td>
 
           <td class="text-nowrap">
-            <router-link
-              v-if="item.jobStatus === 'SUCCESSFULL' || item.jobStatus === 'SUCCESSFUL'"
-              :to="{ name: routeName(item.workflowKind), params: { id: item.key } }"
-              class="btn btn-sm btn-outline-secondary me-1 mb-1"
-            >
-              <i class="bi bi-eye"></i>
-            </router-link>
-            <button
-              v-if="showJobLog"
-              class="btn btn-sm btn-outline-secondary me-1 mb-1"
-              title="Show job logs"
-              @click="emit('show:logs', item.jobID)"
-            >
-              <span class="bi bi-file-earmark-text"></span>
-            </button>
-            <button
-              v-if="showDelete"
-              class="btn btn-sm btn-outline-danger me-1 mb-1"
-              title="Delete job"
-              @click="emit('delete:job', item.jobID)"
-            >
-              <span class="bi bi-trash"></span>
-            </button>
+            <div class="d-flex gap-1">
+              <router-link
+                v-if="item.jobStatus === 'SUCCESSFULL' || item.jobStatus === 'SUCCESSFUL'"
+                :to="{ name: routeName(item.workflowKind), params: { id: item.key } }"
+                class="btn btn-sm btn-outline-secondary"
+              >
+                <i class="bi bi-eye"></i>
+              </router-link>
+              <button
+                v-if="showJobLog"
+                class="btn btn-sm btn-outline-secondary"
+                title="Show job logs"
+                @click="emit('show:logs', item.jobID)"
+              >
+                <i class="bi bi-file-earmark-text"></i>
+              </button>
+              <button
+                v-if="showDelete"
+                class="btn btn-sm btn-outline-danger"
+                title="Delete job"
+                @click="emit('delete:job', item.jobID)"
+              >
+                <i class="bi bi-trash"></i>
+              </button>
+            </div>
           </td>
         </tr>
       </tbody>

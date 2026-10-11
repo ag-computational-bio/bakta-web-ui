@@ -2,8 +2,7 @@
   <div class="w-100 h-100">
     <div v-if="bakta.sequences.length > 1" class="input-group">
       <button
-        class="btn btn-light"
-        style="border-color: var(--bs-border-color)"
+        class="btn btn-outline-secondary"
         @click="previousSeq"
         :disabled="currentPos === 0"
         title="Show previous sequence"
@@ -19,8 +18,7 @@
         <label for="selectSequence">Select sequence</label>
       </div>
       <button
-        class="btn btn-light"
-        style="border-color: var(--bs-border-color)"
+        class="btn btn-outline-secondary"
         @click="nextSeq"
         :disabled="currentPos >= sequencCount - 1"
         title="Show next sequence"

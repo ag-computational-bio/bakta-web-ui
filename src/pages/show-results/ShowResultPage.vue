@@ -50,11 +50,7 @@
                   prediction as a standalone Baktfold workflow.
                 </p>
               </div>
-              <button
-                class="btn btn-warning text-dark fw-semibold"
-                :disabled="submittingBaktfold"
-                @click="runBaktfold"
-              >
+              <button class="btn btn-primary" :disabled="submittingBaktfold" @click="runBaktfold">
                 <template v-if="!submittingBaktfold">
                   <i class="bi bi-stars me-1"></i> Run Baktfold
                 </template>
