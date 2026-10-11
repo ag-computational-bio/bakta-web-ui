@@ -1,5 +1,5 @@
 <template>
-  <RouterLink to="/admin/jobs" class="small d-inline-block mb-3">
+  <RouterLink :to="{ path: '/admin/jobs', query: filterQuery() }" class="small d-inline-block mb-3">
     <i class="bi bi-arrow-left me-1"></i>All jobs
   </RouterLink>
   <Notification v-if="error" class="mb-3" type="danger" :message="error" />
@@ -180,6 +180,7 @@ import type { WorkflowLogs } from '@/model/submit'
 import { computed, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { AdminApiError, type JobDetail } from '../admin-api'
+import { filterQuery } from '../admin-filters'
 import { handleAdminError, useAdminApi } from '../admin-session'
 import ConfirmModal from '../components/ConfirmModal.vue'
 import ListPagination from '../components/ListPagination.vue'

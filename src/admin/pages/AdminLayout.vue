@@ -81,8 +81,13 @@ import { session, signIn, signOut, startSession } from '../admin-session'
 const route = useRoute()
 const router = useRouter()
 
-// the time range lives in the URL, so a link opens the same range
-readFilterQuery(route.query)
+// the time range lives in the URL, so a link, back and forward open the same range;
+// the job page shows no time range and keeps the one of the list
+watch(
+  () => [route.name, route.query.range, route.query.from, route.query.to],
+  () => route.name !== 'AdminJob' && readFilterQuery(route.query),
+  { immediate: true },
+)
 watch(
   () => [filters.range, filters.customFrom, filters.customTo],
   () => router.replace({ query: { ...route.query, ...filterQuery() } }),

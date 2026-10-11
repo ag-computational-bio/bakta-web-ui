@@ -61,6 +61,15 @@ describe('time range', () => {
     expect(filterQuery()).toEqual({ range: 'custom', from: '2026-01-01', to: undefined })
   })
 
+  it('restores the default range when the URL has none', () => {
+    readFilterQuery({ range: '90d' })
+    expect(filters.range).toBe('90d')
+    readFilterQuery({})
+    expect(filters.range).toBe('30d')
+    readFilterQuery({ range: 'unknown' })
+    expect(filters.range).toBe('30d')
+  })
+
   it('uses the default range for dates that do not exist', () => {
     for (const to of ['bad', '2026-13-01', '2026-02-30']) {
       Object.assign(filters, { range: '90d' })

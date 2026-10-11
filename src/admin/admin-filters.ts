@@ -100,11 +100,11 @@ export function filterQuery(): Record<string, string | undefined> {
 }
 
 /**
- * Takes the time range from the URL, if there is one.
+ * Takes the time range from the URL.
  */
 export function readFilterQuery(query: Record<string, unknown>) {
-  const range = timeRanges.find((r) => r.value === query.range)?.value
-  if (range) filters.range = range
+  // without a range in the URL the default range applies, like in filterQuery
+  filters.range = timeRanges.find((r) => r.value === query.range)?.value ?? '30d'
   if (filters.range === 'custom') {
     const from = query.from == undefined ? '' : calendarDate(query.from)
     const to = query.to == undefined ? '' : calendarDate(query.to)
