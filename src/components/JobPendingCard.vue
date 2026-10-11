@@ -16,7 +16,7 @@
           <div class="fw-semibold">Your job is not finished yet.</div>
           <div class="text-secondary small">
             Status:
-            <span class="badge" :class="`text-bg-${jobStatusClass}`">{{ displayStatus }}</span>
+            <StatusBadge :status="displayStatus" />
           </div>
         </div>
         <button
@@ -41,22 +41,18 @@
           >
             <div class="d-flex align-items-center gap-2">
               <div class="stage-icon d-flex align-items-center justify-content-center">
-                <i
-                  v-if="stage.status === 'succeeded'"
-                  class="bi bi-check-circle-fill text-success"
-                ></i>
-                <i
-                  v-else-if="stage.status === 'failed' || stage.status === 'error'"
-                  class="bi bi-x-circle-fill text-danger"
-                ></i>
                 <div
-                  v-else-if="stage.status === 'running'"
-                  class="spinner-border spinner-border-sm text-success"
+                  v-if="stage.status === 'running'"
+                  class="spinner-border spinner-border-sm text-primary"
                   role="status"
                 >
                   <span class="visually-hidden">Running...</span>
                 </div>
-                <i v-else class="bi bi-circle text-secondary"></i>
+                <i
+                  v-else
+                  class="bi"
+                  :class="[statusIcon(stage.status), `text-${statusTone(stage.status)}`]"
+                ></i>
               </div>
               <span class="flex-grow-1 text-capitalize">{{ formatStage(stage.stage) }}</span>
               <button
@@ -71,9 +67,7 @@
                   :class="openLogs.has(stage.stage) ? 'bi-chevron-up' : 'bi-chevron-down'"
                 ></i>
               </button>
-              <span class="badge text-uppercase" :class="stageStatusClass(stage.status)">{{
-                stage.status
-              }}</span>
+              <StatusBadge :status="stage.status" />
             </div>
             <pre
               v-if="stage.status === 'running' && openLogs.has(stage.stage)"
@@ -89,7 +83,9 @@
 </template>
 
 <script setup lang="ts">
-import type { JobStatus, StageLog, StageStatus } from '@/model/submit'
+import StatusBadge from '@/components/StatusBadge.vue'
+import { statusIcon, statusTone } from '@/model/status-style'
+import type { JobStatus, StageLog } from '@/model/submit'
 import { computed, nextTick, ref, useTemplateRef, watch } from 'vue'
 
 const props = withDefaults(
@@ -133,30 +129,10 @@ const displayStatus = computed(() =>
     : (props.jobStatus ?? 'INIT'),
 )
 
-const jobStatusClass = computed(() => {
-  if (displayStatus.value === 'RUNNING') return 'success'
-  if (props.jobStatus) return 'warning'
-  return 'secondary'
-})
+const jobStatusClass = computed(() => statusTone(displayStatus.value))
 
 function formatStage(stage: string): string {
   return stage.replace(/_/g, ' ')
-}
-
-function stageStatusClass(status: StageStatus): string {
-  switch (status) {
-    case 'running':
-      return 'text-bg-success'
-    case 'succeeded':
-      return 'text-bg-success'
-    case 'failed':
-    case 'error':
-      return 'text-bg-danger'
-    case 'pending':
-      return 'text-bg-secondary'
-    case 'unknown':
-      return 'text-bg-dark'
-  }
 }
 </script>
 

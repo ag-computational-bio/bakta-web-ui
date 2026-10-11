@@ -28,10 +28,7 @@
           <td>{{ 'started' in item ? formatDateTime(item.started) : 'unknown' }}</td>
           <td>{{ 'updated' in item ? formatDateTime(item.updated) : 'unknown' }}</td>
           <td>
-            <span class="badge rounded-pill fw-medium" :class="stateClass(item.jobStatus)">
-              <i class="me-1" :class="stateIcon(item.jobStatus)"></i
-              >{{ formatState(item.jobStatus) }}
-            </span>
+            <StatusBadge :status="item.jobStatus" />
           </td>
 
           <td class="text-nowrap">
@@ -66,10 +63,10 @@
 </template>
 <script setup lang="ts">
 import Shield from '@/components/Shield.vue'
+import StatusBadge from '@/components/StatusBadge.vue'
 import { workflowRouteName } from '@/model/bakta-service'
 import { formatWorkflowKind, workflowShieldProps, type WorkflowKind } from '@/model/job'
 import type { JobList } from '@/model/bakta-service'
-import type { FailedJobStatus, JobStatus } from '@/model/submit'
 
 defineProps<{
   jobs: JobList
@@ -80,14 +77,6 @@ const emit = defineEmits<{
   (e: 'delete:job', jobKey: string): void
   (e: 'show:logs', jobKey: string): void
 }>()
-
-function formatState(state: JobStatus | FailedJobStatus): string {
-  switch (state) {
-    case 'NOT_FOUND':
-      return 'Outdated'
-  }
-  return state.charAt(0) + state.slice(1).toLowerCase()
-}
 
 function formatDateTime(datestring: string): string {
   if (datestring) {
@@ -102,37 +91,6 @@ function formatDateTime(datestring: string): string {
     }
   } else {
     return ''
-  }
-}
-
-function stateClass(state: JobStatus | FailedJobStatus): string {
-  switch (state) {
-    case 'RUNNING':
-      return 'bg-info-subtle text-info-emphasis'
-    case 'SUCCESSFUL':
-    case 'SUCCESSFULL':
-      return 'bg-success-subtle text-success-emphasis'
-    case 'ERROR':
-    case 'UNAUTHORIZED':
-      return 'bg-danger-subtle text-danger-emphasis'
-    default:
-      return 'bg-secondary-subtle text-secondary-emphasis'
-  }
-}
-
-function stateIcon(state: JobStatus | FailedJobStatus): string {
-  switch (state) {
-    case 'INIT':
-      return 'bi bi-hourglass'
-    case 'RUNNING':
-      return 'bi bi-gear'
-    case 'SUCCESSFUL':
-    case 'SUCCESSFULL':
-      return 'bi bi-check2-circle'
-    case 'NOT_FOUND':
-    case 'UNAUTHORIZED':
-    case 'ERROR':
-      return 'bi bi-x-circle'
   }
 }
 
