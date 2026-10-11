@@ -353,19 +353,16 @@
               </div>
               <div class="row g-2">
                 <div class="col-sm-6 col-lg-4" v-for="option in skipOptions" :key="option.key">
-                  <div class="skip-wrap">
-                    <label class="skip-option" :for="option.key">
-                      <input
-                        :id="option.key"
-                        :checked="skipOptionValue(option.key)"
-                        class="form-check-input mt-0"
-                        type="checkbox"
-                        @change="(evt) => updateSkipOption(option.key, evt)"
-                      />
-                      <span>{{ option.label }}</span>
-                    </label>
-                    <HelpTip class="skip-help" :text="option.hint" />
-                  </div>
+                  <label class="skip-option" :for="option.key">
+                    <input
+                      :id="option.key"
+                      :checked="skipOptionValue(option.key)"
+                      class="form-check-input mt-0"
+                      type="checkbox"
+                      @change="(evt) => updateSkipOption(option.key, evt)"
+                    />
+                    <span>{{ option.label }}</span>
+                  </label>
                 </div>
               </div>
             </div>
@@ -678,32 +675,20 @@ function loadExampleData(evt: Event, type: 'plasmid' | 'complete') {
     })
 }
 
-const skipOptions: { key: SkipOptionKey; label: string; hint: string }[] = [
-  { key: 'skipTrna', label: 'Skip tRNA', hint: 'Do not detect and annotate tRNA genes.' },
-  { key: 'skipTmrna', label: 'Skip tmRNA', hint: 'Do not detect and annotate tmRNA genes.' },
-  { key: 'skipRrna', label: 'Skip rRNA', hint: 'Do not detect and annotate rRNA genes.' },
-  { key: 'skipNcrna', label: 'Skip ncRNA', hint: 'Do not detect and annotate ncRNA genes.' },
-  {
-    key: 'skipNcrnaRegion',
-    label: 'Skip ncRNA region',
-    hint: 'Do not detect and annotate ncRNA cis-regulatory regions.',
-  },
-  { key: 'skipCrispr', label: 'Skip CRISPR', hint: 'Do not detect and annotate CRISPR arrays.' },
-  { key: 'skipCds', label: 'Skip CDS', hint: 'Do not predict and annotate coding sequences.' },
-  { key: 'skipPseudo', label: 'Skip pseudogenes', hint: 'Do not detect and annotate pseudogenes.' },
-  {
-    key: 'skipSorf',
-    label: 'Skip sORFs',
-    hint: 'Do not detect and annotate small open reading frames.',
-  },
-  { key: 'skipGap', label: 'Skip gaps', hint: 'Do not detect and annotate sequence gaps.' },
-  {
-    key: 'skipOri',
-    label: 'Skip ori',
-    hint: 'Do not detect and annotate origins of replication and transfer (oriC, oriV, oriT).',
-  },
-  { key: 'skipFilter', label: 'Skip filters', hint: 'Do not filter overlapping features.' },
-  { key: 'skipPlot', label: 'Skip circular plot', hint: 'Do not create the circular genome plot.' },
+const skipOptions: { key: SkipOptionKey; label: string }[] = [
+  { key: 'skipTrna', label: 'Skip tRNA' },
+  { key: 'skipTmrna', label: 'Skip tmRNA' },
+  { key: 'skipRrna', label: 'Skip rRNA' },
+  { key: 'skipNcrna', label: 'Skip ncRNA' },
+  { key: 'skipNcrnaRegion', label: 'Skip ncRNA region' },
+  { key: 'skipCrispr', label: 'Skip CRISPR' },
+  { key: 'skipCds', label: 'Skip CDS' },
+  { key: 'skipPseudo', label: 'Skip pseudogenes' },
+  { key: 'skipSorf', label: 'Skip sORFs' },
+  { key: 'skipGap', label: 'Skip gaps' },
+  { key: 'skipOri', label: 'Skip ori' },
+  { key: 'skipFilter', label: 'Skip filters' },
+  { key: 'skipPlot', label: 'Skip circular plot' },
 ]
 
 function skipOptionValue(key: SkipOptionKey): boolean {
@@ -750,18 +735,6 @@ function updateSkipOption(key: SkipOptionKey, evt: Event) {
   padding: 0.3rem 0.5rem 0.3rem 2rem;
   border-radius: var(--bs-border-radius);
   background-color: var(--bs-primary-bg-subtle);
-}
-
-.skip-wrap {
-  position: relative;
-  height: 100%;
-}
-
-.skip-help {
-  position: absolute;
-  top: 50%;
-  right: 0.75rem;
-  transform: translateY(-50%);
 }
 
 .skip-option:hover {
