@@ -20,7 +20,7 @@
         </Shield>
       </div>
       <div class="d-flex flex-wrap gap-2">
-        <button class="btn btn-icon btn-sm" title="Reload" :disabled="busy" @click="load">
+        <button class="btn btn-icon btn-sm" title="Reload" :disabled="busy" @click="load()">
           <i class="bi bi-arrow-clockwise"></i>
         </button>
         <button
@@ -261,18 +261,26 @@ const panels = computed(() => {
   ]
 })
 
+// only the answers of the newest request are shown, so a late answer for
+// another job cannot replace the shown one
+let request = 0
 async function load() {
+  const current = ++request
+  const jobId = id.value
   error.value = undefined
+  let d: JobDetail
   try {
-    detail.value = await api.job(id.value)
+    d = await api.job(jobId)
   } catch (e) {
-    error.value = handleAdminError(e)
+    if (current === request) error.value = handleAdminError(e)
     return
   }
+  if (current !== request) return
+  detail.value = d
   api
-    .jobLogs(id.value)
-    .then((l) => (logs.value = l))
-    .catch((e) => (logsError.value = handleAdminError(e)))
+    .jobLogs(jobId)
+    .then((l) => current === request && (logs.value = l))
+    .catch((e) => current === request && (logsError.value = handleAdminError(e)))
 }
 
 async function confirm(settings: Partial<typeof modal.value>): Promise<boolean> {
@@ -281,15 +289,22 @@ async function confirm(settings: Partial<typeof modal.value>): Promise<boolean> 
   return (await confirmModal.value?.open()) ?? false
 }
 
-async function perform(task: () => Promise<string>) {
+/**
+ * Runs an action on the shown job. Nothing happens when another job was opened
+ * while the confirmation was open, and its result is only shown on that job.
+ */
+async function perform(jobId: string, task: () => Promise<string>) {
+  if (jobId !== id.value) return
   busy.value = true
   error.value = undefined
   result.value = undefined
   try {
-    result.value = await task()
+    const text = await task()
+    if (jobId !== id.value) return
+    result.value = text
     await load()
   } catch (e) {
-    error.value = handleAdminError(e)
+    if (jobId === id.value) error.value = handleAdminError(e)
   } finally {
     busy.value = false
   }
@@ -321,14 +336,16 @@ const actionTexts: Record<Action, { title: string; text: string; danger: boolean
 async function runAction(action: Action) {
   const texts = actionTexts[action]
   const label = action.charAt(0).toUpperCase() + action.slice(1)
+  const jobId = job.value.id
   if (!(await confirm({ ...texts, confirmLabel: label }))) return
-  await perform(async () => {
-    const r = await api[action](id.value)
+  await perform(jobId, async () => {
+    const r = await api[action](jobId)
     return `${label}: workflow ${r.workflow_name} is now ${r.phase.toLowerCase()}.`
   })
 }
 
 async function runDelete() {
+  const jobId = job.value.id
   purgeData.value = false
   const confirmed = await confirm({
     title: 'Delete the job?',
@@ -339,8 +356,8 @@ async function runDelete() {
   })
   if (!confirmed) return
   const purge = purgeData.value
-  await perform(async () => {
-    const r = await api.deleteJob(id.value, purge)
+  await perform(jobId, async () => {
+    const r = await api.deleteJob(jobId, purge)
     const workflowText = r.deleted_workflow ? 'Workflow deleted' : 'No workflow to delete'
     return purge ? `${workflowText}, ${r.purged_objects} S3 objects deleted.` : `${workflowText}.`
   })
