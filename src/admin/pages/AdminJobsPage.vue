@@ -3,7 +3,7 @@
   <Notification v-if="error" class="mb-3" type="danger" :message="error" />
   <Notification v-if="result" class="mb-3" type="primary" :message="result" />
 
-  <div class="card p-4">
+  <div class="card p-3 p-md-4">
     <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
       <input
         v-model="search"
@@ -109,7 +109,7 @@
       >
         Reset
       </button>
-      <div class="d-flex flex-wrap align-items-center gap-2 ms-auto">
+      <div class="d-flex flex-wrap align-items-center justify-content-end gap-2 ms-auto">
         <span v-if="loading" class="spinner-border spinner-border-sm text-secondary"></span>
         <span class="small text-secondary text-nowrap">
           {{ formatCount(total) }} {{ total === 1 ? 'job' : 'jobs' }}
@@ -153,7 +153,37 @@
       </div>
     </div>
 
-    <div class="table-responsive">
+    <!-- small screens: two compact lines per job -->
+    <ul class="list-unstyled mb-0 d-md-none job-list">
+      <li v-for="job in jobs" :key="job.id" class="py-2">
+        <div class="d-flex align-items-center gap-2">
+          <RouterLink :to="detailLink(job.id)" :title="job.id" class="fw-medium">
+            {{ job.id.slice(0, 8) }}
+          </RouterLink>
+          <StatusBadge :status="job.status" />
+          <Shield v-bind="workflowShieldProps(job.workflow_kind)">
+            {{ formatWorkflowKind(job.workflow_kind) }}
+          </Shield>
+          <JobRowActions
+            v-if="job.status !== 'deleted'"
+            :id="job.id"
+            class="ms-auto"
+            :phase="job.workflow_phase"
+            :data-available="job.data_available"
+            :busy="busy"
+            @run="runAction(job, $event)"
+          />
+        </div>
+        <div class="small text-secondary mt-1">
+          {{ mobileDetails(job) }}
+        </div>
+      </li>
+      <li v-if="!loading && jobs.length === 0" class="text-center text-secondary py-4">
+        No jobs found.
+      </li>
+    </ul>
+
+    <div class="table-responsive d-none d-md-block">
       <table class="table table-striped align-middle mb-0 jobs">
         <thead>
           <tr>
@@ -336,6 +366,20 @@ const busy = ref(false)
 const confirmModal = ref<InstanceType<typeof ConfirmModal>>()
 const modal = ref({ title: '', text: '', confirmLabel: '', danger: false })
 
+// the second line of a job on small screens
+function mobileDetails(job: JobListItem): string {
+  return [
+    job.organism,
+    job.total_length != undefined ? formatBp(job.total_length) : undefined,
+    formatDateTime(job.created_at),
+    job.runtime_seconds != undefined ? formatDuration(job.runtime_seconds) : undefined,
+    argoNote(job.status, job.workflow_phase),
+    job.data_available ? undefined : 'Data deleted',
+  ]
+    .filter(Boolean)
+    .join(' · ')
+}
+
 function detailLink(id: string) {
   return { name: 'AdminJob', params: { id } }
 }
@@ -491,6 +535,9 @@ load()
   gap: 0.5rem 1rem;
   width: max-content;
   max-width: calc(100vw - 3rem);
+}
+.job-list li + li {
+  border-top: 1px solid var(--bs-border-color);
 }
 .filter-note {
   max-width: 28rem;
