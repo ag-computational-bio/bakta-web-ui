@@ -23,7 +23,9 @@
         <button class="btn btn-icon btn-sm" title="Reload" :disabled="busy" @click="load()">
           <i class="bi bi-arrow-clockwise"></i>
         </button>
+        <!-- retry and resubmit need the input data -->
         <button
+          v-if="job.data_available"
           class="btn btn-outline-secondary btn-sm"
           :disabled="busy || !canRetry"
           @click="runAction('retry')"
@@ -39,6 +41,7 @@
           <i class="bi bi-play-circle me-1"></i>Resume
         </button>
         <button
+          v-if="job.data_available"
           class="btn btn-outline-secondary btn-sm"
           :disabled="busy || job.status === 'deleted'"
           @click="runAction('resubmit')"
@@ -61,6 +64,11 @@
         </button>
       </div>
     </div>
+
+    <p v-if="!job.data_available" class="small text-secondary mb-3">
+      <i class="bi bi-info-circle me-1"></i>Input data, results and logs were deleted on
+      {{ formatDateTime(job.data_expires_at) }}, 30 days after the job.
+    </p>
 
     <div class="row g-3 mb-4">
       <div v-for="panel in panels" :key="panel.title" class="col-md-6">
@@ -142,6 +150,9 @@
     <div class="card p-4">
       <h3 class="section-title">Logs</h3>
       <WorkflowLogViewer v-if="logs" :logs="logs" />
+      <p v-else-if="logsDeleted" class="text-secondary mb-0">
+        The logs were deleted after the retention period.
+      </p>
       <p v-else-if="logsError" class="text-secondary mb-0">No logs available: {{ logsError }}</p>
       <div v-else class="spinner-border spinner-border-sm text-secondary"></div>
     </div>
@@ -168,7 +179,7 @@ import { formatWorkflowKind, workflowShieldProps } from '@/model/job'
 import type { WorkflowLogs } from '@/model/submit'
 import { computed, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import type { JobDetail } from '../admin-api'
+import { AdminApiError, type JobDetail } from '../admin-api'
 import { handleAdminError, useAdminApi } from '../admin-session'
 import ConfirmModal from '../components/ConfirmModal.vue'
 import ListPagination from '../components/ListPagination.vue'
@@ -190,6 +201,7 @@ const route = useRoute()
 const detail = ref<JobDetail>()
 const logs = ref<WorkflowLogs>()
 const logsError = ref<string>()
+const logsDeleted = ref(false)
 const error = ref<string>()
 const result = ref<string>()
 const busy = ref(false)
@@ -277,10 +289,19 @@ async function load() {
   }
   if (current !== request) return
   detail.value = d
+  // archived logs are gone with the data, only a live workflow still has them
+  if (!d.job.data_available && !d.workflow) {
+    logsDeleted.value = true
+    return
+  }
   api
     .jobLogs(jobId)
     .then((l) => current === request && (logs.value = l))
-    .catch((e) => current === request && (logsError.value = handleAdminError(e)))
+    .catch((e) => {
+      if (current !== request) return
+      if (e instanceof AdminApiError && e.status === 410) logsDeleted.value = true
+      else logsError.value = handleAdminError(e)
+    })
 }
 
 async function confirm(settings: Partial<typeof modal.value>): Promise<boolean> {
@@ -352,7 +373,8 @@ async function runDelete() {
     text: 'The Argo workflow and its pods are deleted and the job is marked as deleted. The statistics keep the job record.',
     confirmLabel: 'Delete',
     danger: true,
-    purgeOption: true,
+    // without data there is nothing left to delete in S3
+    purgeOption: job.value.data_available,
   })
   if (!confirmed) return
   const purge = purgeData.value
@@ -367,6 +389,7 @@ watch(id, () => {
   detail.value = undefined
   logs.value = undefined
   logsError.value = undefined
+  logsDeleted.value = false
   result.value = undefined
   load()
 })

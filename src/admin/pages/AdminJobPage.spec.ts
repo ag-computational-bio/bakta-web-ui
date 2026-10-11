@@ -1,7 +1,7 @@
-import { flushPromises, mount } from '@vue/test-utils'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { defineComponent, h, reactive } from 'vue'
-import type { JobDetail } from '../admin-api'
+import { AdminApiError, type JobDetail } from '../admin-api'
 
 const route = reactive({ params: { id: 'a' } })
 const confirmation = vi.hoisted(() => ({ open: () => Promise.resolve(true) }))
@@ -24,7 +24,7 @@ vi.mock('../components/ConfirmModal.vue', () => ({
 
 const { default: AdminJobPage } = await import('./AdminJobPage.vue')
 
-function detail(id: string): JobDetail {
+function detail(id: string, dataAvailable = true): JobDetail {
   return {
     job: {
       id,
@@ -34,7 +34,10 @@ function detail(id: string): JobDetail {
       status: 'succeeded',
       created_at: '2026-10-01T00:00:00Z',
       updated_at: '2026-10-01T00:00:00Z',
+      data_expires_at: '2026-10-31T00:00:00Z',
+      data_available: dataAvailable,
     },
+    workflow: null,
   } as JobDetail
 }
 
@@ -45,6 +48,9 @@ function deferred<T>() {
 }
 
 const stubs = { WorkflowLogViewer: true, DisplayTuple: true }
+
+// pages of earlier tests must not load again when the route changes
+enableAutoUnmount(afterEach)
 
 beforeEach(() => {
   route.params.id = 'a'
@@ -89,5 +95,27 @@ describe('AdminJobPage', () => {
     confirmed.resolve(true)
     await flushPromises()
     expect(api.deleteJob).not.toHaveBeenCalled()
+  })
+
+  it('hides what needs the deleted data and does not ask for the logs', async () => {
+    api.job.mockResolvedValue(detail('a', false))
+    const wrapper = mount(AdminJobPage, { global: { stubs } })
+    await flushPromises()
+    const labels = wrapper.findAll('button').map((b) => b.text())
+    expect(labels).not.toContain('Retry')
+    expect(labels).not.toContain('Resubmit')
+    expect(labels).toContain('Delete')
+    expect(wrapper.text()).toContain('Input data, results and logs were deleted on')
+    expect(wrapper.text()).toContain('The logs were deleted after the retention period.')
+    expect(api.jobLogs).not.toHaveBeenCalled()
+  })
+
+  it('shows the logs note when the server answers 410', async () => {
+    api.job.mockResolvedValue(detail('a'))
+    api.jobLogs.mockRejectedValue(new AdminApiError(410, 'Logs were deleted'))
+    const wrapper = mount(AdminJobPage, { global: { stubs } })
+    await flushPromises()
+    expect(wrapper.text()).toContain('The logs were deleted after the retention period.')
+    expect(wrapper.text()).not.toContain('No logs available')
   })
 })
