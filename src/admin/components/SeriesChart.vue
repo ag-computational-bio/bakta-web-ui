@@ -133,18 +133,24 @@ function draw() {
     .attr('text-anchor', 'end')
     .text((t) => (props.axisFormat ?? props.format)(t))
 
-  // x labels: about one label per 90 px
-  const step = Math.max(1, Math.ceil(n / Math.max(1, Math.floor(w / 90))))
+  // x labels: as many as fit, estimated from the longest label
+  const xTicks = props.tickLabels ?? props.labels
+  const half = (d3.max(xTicks, (t) => t.length) ?? 0) * 3.3
+  const step = Math.max(1, Math.ceil(n / Math.max(1, Math.floor(w / (2 * half + 16)))))
   const center = (i: number) => (x(i) ?? 0) + x.bandwidth() / 2
   g.selectAll('text.x-label')
     // labels that would stick out of the chart are left out
-    .data(d3.range(0, n, step).filter((i) => center(i) > 40 && center(i) < w - 40))
+    .data(
+      d3
+        .range(0, n, step)
+        .filter((i) => center(i) - half > -margin.left && center(i) + half < w + margin.right),
+    )
     .join('text')
     .attr('class', 'axis-label x-label')
     .attr('x', center)
     .attr('y', h + 18)
     .attr('text-anchor', 'middle')
-    .text((i) => (props.tickLabels ?? props.labels)[i])
+    .text((i) => xTicks[i])
 
   const highlight = g
     .append('rect')

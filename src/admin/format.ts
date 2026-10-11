@@ -2,6 +2,7 @@ import {
   bpScale,
   formatBp as formatBpScale,
 } from '@/components/bakta-result/feature-plot/circluar-plot/formatters'
+import { formatWorkflowKind, WorkflowKinds, type WorkflowKind } from '@/model/job'
 import type { AnyStatus } from '@/model/status-style'
 import { StageStatuses, type StageStatus } from '@/model/submit'
 import type { Interval } from './admin-api'
@@ -152,4 +153,49 @@ export function configEntries(config: Record<string, unknown>): { label: string;
     else text = String(value)
     return { label, value: text }
   })
+}
+
+type RangeLabels = { label: string; tick: string }
+
+/**
+ * Readable labels of a bucket from min up to max, with a long label for the
+ * tooltip ("2 to 5 min") and a short one for the axis ("2-5 min"). A bucket
+ * from 0 reads "Under ...", a bucket without max "... and more". part splits a
+ * value into number and unit.
+ */
+function rangeLabels(
+  min: number,
+  max: number | null | undefined,
+  part: (value: number) => [string, string],
+): RangeLabels {
+  const text = (value: number) => part(value).join(' ')
+  if (max == null) return { label: `${text(min)} and more`, tick: `≥ ${text(min)}` }
+  if (min === 0) return { label: `Under ${text(max)}`, tick: `< ${text(max)}` }
+  const [from, fromUnit] = part(min)
+  const [to, toUnit] = part(max)
+  if (fromUnit === toUnit) {
+    return { label: `${from} to ${to} ${toUnit}`, tick: `${from}-${to} ${toUnit}` }
+  }
+  return { label: `${text(min)} to ${text(max)}`, tick: `${text(min)}-${text(max)}` }
+}
+
+const round = (value: number) => String(Math.round(value * 10) / 10)
+
+export function secondsRange(min: number, max: number | null | undefined): RangeLabels {
+  return rangeLabels(min, max, (s) => (s < 3600 ? [round(s / 60), 'min'] : [round(s / 3600), 'h']))
+}
+
+export function bpRange(min: number, max: number | null | undefined): RangeLabels {
+  return rangeLabels(min, max, (bp) => [round(bp / 1e6), 'Mbp'])
+}
+
+export function isWorkflowKind(kind: string | null | undefined): kind is WorkflowKind {
+  return (WorkflowKinds as readonly string[]).includes(kind ?? '')
+}
+
+/**
+ * The name of a workflow kind, unknown kinds as they are.
+ */
+export function kindLabel(kind: string): string {
+  return isWorkflowKind(kind) ? formatWorkflowKind(kind) : kind
 }

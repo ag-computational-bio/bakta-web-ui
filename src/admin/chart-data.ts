@@ -1,7 +1,7 @@
 import type { Bucket, Interval, StatsFilter } from './admin-api'
 import { periods } from './format'
 
-type BucketField = 'jobs_total' | 'runtime_p50' | 'runtime_avg'
+type BucketField = 'jobs_total' | 'runtime_p50' | 'runtime_p90' | 'runtime_avg'
 
 /**
  * The periods of a chart: from the start of the time range, or the first bucket

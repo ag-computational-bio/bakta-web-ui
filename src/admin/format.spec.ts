@@ -1,11 +1,13 @@
 import { describe, expect, it } from 'vitest'
 import {
+  bpRange,
   configEntries,
   formatDuration,
   formatPercent,
   percentile,
   periods,
   phaseStatus,
+  secondsRange,
   truncDate,
 } from './format'
 
@@ -88,5 +90,16 @@ describe('phaseStatus', () => {
   it('maps Argo phases to badge statuses', () => {
     expect(phaseStatus('Failed')).toBe('failed')
     expect(phaseStatus('Omitted')).toBe('unknown')
+  })
+})
+
+describe('bucket ranges', () => {
+  it('reads like plain text', () => {
+    expect(secondsRange(0, 120)).toEqual({ label: 'Under 2 min', tick: '< 2 min' })
+    expect(secondsRange(120, 300)).toEqual({ label: '2 to 5 min', tick: '2-5 min' })
+    expect(secondsRange(1800, 3600).label).toBe('30 min to 1 h')
+    expect(secondsRange(14400, null)).toEqual({ label: '4 h and more', tick: '≥ 4 h' })
+    expect(bpRange(1e6, 2e6).label).toBe('1 to 2 Mbp')
+    expect(bpRange(12e6, null).label).toBe('12 Mbp and more')
   })
 })

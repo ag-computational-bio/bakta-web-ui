@@ -1,5 +1,5 @@
 import { reactive } from 'vue'
-import type { Environment, StatsFilter } from './admin-api'
+import type { Environment, Interval, StatsFilter } from './admin-api'
 
 /*
  * Environment and time range of the admin pages. They are shared, so the
@@ -50,4 +50,18 @@ export function statsFilter(now = new Date()): StatsFilter {
       break
   }
   return filter
+}
+
+export const intervalOptions: { value: Interval; label: string }[] = [
+  { value: 'day', label: 'Day' },
+  { value: 'week', label: 'Week' },
+  { value: 'month', label: 'Month' },
+  { value: 'year', label: 'Year' },
+]
+
+/**
+ * A matching interval for the time range, so a chart has a useful number of bars.
+ */
+export function defaultInterval(range: TimeRange): Interval {
+  return range === '30d' ? 'day' : range === '12m' ? 'week' : 'month'
 }

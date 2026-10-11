@@ -18,6 +18,10 @@
         aria-label="To"
       />
     </div>
+    <template v-if="$slots.default">
+      <div class="vr d-none d-md-block"></div>
+      <slot></slot>
+    </template>
   </div>
 </template>
 

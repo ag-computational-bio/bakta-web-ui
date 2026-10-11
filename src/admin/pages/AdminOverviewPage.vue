@@ -29,22 +29,6 @@
     <p v-else class="text-secondary mb-0">No jobs in this time range.</p>
   </div>
 
-  <div class="card p-4 mb-4">
-    <h3 class="section-title">Runtime over time</h3>
-    <SeriesChart
-      v-if="periods.length"
-      kind="lines"
-      label="Runtime over time"
-      :labels="periodLabels"
-      :tick-labels="periodTicks"
-      :series="runtimeSeries"
-      :values="runtimeValues"
-      :format="(minutes) => formatDuration(minutes == null ? null : minutes * 60)"
-      :axis-format="(minutes) => `${minutes} min`"
-    />
-    <p v-else class="text-secondary mb-0">No jobs in this time range.</p>
-  </div>
-
   <div class="row g-4">
     <div class="col-xl-6">
       <div class="card p-4 h-100">
@@ -118,7 +102,7 @@ import Notification from '@/components/Notification.vue'
 import { formatWorkflowKind, type WorkflowKind } from '@/model/job'
 import { computed, ref, watch } from 'vue'
 import type { GroupBy, Interval, StatsSummary, Timeseries, VersionStats } from '../admin-api'
-import { filters, statsFilter } from '../admin-filters'
+import { defaultInterval, filters, intervalOptions, statsFilter } from '../admin-filters'
 import { handleAdminError, useAdminApi } from '../admin-session'
 import { groupSeries } from '../chart-colors'
 import { bucketValues, chartPeriods } from '../chart-data'
@@ -137,12 +121,6 @@ import {
 } from '../format'
 import { useClientPages } from '../pagination'
 
-const intervalOptions: { value: Interval; label: string }[] = [
-  { value: 'day', label: 'Day' },
-  { value: 'week', label: 'Week' },
-  { value: 'month', label: 'Month' },
-  { value: 'year', label: 'Year' },
-]
 const groupOptions: { value: GroupBy; label: string }[] = [
   { value: 'workflow_kind', label: 'Workflow' },
   { value: 'status', label: 'Status' },
@@ -163,10 +141,6 @@ const {
 } = useClientPages(versions, 10)
 const loading = ref(false)
 
-// a matching interval for the time range, so the chart has a useful number of bars
-function defaultInterval(range: string): Interval {
-  return range === '30d' ? 'day' : range === '12m' ? 'week' : 'month'
-}
 watch(
   () => filters.range,
   (range) => (interval.value = defaultInterval(range)),
@@ -207,20 +181,6 @@ const jobValues = computed(() =>
   grouped.value ? bucketValues(grouped.value.buckets, periods.value, 'jobs_total') : {},
 )
 const jobSeries = computed(() => groupSeries(groupBy.value, Object.keys(jobValues.value)))
-const runtimeSeries = [
-  { key: 'p50', label: 'Median', color: 'var(--bs-primary)' },
-  { key: 'avg', label: 'Average', color: 'var(--bs-info)' },
-]
-const runtimeValues = computed(() => {
-  const buckets = overall.value?.buckets ?? []
-  // in minutes, so the axis gets round steps
-  const minutes = (values: (number | null)[] = []) => values.map((v) => (v == null ? v : v / 60))
-  return {
-    p50: minutes(bucketValues(buckets, periods.value, 'runtime_p50')['']),
-    avg: minutes(bucketValues(buckets, periods.value, 'runtime_avg')['']),
-  }
-})
-
 let request = 0
 async function load() {
   const current = ++request

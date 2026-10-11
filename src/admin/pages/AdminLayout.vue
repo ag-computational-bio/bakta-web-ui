@@ -80,6 +80,7 @@ const route = useRoute()
 
 const tabs = computed(() => [
   { label: 'Overview', to: '/admin', active: route.name === 'AdminOverview' },
+  { label: 'Runtimes', to: '/admin/runtimes', active: route.name === 'AdminRuntimes' },
   {
     label: 'Jobs',
     to: '/admin/jobs',
