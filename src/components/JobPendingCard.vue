@@ -2,14 +2,7 @@
   <div class="py-4">
     <div class="border rounded-3 p-4">
       <div class="d-flex align-items-center gap-3 mb-3">
-        <div
-          class="spinner-border"
-          :class="`text-${jobStatusClass}`"
-          role="status"
-          style="width: 1.5rem; height: 1.5rem"
-        >
-          <span class="visually-hidden">Running...</span>
-        </div>
+        <i class="bi bi-hourglass-split fs-4" :class="`text-${jobStatusClass}`"></i>
         <div class="flex-grow-1">
           <div class="fw-semibold">Your job is not finished yet.</div>
           <div class="text-secondary small">
@@ -31,16 +24,7 @@
       </div>
 
       <div v-if="stages.length > 0">
-        <div class="d-flex justify-content-between align-items-center mb-2">
-          <div class="text-secondary small fw-semibold">Workflow steps</div>
-          <button
-            class="btn btn-outline-secondary btn-sm"
-            type="button"
-            @click="showLogs = !showLogs"
-          >
-            <i class="bi bi-terminal me-1"></i>{{ showLogs ? 'Hide live logs' : 'Show live logs' }}
-          </button>
-        </div>
+        <div class="text-secondary small fw-semibold mb-2">Workflow steps</div>
         <div class="d-flex flex-column gap-0">
           <div
             v-for="(stage, idx) in stages"
@@ -68,13 +52,28 @@
                 <i v-else class="bi bi-circle text-secondary"></i>
               </div>
               <span class="flex-grow-1 text-capitalize">{{ formatStage(stage.stage) }}</span>
+              <button
+                v-if="stage.status === 'running'"
+                class="btn btn-link btn-sm py-0 text-decoration-none"
+                type="button"
+                @click="toggleLogs(stage.stage)"
+              >
+                <i class="bi bi-terminal me-1"></i>Logs
+                <i
+                  class="bi"
+                  :class="openLogs.has(stage.stage) ? 'bi-chevron-up' : 'bi-chevron-down'"
+                ></i>
+              </button>
               <span class="badge text-uppercase" :class="stageStatusClass(stage.status)">{{
                 stage.status
               }}</span>
             </div>
-            <pre v-if="showLogs" ref="logBlocks" class="log-block mt-2 mb-0 p-3 rounded-2">{{
-              stage.content || 'No log output yet.'
-            }}</pre>
+            <pre
+              v-if="stage.status === 'running' && openLogs.has(stage.stage)"
+              ref="logBlocks"
+              class="log-block mt-2 mb-0 p-3 rounded-2"
+              >{{ stage.content || 'No log output yet.' }}</pre
+            >
           </div>
         </div>
       </div>
@@ -102,17 +101,23 @@ const emit = defineEmits<{
   (e: 'share'): void
 }>()
 
-const showLogs = ref(false)
+const openLogs = ref(new Set<string>())
 const logBlocks = useTemplateRef<HTMLPreElement[]>('logBlocks')
 
 // keep the newest log lines in view while the job runs
 watch(
-  () => [showLogs.value, props.stages.map((stage) => stage.content.length)],
+  () => [openLogs.value.size, props.stages.map((stage) => stage.content.length)],
   async () => {
     await nextTick()
     for (const el of logBlocks.value ?? []) el.scrollTop = el.scrollHeight
   },
 )
+
+function toggleLogs(stage: string) {
+  const open = new Set(openLogs.value)
+  if (!open.delete(stage)) open.add(stage)
+  openLogs.value = open
+}
 
 const jobStatusClass = computed(() => {
   if (props.jobStatus === 'RUNNING') return 'success'
