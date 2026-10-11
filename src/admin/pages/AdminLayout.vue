@@ -73,19 +73,40 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { computed, onMounted, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { filterQuery, filters, readFilterQuery } from '../admin-filters'
 import { session, signIn, signOut, startSession } from '../admin-session'
 
 const route = useRoute()
+const router = useRouter()
+
+// the time range lives in the URL, so a link opens the same range
+readFilterQuery(route.query)
+watch(
+  () => [filters.range, filters.customFrom, filters.customTo],
+  () => router.replace({ query: { ...route.query, ...filterQuery() } }),
+)
 
 const tabs = computed(() => [
-  { label: 'Overview', to: '/admin', active: route.name === 'AdminOverview' },
-  { label: 'Runtimes', to: '/admin/runtimes', active: route.name === 'AdminRuntimes' },
-  { label: 'Input sizes', to: '/admin/inputs', active: route.name === 'AdminInputs' },
+  {
+    label: 'Overview',
+    to: { path: '/admin', query: filterQuery() },
+    active: route.name === 'AdminOverview',
+  },
+  {
+    label: 'Runtimes',
+    to: { path: '/admin/runtimes', query: filterQuery() },
+    active: route.name === 'AdminRuntimes',
+  },
+  {
+    label: 'Input sizes',
+    to: { path: '/admin/inputs', query: filterQuery() },
+    active: route.name === 'AdminInputs',
+  },
   {
     label: 'Jobs',
-    to: '/admin/jobs',
+    to: { path: '/admin/jobs', query: filterQuery() },
     active: route.name === 'AdminJobs' || route.name === 'AdminJob',
   },
 ])

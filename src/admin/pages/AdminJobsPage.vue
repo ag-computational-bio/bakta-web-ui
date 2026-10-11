@@ -142,7 +142,7 @@ import {
   type JobSort,
   type WorkflowPhase,
 } from '../admin-api'
-import { filters, statsFilter } from '../admin-filters'
+import { filterQuery, filters, statsFilter } from '../admin-filters'
 import { handleAdminError, useAdminApi } from '../admin-session'
 import AdminFilterBar from '../components/AdminFilterBar.vue'
 import BulkActionsPanel from '../components/BulkActionsPanel.vue'
@@ -227,6 +227,7 @@ async function load() {
   error.value = undefined
   router.replace({
     query: {
+      ...filterQuery(),
       q: search.value || undefined,
       sort: sort.value === 'created_at' ? undefined : sort.value,
       status: statuses.value.join(',') || undefined,

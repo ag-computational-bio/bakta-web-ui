@@ -52,9 +52,9 @@
   </div>
 
   <div class="card p-4 mb-4">
-    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+    <div class="d-flex align-items-baseline gap-2 mb-3">
       <h3 class="section-title mb-0">Runtime over time</h3>
-      <ChipGroup v-model="interval" :options="intervalOptions" label="Interval" segmented />
+      <span class="small text-secondary">{{ intervalNote(interval) }}</span>
     </div>
     <SeriesChart
       v-if="periods.length"
@@ -155,17 +155,17 @@ import { computed, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import type { Interval, RuntimeStats, StatsSummary, Timeseries } from '../admin-api'
 import {
-  defaultInterval,
   filters,
-  intervalOptions,
+  firstBucket,
+  intervalNote,
   kindFilterOptions,
+  loadChart,
   statsFilter,
 } from '../admin-filters'
 import { handleAdminError, useAdminApi } from '../admin-session'
 import { lightColor } from '../chart-colors'
 import { bucketValues, chartPeriods } from '../chart-data'
 import AdminFilterBar from '../components/AdminFilterBar.vue'
-import ChipGroup from '../components/ChipGroup.vue'
 import SeriesChart from '../components/SeriesChart.vue'
 import StatTile from '../components/StatTile.vue'
 import {
@@ -208,17 +208,12 @@ const timeSeries = [
 const api = useAdminApi()
 const router = useRouter()
 const kind = ref('')
-const interval = ref<Interval>(defaultInterval(filters.range))
+const interval = ref<Interval>('day')
 const stats = ref<RuntimeStats>()
 const summary = ref<StatsSummary>()
 const series = ref<Timeseries>()
 const error = ref<string>()
 const loading = ref(false)
-
-watch(
-  () => filters.range,
-  (range) => (interval.value = defaultInterval(range)),
-)
 
 function formatMinutes(minutes: number | null): string {
   return formatDuration(minutes == null ? null : minutes * 60)
@@ -298,13 +293,17 @@ async function load() {
     const [r, s, t] = await Promise.all([
       api.runtimes(filter, kind.value || undefined),
       api.summary(filter),
-      api.timeseries(filter, interval.value, kind.value ? 'workflow_kind' : 'none'),
+      loadChart(
+        (i) => api.timeseries(filter, i, kind.value ? 'workflow_kind' : 'none'),
+        (t) => firstBucket(t.buckets),
+      ),
     ])
     // an older answer must not replace the data of a newer request
     if (current !== request) return
     stats.value = r
     summary.value = s
-    series.value = t
+    interval.value = t.interval
+    series.value = t.data
   } catch (e) {
     if (current === request) error.value = handleAdminError(e)
   } finally {
@@ -312,7 +311,7 @@ async function load() {
   }
 }
 
-watch([filters, kind, interval], load, { immediate: true })
+watch([filters, kind], load, { immediate: true })
 </script>
 
 <style scoped>

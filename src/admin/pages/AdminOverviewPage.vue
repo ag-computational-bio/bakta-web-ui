@@ -10,11 +10,11 @@
 
   <div class="card p-4 mb-4">
     <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
-      <h3 class="section-title mb-0">Jobs over time</h3>
-      <div class="d-flex flex-wrap gap-3">
-        <ChipGroup v-model="groupBy" :options="groupOptions" label="Group by" segmented />
-        <ChipGroup v-model="interval" :options="intervalOptions" label="Interval" segmented />
+      <div class="d-flex align-items-baseline gap-2">
+        <h3 class="section-title mb-0">Jobs over time</h3>
+        <span class="small text-secondary">{{ intervalNote(interval) }}</span>
       </div>
+      <ChipGroup v-model="groupBy" :options="groupOptions" label="Group by" segmented />
     </div>
     <SeriesChart
       v-if="periods.length"
@@ -102,7 +102,7 @@ import Notification from '@/components/Notification.vue'
 import { formatWorkflowKind, type WorkflowKind } from '@/model/job'
 import { computed, ref, watch } from 'vue'
 import type { GroupBy, Interval, StatsSummary, Timeseries, VersionStats } from '../admin-api'
-import { defaultInterval, filters, intervalOptions, statsFilter } from '../admin-filters'
+import { filters, firstBucket, intervalNote, loadChart, statsFilter } from '../admin-filters'
 import { handleAdminError, useAdminApi } from '../admin-session'
 import { groupSeries } from '../chart-colors'
 import { bucketValues, chartPeriods } from '../chart-data'
@@ -127,7 +127,7 @@ const groupOptions: { value: GroupBy; label: string }[] = [
 ]
 
 const api = useAdminApi()
-const interval = ref<Interval>(defaultInterval(filters.range))
+const interval = ref<Interval>('day')
 const groupBy = ref<GroupBy>('workflow_kind')
 const summary = ref<StatsSummary>()
 const grouped = ref<Timeseries>()
@@ -140,11 +140,6 @@ const {
   pageItems: versionPage,
 } = useClientPages(versions, 10)
 const loading = ref(false)
-
-watch(
-  () => filters.range,
-  (range) => (interval.value = defaultInterval(range)),
-)
 
 const tiles = computed(() => {
   const s = summary.value
@@ -188,17 +183,23 @@ async function load() {
   loading.value = true
   error.value = undefined
   try {
-    const [s, g, o, v] = await Promise.all([
+    const [s, chart, v] = await Promise.all([
       api.summary(filter),
-      api.timeseries(filter, interval.value, groupBy.value),
-      api.timeseries(filter, interval.value, 'none'),
+      loadChart(
+        (i) =>
+          Promise.all([
+            api.timeseries(filter, i, groupBy.value),
+            api.timeseries(filter, i, 'none'),
+          ]),
+        ([, o]) => firstBucket(o.buckets),
+      ),
       api.versions(filter),
     ])
     // an older answer must not replace the data of a newer request
     if (current !== request) return
     summary.value = s
-    grouped.value = g
-    overall.value = o
+    interval.value = chart.interval
+    ;[grouped.value, overall.value] = chart.data
     versions.value = [...v.items].sort((a, b) =>
       (b.last_seen ?? '').localeCompare(a.last_seen ?? ''),
     )
@@ -209,7 +210,7 @@ async function load() {
   }
 }
 
-watch([filters, interval, groupBy], load, { immediate: true })
+watch([filters, groupBy], load, { immediate: true })
 </script>
 
 <style scoped>
