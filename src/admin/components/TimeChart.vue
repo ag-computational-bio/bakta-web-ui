@@ -18,7 +18,11 @@
         :style="{ left: `${hover.x}px`, transform: hover.flip ? 'translateX(-100%)' : 'none' }"
       >
         <div class="fw-semibold mb-1">{{ formatPeriod(periods[hover.index], interval) }}</div>
-        <div v-for="s in series" :key="s.key" class="d-flex align-items-center gap-2">
+        <div
+          v-for="s in tooltipSeries(hover.index)"
+          :key="s.key"
+          class="d-flex align-items-center gap-2"
+        >
           <span class="swatch" :style="{ backgroundColor: s.color }"></span>
           <span class="flex-grow-1">{{ s.label }}</span>
           <span class="fw-semibold">{{ format(valueAt(s.key, hover.index)) }}</span>
@@ -50,6 +54,8 @@ const props = defineProps<{
   series: ChartSeries[]
   values: Record<string, (number | null)[]>
   format: (value: number | null) => string
+  // labels of the y axis, by default like the values
+  axisFormat?: (value: number) => string
   label: string
 }>()
 
@@ -62,6 +68,13 @@ const hover = ref<{ index: number; x: number; flip: boolean }>()
 
 function valueAt(key: string, index: number): number | null {
   return props.values[key]?.[index] ?? null
+}
+
+// the tooltip of a bar leaves out empty groups
+function tooltipSeries(index: number): ChartSeries[] {
+  if (props.kind === 'lines') return props.series
+  const shown = props.series.filter((s) => valueAt(s.key, index))
+  return shown.length ? shown : props.series
 }
 
 function total(index: number): number {
@@ -112,15 +125,17 @@ function draw() {
     .attr('y', (t) => y(t))
     .attr('dy', '0.32em')
     .attr('text-anchor', 'end')
-    .text((t) => props.format(t))
+    .text((t) => (props.axisFormat ?? props.format)(t))
 
   // x labels: about one label per 90 px
   const step = Math.max(1, Math.ceil(n / Math.max(1, Math.floor(w / 90))))
+  const center = (i: number) => (x(i) ?? 0) + x.bandwidth() / 2
   g.selectAll('text.x-label')
-    .data(d3.range(0, n, step))
+    // labels that would stick out of the chart are left out
+    .data(d3.range(0, n, step).filter((i) => center(i) > 40 && center(i) < w - 40))
     .join('text')
     .attr('class', 'axis-label x-label')
-    .attr('x', (i) => (x(i) ?? 0) + x.bandwidth() / 2)
+    .attr('x', center)
     .attr('y', h + 18)
     .attr('text-anchor', 'middle')
     .text((i) => formatPeriod(props.periods[i], props.interval).replace('Week of ', ''))
