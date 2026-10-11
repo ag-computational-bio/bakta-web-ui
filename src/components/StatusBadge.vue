@@ -1,5 +1,5 @@
 <template>
-  <span class="badge fw-medium" :class="`bg-${tone}-subtle text-${tone}-emphasis`">
+  <span class="badge fw-medium" :class="`text-bg-${tone}`">
     <i class="bi me-1" :class="statusIcon(status)"></i>{{ formatStatus(status) }}
   </span>
 </template>

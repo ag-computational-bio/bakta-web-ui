@@ -43,7 +43,7 @@
               <div class="stage-icon d-flex align-items-center justify-content-center">
                 <div
                   v-if="stage.status === 'running'"
-                  class="spinner-border spinner-border-sm text-primary"
+                  class="spinner-border spinner-border-sm text-success"
                   role="status"
                 >
                   <span class="visually-hidden">Running...</span>

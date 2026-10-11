@@ -3,13 +3,15 @@ import type { FailedJobStatus, JobStatus, StageStatus } from '@/model/submit'
 // job statuses come in upper case from the job list, step statuses in lower case from the logs
 export type AnyStatus = JobStatus | FailedJobStatus | StageStatus
 
-type StatusTone = 'primary' | 'success' | 'danger' | 'secondary'
+type StatusTone = 'warning' | 'success' | 'danger' | 'secondary'
 
 export function statusTone(status: AnyStatus): StatusTone {
   switch (status) {
+    case 'INIT':
+    case 'pending':
+      return 'warning'
     case 'RUNNING':
     case 'running':
-      return 'primary'
     case 'SUCCESSFUL':
     case 'SUCCESSFULL':
     case 'succeeded':
