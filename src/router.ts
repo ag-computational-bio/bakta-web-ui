@@ -91,11 +91,8 @@ const routes = [
         name: 'AdminJob',
         component: () => import('@/admin/pages/AdminJobPage.vue'),
       },
-      {
-        path: 'workflows',
-        name: 'AdminWorkflows',
-        component: () => import('@/admin/pages/AdminWorkflowsPage.vue'),
-      },
+      // the workflows are part of the job list now
+      { path: 'workflows', redirect: '/admin/jobs' },
     ],
   },
   {

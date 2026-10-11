@@ -86,7 +86,6 @@ const tabs = computed(() => [
     to: '/admin/jobs',
     active: route.name === 'AdminJobs' || route.name === 'AdminJob',
   },
-  { label: 'Workflows', to: '/admin/workflows', active: route.name === 'AdminWorkflows' },
 ])
 
 onMounted(() => startSession())
