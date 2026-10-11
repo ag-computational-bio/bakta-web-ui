@@ -1,10 +1,6 @@
 <template>
   <AdminFilterBar>
-    <select v-model="kind" class="form-select form-select-sm w-auto" aria-label="Workflow">
-      <option v-for="option in kindFilterOptions" :key="option.value" :value="option.value">
-        {{ option.label }}
-      </option>
-    </select>
+    <AdminSelect v-model="kind" label="Workflow" icon="bi-diagram-3" :options="kindFilterOptions" />
   </AdminFilterBar>
   <Notification v-if="error" class="mb-3" type="danger" :message="error" />
 
@@ -173,6 +169,7 @@ import { handleAdminError, useAdminApi } from '../admin-session'
 import { lightColor } from '../chart-colors'
 import { bucketValues, chartPeriods } from '../chart-data'
 import AdminFilterBar from '../components/AdminFilterBar.vue'
+import AdminSelect from '../components/AdminSelect.vue'
 import SeriesChart from '../components/SeriesChart.vue'
 import StatTile from '../components/StatTile.vue'
 import {

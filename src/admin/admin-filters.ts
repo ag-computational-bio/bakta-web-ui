@@ -45,29 +45,46 @@ export const filters = reactive({
  */
 export function statsFilter(now = new Date()): StatsFilter {
   const filter: StatsFilter = { environment: filters.environment }
-  switch (filters.range) {
+  const from = rangeStart(filters.range, now)
+  if (from) filter.from = from.toISOString()
+  if (filters.range === 'custom') {
+    if (filters.customFrom) filter.from = `${filters.customFrom}T00:00:00Z`
+    // the server excludes "to", so the range ends at the start of the next day
+    if (filters.customTo) {
+      const to = new Date(`${filters.customTo}T00:00:00Z`)
+      to.setUTCDate(to.getUTCDate() + 1)
+      filter.to = to.toISOString()
+    }
+  }
+  return filter
+}
+
+/**
+ * The start of a preset time range, none for all time and a custom range.
+ */
+function rangeStart(range: TimeRange, now: Date): Date | undefined {
+  switch (range) {
     case '7d':
     case '30d':
     case '90d':
-      filter.from = new Date(now.getTime() - parseInt(filters.range) * day).toISOString()
-      break
+      return new Date(now.getTime() - parseInt(range) * day)
     case '12m': {
       const from = new Date(now)
       from.setUTCFullYear(from.getUTCFullYear() - 1)
-      filter.from = from.toISOString()
-      break
+      return from
     }
-    case 'custom':
-      if (filters.customFrom) filter.from = `${filters.customFrom}T00:00:00Z`
-      // the server excludes "to", so the range ends at the start of the next day
-      if (filters.customTo) {
-        const to = new Date(`${filters.customTo}T00:00:00Z`)
-        to.setUTCDate(to.getUTCDate() + 1)
-        filter.to = to.toISOString()
-      }
-      break
   }
-  return filter
+  return undefined
+}
+
+/**
+ * A short text with the dates of a time range, for the time range menu.
+ */
+export function rangeDescription(range: TimeRange, now = new Date()): string {
+  if (range === 'all') return 'Every job'
+  if (range === 'custom') return 'Pick a start and end date'
+  const format = new Intl.DateTimeFormat('en-GB', { dateStyle: 'medium', timeZone: 'UTC' })
+  return `${format.format(rangeStart(range, now))} to today`
 }
 
 /**

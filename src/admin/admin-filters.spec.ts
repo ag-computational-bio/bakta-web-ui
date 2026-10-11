@@ -1,5 +1,12 @@
 import { afterEach, describe, expect, it } from 'vitest'
-import { chartInterval, filterQuery, filters, readFilterQuery, statsFilter } from './admin-filters'
+import {
+  chartInterval,
+  filterQuery,
+  filters,
+  rangeDescription,
+  readFilterQuery,
+  statsFilter,
+} from './admin-filters'
 
 const now = new Date('2026-10-11T12:00:00Z')
 
@@ -52,5 +59,13 @@ describe('time range', () => {
     readFilterQuery({ range: 'custom', from: '2026-01-01', to: 'bad' })
     expect(filters).toMatchObject({ range: 'custom', customFrom: '2026-01-01', customTo: '' })
     expect(filterQuery()).toEqual({ range: 'custom', from: '2026-01-01', to: undefined })
+  })
+})
+
+describe('rangeDescription', () => {
+  it('shows the dates of the preset ranges', () => {
+    expect(rangeDescription('7d', now)).toBe('4 Oct 2026 to today')
+    expect(rangeDescription('12m', now)).toBe('11 Oct 2025 to today')
+    expect(rangeDescription('all', now)).toBe('Every job')
   })
 })

@@ -1,23 +1,12 @@
 <template>
   <div class="d-flex flex-wrap align-items-center gap-2 mb-4">
-    <select
+    <AdminSelect
       v-model="filters.environment"
-      class="form-select form-select-sm filter"
-      aria-label="Environment"
-    >
-      <option v-for="option in environments" :key="option.value" :value="option.value">
-        {{ option.label }}
-      </option>
-    </select>
-    <select
-      v-model="filters.range"
-      class="form-select form-select-sm filter"
-      aria-label="Time range"
-    >
-      <option v-for="option in timeRanges" :key="option.value" :value="option.value">
-        {{ option.label }}
-      </option>
-    </select>
+      label="Environment"
+      icon="bi-hdd-stack"
+      :options="environments"
+    />
+    <AdminSelect v-model="filters.range" label="Time range" icon="bi-calendar3" :options="ranges" />
     <div v-if="filters.range === 'custom'" class="d-flex align-items-center gap-2">
       <input
         v-model="filters.customFrom"
@@ -25,7 +14,7 @@
         class="form-control form-control-sm date"
         aria-label="From"
       />
-      <span class="text-secondary">to</span>
+      <span class="small text-secondary">to</span>
       <input
         v-model="filters.customTo"
         type="date"
@@ -39,14 +28,24 @@
 </template>
 
 <script setup lang="ts">
-import { environments, filters, timeRanges } from '../admin-filters'
+import { computed } from 'vue'
+import { environments, filters, rangeDescription, timeRanges } from '../admin-filters'
+import AdminSelect from './AdminSelect.vue'
+
+// the dates of each preset below its name
+const ranges = computed(() =>
+  timeRanges.map((r) => ({ ...r, description: rangeDescription(r.value) })),
+)
 </script>
 
 <style scoped>
-.filter {
-  width: auto;
-}
+/* the date inputs look like the dropdown buttons next to them */
 .date {
   width: 9.5rem;
+  border-color: var(--bs-secondary-border-subtle);
+  color: var(--bs-body-color);
+}
+.date:hover {
+  border-color: var(--bs-primary-border-subtle);
 }
 </style>
