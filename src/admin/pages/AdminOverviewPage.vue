@@ -16,12 +16,12 @@
         <ChipGroup v-model="interval" :options="intervalOptions" label="Interval" />
       </div>
     </div>
-    <TimeChart
+    <SeriesChart
       v-if="periods.length"
       kind="bars"
       label="Jobs over time"
-      :periods="periods"
-      :interval="interval"
+      :labels="periodLabels"
+      :tick-labels="periodTicks"
       :series="jobSeries"
       :values="jobValues"
       :format="formatCount"
@@ -31,12 +31,12 @@
 
   <div class="card p-4 mb-4">
     <h3 class="section-title">Runtime over time</h3>
-    <TimeChart
+    <SeriesChart
       v-if="periods.length"
       kind="lines"
       label="Runtime over time"
-      :periods="periods"
-      :interval="interval"
+      :labels="periodLabels"
+      :tick-labels="periodTicks"
       :series="runtimeSeries"
       :values="runtimeValues"
       :format="(minutes) => formatDuration(minutes == null ? null : minutes * 60)"
@@ -126,8 +126,15 @@ import AdminFilterBar from '../components/AdminFilterBar.vue'
 import ChipGroup from '../components/ChipGroup.vue'
 import ListPagination from '../components/ListPagination.vue'
 import StatTile from '../components/StatTile.vue'
-import TimeChart from '../components/TimeChart.vue'
-import { formatBp, formatCount, formatDateTime, formatDuration, formatPercent } from '../format'
+import SeriesChart from '../components/SeriesChart.vue'
+import {
+  formatBp,
+  formatCount,
+  formatDateTime,
+  formatDuration,
+  formatPercent,
+  formatPeriod,
+} from '../format'
 import { useClientPages } from '../pagination'
 
 const intervalOptions: { value: Interval; label: string }[] = [
@@ -194,6 +201,8 @@ const tiles = computed(() => {
 const periods = computed(() =>
   overall.value ? chartPeriods(overall.value.buckets, statsFilter(), interval.value) : [],
 )
+const periodLabels = computed(() => periods.value.map((p) => formatPeriod(p, interval.value)))
+const periodTicks = computed(() => periodLabels.value.map((l) => l.replace('Week of ', '')))
 const jobValues = computed(() =>
   grouped.value ? bucketValues(grouped.value.buckets, periods.value, 'jobs_total') : {},
 )

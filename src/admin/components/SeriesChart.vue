@@ -2,11 +2,7 @@
   <div class="time-chart">
     <div v-if="series.length > 1" class="legend mb-2">
       <span v-for="s in series" :key="s.key" class="legend-item">
-        <span
-          class="swatch"
-          :class="{ line: kind === 'lines' }"
-          :style="{ backgroundColor: s.color }"
-        ></span
+        <span class="swatch" :class="{ line: kind === 'lines' }" :style="swatchStyle(s)"></span
         >{{ s.label }}
       </span>
     </div>
@@ -17,13 +13,13 @@
         class="chart-tooltip"
         :style="{ left: `${hover.x}px`, transform: hover.flip ? 'translateX(-100%)' : 'none' }"
       >
-        <div class="fw-semibold mb-1">{{ formatPeriod(periods[hover.index], interval) }}</div>
+        <div class="fw-semibold mb-1">{{ labels[hover.index] }}</div>
         <div
           v-for="s in tooltipSeries(hover.index)"
           :key="s.key"
           class="d-flex align-items-center gap-2"
         >
-          <span class="swatch" :style="{ backgroundColor: s.color }"></span>
+          <span class="swatch" :style="swatchStyle(s)"></span>
           <span class="flex-grow-1">{{ s.label }}</span>
           <span class="fw-semibold">{{ format(valueAt(s.key, hover.index)) }}</span>
         </div>
@@ -31,6 +27,7 @@
           <span class="flex-grow-1">Total</span>
           <span class="fw-semibold">{{ format(total(hover.index)) }}</span>
         </div>
+        <div v-if="notes?.[hover.index]" class="mt-1 pt-1 total">{{ notes[hover.index] }}</div>
       </div>
     </div>
   </div>
@@ -39,18 +36,21 @@
 <script setup lang="ts">
 import * as d3 from 'd3'
 import { onMounted, onUnmounted, ref, watch } from 'vue'
-import type { Interval } from '../admin-api'
 import type { ChartSeries } from '../chart-colors'
-import { formatPeriod } from '../format'
 
 /*
- * A small time chart: stacked bars for counts or lines for durations.
- * values[key][i] is the value of series "key" in period i, null for no data.
+ * A small chart over periods or buckets: stacked bars for counts, lines for
+ * durations over time, or dots for values per bucket.
+ * values[key][i] is the value of series "key" at label i, null for no data.
  */
 const props = defineProps<{
-  kind: 'bars' | 'lines'
-  periods: Date[]
-  interval: Interval
+  kind: 'bars' | 'lines' | 'dots'
+  // the label of each column in the tooltip
+  labels: string[]
+  // shorter labels for the x axis, by default the labels
+  tickLabels?: string[]
+  // an extra line per column in the tooltip
+  notes?: string[]
   series: ChartSeries[]
   values: Record<string, (number | null)[]>
   format: (value: number | null) => string
@@ -66,13 +66,19 @@ const height = 260
 const margin = { top: 8, right: 8, bottom: 28, left: 64 }
 const hover = ref<{ index: number; x: number; flip: boolean }>()
 
+// bars have a light fill and a stronger outline, lines and dots one strong color
+function swatchStyle(s: ChartSeries) {
+  if (props.kind !== 'bars') return { backgroundColor: s.color }
+  return { backgroundColor: s.color, border: `1px solid ${s.stroke ?? s.color}` }
+}
+
 function valueAt(key: string, index: number): number | null {
   return props.values[key]?.[index] ?? null
 }
 
 // the tooltip of a bar leaves out empty groups
 function tooltipSeries(index: number): ChartSeries[] {
-  if (props.kind === 'lines') return props.series
+  if (props.kind !== 'bars') return props.series
   const shown = props.series.filter((s) => valueAt(s.key, index))
   return shown.length ? shown : props.series
 }
@@ -87,7 +93,7 @@ function draw() {
   root.selectAll('*').remove()
   const w = width.value - margin.left - margin.right
   const h = height - margin.top - margin.bottom
-  const n = props.periods.length
+  const n = props.labels.length
   const x = d3
     .scaleBand<number>()
     .domain(d3.range(n))
@@ -138,7 +144,7 @@ function draw() {
     .attr('x', center)
     .attr('y', h + 18)
     .attr('text-anchor', 'middle')
-    .text((i) => formatPeriod(props.periods[i], props.interval).replace('Week of ', ''))
+    .text((i) => (props.tickLabels ?? props.labels)[i])
 
   const highlight = g
     .append('rect')
@@ -153,11 +159,12 @@ function draw() {
       .stack<number>()
       .keys(props.series.map((s) => s.key))
       .value((i, key) => valueAt(key, i) ?? 0)(d3.range(n))
-    const gap = x.bandwidth() > 6
+    const wide = x.bandwidth() > 6
     g.selectAll('g.series')
       .data(stacked)
       .join('g')
       .style('fill', (_, i) => props.series[i].color)
+      .style('stroke', (_, i) => props.series[i].stroke ?? props.series[i].color)
       .selectAll('rect')
       .data((d) => d)
       .join('rect')
@@ -165,7 +172,7 @@ function draw() {
       .attr('width', x.bandwidth())
       .attr('y', (d) => y(d[1]))
       .attr('height', (d) => Math.max(0, y(d[0]) - y(d[1])))
-      .attr('class', gap ? 'segment gap' : 'segment')
+      .attr('class', wide ? 'segment' : 'segment narrow')
   } else {
     for (const s of props.series) {
       const line = d3
@@ -174,11 +181,13 @@ function draw() {
         .x((i) => (x(i) ?? 0) + x.bandwidth() / 2)
         .y((i) => y(valueAt(s.key, i) ?? 0))
         .curve(d3.curveMonotoneX)
-      g.append('path')
-        .attr('class', 'line')
-        .style('stroke', s.color)
-        .attr('d', line(d3.range(n)))
-      if (n <= 40) {
+      if (props.kind === 'lines') {
+        g.append('path')
+          .attr('class', 'line')
+          .style('stroke', s.color)
+          .attr('d', line(d3.range(n)))
+      }
+      if (n <= 40 || props.kind === 'dots') {
         g.selectAll(null)
           .data(d3.range(n).filter((i) => valueAt(s.key, i) != null))
           .join('circle')
@@ -218,7 +227,7 @@ onMounted(() => {
   draw()
 })
 onUnmounted(() => observer?.disconnect())
-watch([() => props.values, () => props.series, () => props.periods, width], draw, {
+watch([() => props.values, () => props.series, () => props.labels, width], draw, {
   flush: 'post',
 })
 </script>
@@ -274,9 +283,12 @@ watch([() => props.values, () => props.series, () => props.periods, width], draw
 .plot :deep(.hover-band) {
   fill: var(--bakta-surface);
 }
-.plot :deep(.segment.gap) {
-  stroke: var(--bs-body-bg);
+.plot :deep(.segment) {
   stroke-width: 1px;
+}
+/* very narrow bars would be only outline, they keep the fill alone */
+.plot :deep(.segment.narrow) {
+  stroke-width: 0;
 }
 .plot :deep(.line) {
   fill: none;

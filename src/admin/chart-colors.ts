@@ -3,32 +3,50 @@ import { formatStatus } from '@/model/status-style'
 import { AdminJobStatuses, type GroupBy } from './admin-api'
 
 /*
- * Chart colors come from the theme. Workflow kinds use the colors of their
- * shields, statuses the colors of their badges: the strong color for the
- * main state of a tone, the lighter border color for the second one.
+ * Chart colors come from the theme. Bars use the light colors of the status
+ * badges with a thin outline in a stronger tone, so stacked segments stay
+ * apart. Workflow kinds use the tones of their shields, statuses the tones of
+ * their badges: the main state of a tone gets the stronger light color, the
+ * second state the lightest one. Lines keep the strong colors.
  */
 
-export type ChartSeries = { key: string; label: string; color: string }
+// color is the fill of a bar or the color of a line, stroke the outline of a bar
+export type ChartSeries = { key: string; label: string; color: string; stroke?: string }
 
-const workflowColors: Record<WorkflowKind, string> = {
-  bakta: 'var(--bs-success)',
-  bakta_baktfold: 'var(--bs-primary)',
-  bakta_proteins: 'var(--bs-info)',
-  baktfold: 'var(--bs-warning)',
+type Tone = 'primary' | 'success' | 'info' | 'warning' | 'danger' | 'secondary'
+
+// the main light color of a tone, for example for the only state of a tone
+export function lightColor(tone: Tone): Pick<ChartSeries, 'color' | 'stroke'> {
+  return { color: `var(--bs-${tone}-border-subtle)`, stroke: `var(--bs-${tone})` }
 }
 
-const statusColors: Record<(typeof AdminJobStatuses)[number], string> = {
-  succeeded: 'var(--bs-success)',
-  running: 'var(--bs-success-border-subtle)',
-  submitted: 'var(--bs-warning)',
-  created: 'var(--bs-warning-border-subtle)',
-  failed: 'var(--bs-danger)',
-  error: 'var(--bs-danger-border-subtle)',
-  deleted: 'var(--bs-secondary)',
-  expired: 'var(--bs-secondary-border-subtle)',
+// the lightest color of a tone, for the second state of a tone
+function lighterColor(tone: Tone): Pick<ChartSeries, 'color' | 'stroke'> {
+  return { color: `var(--bs-${tone}-bg-subtle)`, stroke: `var(--bs-${tone}-border-subtle)` }
 }
 
-const otherColor = 'var(--bs-secondary-color)'
+const workflowColors: Record<WorkflowKind, Pick<ChartSeries, 'color' | 'stroke'>> = {
+  bakta: lightColor('success'),
+  bakta_baktfold: lightColor('primary'),
+  bakta_proteins: lightColor('info'),
+  baktfold: lightColor('warning'),
+}
+
+const statusColors: Record<
+  (typeof AdminJobStatuses)[number],
+  Pick<ChartSeries, 'color' | 'stroke'>
+> = {
+  succeeded: lightColor('success'),
+  running: lighterColor('success'),
+  submitted: lightColor('warning'),
+  created: lighterColor('warning'),
+  failed: lightColor('danger'),
+  error: lighterColor('danger'),
+  deleted: lightColor('secondary'),
+  expired: lighterColor('secondary'),
+}
+
+const otherColor = { color: 'var(--bs-tertiary-bg)', stroke: 'var(--bs-secondary-color)' }
 
 /**
  * The series of a grouping in a fixed order, so a color always belongs to the same group.
@@ -36,22 +54,22 @@ const otherColor = 'var(--bs-secondary-color)'
 export function groupSeries(groupBy: GroupBy, groups: string[]): ChartSeries[] {
   let known: ChartSeries[] = []
   if (groupBy === 'workflow_kind') {
-    known = Object.entries(workflowColors).map(([key, color]) => ({
+    known = Object.entries(workflowColors).map(([key, colors]) => ({
       key,
-      color,
+      ...colors,
       label: formatWorkflowKind(key as WorkflowKind),
     }))
   } else if (groupBy === 'status') {
-    known = Object.entries(statusColors).map(([key, color]) => ({
+    known = Object.entries(statusColors).map(([key, colors]) => ({
       key,
-      color,
+      ...colors,
       label: formatStatus(key as keyof typeof statusColors),
     }))
   } else if (groupBy === 'none') {
-    known = [{ key: '', label: 'Jobs', color: 'var(--bs-primary)' }]
+    known = [{ key: '', label: 'Jobs', ...lightColor('primary') }]
   }
   const others = groups
     .filter((g) => !known.some((s) => s.key === g))
-    .map((key) => ({ key, label: key || 'Unknown', color: otherColor }))
+    .map((key) => ({ key, label: key || 'Unknown', ...otherColor }))
   return [...known.filter((s) => groups.includes(s.key)), ...others]
 }
