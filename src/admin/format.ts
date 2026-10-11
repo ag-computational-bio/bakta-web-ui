@@ -226,3 +226,23 @@ export function successRate(row: {
 }): number | null {
   return row.jobs_finished ? row.jobs_succeeded / row.jobs_finished : null
 }
+
+// the Argo phase that matches a job status
+const statusPhase: Record<string, string> = {
+  created: 'Pending',
+  submitted: 'Pending',
+  running: 'Running',
+  succeeded: 'Succeeded',
+  failed: 'Failed',
+  error: 'Error',
+}
+
+/**
+ * A short note when the Argo workflow tells something else than the job
+ * status, like "Argo: Failed", or "Argo: gone" when an active job has no
+ * workflow. Empty when both agree.
+ */
+export function argoNote(status: string, phase: string | null | undefined): string {
+  if (!phase) return status === 'submitted' || status === 'running' ? 'Argo: gone' : ''
+  return statusPhase[status] === phase ? '' : `Argo: ${phase}`
+}

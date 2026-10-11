@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
+  argoNote,
   bpRange,
   configEntries,
   formatDuration,
@@ -123,5 +124,16 @@ describe('successRate', () => {
     expect(successRate({ jobs_succeeded: 3, jobs_finished: 4 })).toBe(0.75)
     expect(successRate({ jobs_succeeded: 0, jobs_finished: 0 })).toBeNull()
     expect(successRate({ jobs_succeeded: 3 })).toBeNull()
+  })
+})
+
+describe('argoNote', () => {
+  it('only tells when Argo differs from the job status', () => {
+    expect(argoNote('running', 'Running')).toBe('')
+    expect(argoNote('submitted', 'Pending')).toBe('')
+    expect(argoNote('running', 'Failed')).toBe('Argo: Failed')
+    expect(argoNote('deleted', 'Succeeded')).toBe('Argo: Succeeded')
+    expect(argoNote('running', null)).toBe('Argo: gone')
+    expect(argoNote('succeeded', null)).toBe('')
   })
 })

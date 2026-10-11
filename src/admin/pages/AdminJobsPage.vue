@@ -14,6 +14,7 @@
       />
       <div class="dropdown">
         <button
+          ref="filterToggle"
           type="button"
           class="btn btn-outline-secondary btn-sm admin-toggle"
           data-bs-toggle="dropdown"
@@ -77,6 +78,16 @@
                 </label>
               </div>
             </fieldset>
+          </div>
+          <p class="filter-note small text-secondary">
+            Status is the state of the job in Bakta Web. Live phase is the state of its Argo
+            workflow, only while the workflow exists.
+          </p>
+          <div class="d-flex justify-content-end gap-2 px-2 pb-1">
+            <button type="button" class="btn btn-link btn-sm" @click="resetFilters">Clear</button>
+            <button type="button" class="btn btn-outline-secondary btn-sm" @click="closeFilters">
+              Done
+            </button>
           </div>
         </div>
       </div>
@@ -151,7 +162,6 @@
             <th class="text-end">Input</th>
             <th>Workflow</th>
             <th>Status</th>
-            <th>Live phase</th>
             <th>Created</th>
             <th class="text-end">Runtime</th>
             <th class="text-end">Actions</th>
@@ -186,20 +196,19 @@
                 {{ outcomeText(job) }}
               </div>
               <div
+                v-if="argoNote(job.status, job.workflow_phase)"
+                class="small text-secondary text-nowrap"
+                :title="job.workflow_name ?? undefined"
+              >
+                {{ argoNote(job.status, job.workflow_phase) }}
+              </div>
+              <div
                 v-if="!job.data_available"
                 class="small text-secondary text-nowrap"
                 :title="`Input data, results and logs were deleted on ${formatDateTime(job.data_expires_at)}`"
               >
                 <i class="bi bi-archive me-1" aria-hidden="true"></i>Data deleted
               </div>
-            </td>
-            <td>
-              <StatusBadge
-                v-if="job.workflow_phase"
-                :status="phaseStatus(job.workflow_phase)"
-                :title="job.workflow_name ?? undefined"
-              />
-              <span v-else class="text-secondary">-</span>
             </td>
             <td class="text-nowrap">{{ formatDateTime(job.created_at) }}</td>
             <td class="text-end text-nowrap">{{ formatDuration(job.runtime_seconds) }}</td>
@@ -223,7 +232,7 @@
             </td>
           </tr>
           <tr v-if="!loading && jobs.length === 0">
-            <td colspan="9" class="text-center text-secondary py-4">No jobs found.</td>
+            <td colspan="8" class="text-center text-secondary py-4">No jobs found.</td>
           </tr>
         </tbody>
       </table>
@@ -246,6 +255,7 @@ import Shield from '@/components/Shield.vue'
 import StatusBadge from '@/components/StatusBadge.vue'
 import { formatWorkflowKind, workflowShieldProps, WorkflowKinds } from '@/model/job'
 import { formatStatus } from '@/model/status-style'
+import { Dropdown } from 'bootstrap'
 import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import {
@@ -269,13 +279,13 @@ import ConfirmModal from '../components/ConfirmModal.vue'
 import ListPagination from '../components/ListPagination.vue'
 import OrphanWorkflows from '../components/OrphanWorkflows.vue'
 import {
+  argoNote,
   formatBp,
   formatCount,
   formatDateTime,
   formatDuration,
   kindLabel,
   outcomeText,
-  phaseStatus,
 } from '../format'
 import { clampPage, pageSizes } from '../pagination'
 import {
@@ -407,6 +417,11 @@ const activeFilters = computed(() => [
   })),
 ])
 
+const filterToggle = ref<HTMLElement>()
+function closeFilters() {
+  if (filterToggle.value) Dropdown.getOrCreateInstance(filterToggle.value).hide()
+}
+
 function resetFilters() {
   statuses.value = []
   kinds.value = []
@@ -486,6 +501,10 @@ load()
   gap: 0.5rem 1rem;
   width: max-content;
   max-width: calc(100vw - 3rem);
+}
+.filter-note {
+  max-width: 28rem;
+  margin: 0.5rem 0.75rem;
 }
 .filter-menu fieldset {
   min-width: 8rem;
