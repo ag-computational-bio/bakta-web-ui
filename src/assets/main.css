@@ -178,6 +178,11 @@ a {
   box-shadow: none;
 }
 
+/* Badges: always fully rounded, like the feature type chips */
+.badge {
+  --bs-badge-border-radius: var(--bs-border-radius-pill);
+}
+
 /* Alerts */
 .alert {
   --bs-alert-border-radius: var(--bs-border-radius-lg);
