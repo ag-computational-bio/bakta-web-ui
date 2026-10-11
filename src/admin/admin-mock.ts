@@ -19,7 +19,7 @@ import {
   type WorkflowPhase,
   type WorkflowQuery,
 } from './admin-api'
-import { createJobs, day, uuid } from './admin-mock-data'
+import { createJobs, day, retentionDays, uuid, withRetention } from './admin-mock-data'
 import { inputStats, runtimeStats } from './admin-mock-stats'
 import { percentile, truncDate } from './format'
 
@@ -86,6 +86,11 @@ export function bulkApplicable(action: BulkAction, phase: string, suspended: boo
   }
 }
 
+// the answers of the backend when the S3 data of a job is gone
+const inputsDeleted = 'Input data was deleted after the retention period'
+const logsDeleted = 'Logs were deleted after the retention period'
+const inputsDeletedReason = 'Input data deleted after the retention period'
+
 const orphanNames = ['bakta-job-1.12.2-orphan', 'baktfold-job-0.3.0-orphan', 'bakta-job-1.11.0-old']
 
 function delay<T>(value: T): Promise<T> {
@@ -112,7 +117,9 @@ class MockAdminApi implements AdminApi {
 
   #orphans = new Map<string, WorkflowItem>(
     orphanNames.map((name, i) => {
-      const finished = new Date(Date.now() - (3 + i * 5) * day).toISOString()
+      // the old one finished before the retention period, so its data is gone
+      const age = name.endsWith('-old') ? 40 : 3 + i * 5
+      const finished = new Date(Date.now() - age * day).toISOString()
       const item: WorkflowItem = {
         name,
         job_id: null,
@@ -129,10 +136,18 @@ class MockAdminApi implements AdminApi {
     }),
   )
 
+  // the retention fields depend on the time, so they are set again on each access
   #find(id: string): JobRecord {
     const job = this.#jobs.find((j) => j.id === id)
     if (!job) throw new AdminApiError(404, 'job not found')
-    return job
+    return withRetention(job)
+  }
+
+  // whether the S3 data of a workflow still exists, also for workflows without a job
+  #dataAvailable(w: WorkflowItem): boolean {
+    if (w.job_id) return this.#find(w.job_id).data_available
+    const reference = w.finished_at ?? w.started_at
+    return !reference || Date.now() < Date.parse(reference) + retentionDays * day
   }
 
   #filtered(filter: StatsFilter) {
@@ -267,7 +282,7 @@ class MockAdminApi implements AdminApi {
     return delay({
       total: jobs.length,
       items: jobs.slice(offset, offset + (query.limit ?? 50)).map((j) => ({
-        ...j,
+        ...withRetention(j),
         organism: [j.genus, j.species, j.strain].filter(Boolean).join(' ') || null,
         workflow_phase: this.#workflows.has(j.id) ? phaseOf(j.status) : null,
       })),
@@ -308,6 +323,8 @@ class MockAdminApi implements AdminApi {
 
   async jobLogs(id: string): Promise<WorkflowLogs> {
     const job = this.#find(id)
+    // logs of a live workflow come from Argo, the others from the deleted archive
+    if (!job.data_available && !this.#workflows.has(id)) throw new AdminApiError(410, logsDeleted)
     const failed = job.status === 'failed' || job.status === 'error'
     return delay({
       workflowKind: job.workflow_kind,
@@ -327,6 +344,8 @@ class MockAdminApi implements AdminApi {
   async #setPhase(id: string, status: AdminJobStatus, newWorkflow: boolean) {
     const job = this.#find(id)
     if (newWorkflow) job.workflow_name = `${job.workflow_kind}-job-${uuid().slice(0, 8)}`
+    // a new attempt has not finished yet
+    if (status === 'running' || status === 'submitted') job.finished_at = null
     job.status = status
     job.outcome = status === 'failed' ? 'failed' : null
     job.updated_at = new Date().toISOString()
@@ -340,10 +359,14 @@ class MockAdminApi implements AdminApi {
     if (job.status !== 'failed' && job.status !== 'error') {
       return Promise.reject(new AdminApiError(409, 'workflow is not failed'))
     }
+    if (!job.data_available) return Promise.reject(new AdminApiError(409, inputsDeleted))
     return this.#setPhase(id, 'running', false)
   }
 
   resubmit(id: string) {
+    if (!this.#find(id).data_available) {
+      return Promise.reject(new AdminApiError(409, inputsDeleted))
+    }
     return this.#setPhase(id, 'submitted', true)
   }
 
@@ -366,7 +389,9 @@ class MockAdminApi implements AdminApi {
     const job = this.#find(id)
     const existed = this.#workflows.delete(id)
     job.status = 'deleted'
-    return delay({ deleted_workflow: existed, purged_objects: purgeData ? 12 : 0 })
+    // without data there is nothing to purge in S3
+    const purged = purgeData && job.data_available ? 12 : 0
+    return delay({ deleted_workflow: existed, purged_objects: purged })
   }
 
   #workflowItems(environment: Environment): WorkflowItem[] {
@@ -430,16 +455,21 @@ class MockAdminApi implements AdminApi {
 
   async bulk(request: BulkRequest) {
     const matches = this.#bulkMatches(request)
-    const item = (w: WorkflowItem): BulkItem => ({
-      name: w.name,
-      job_id: w.job_id,
-      workflow_kind: w.workflow_kind,
-      phase: w.phase,
-      finished_at: w.finished_at,
-      applicable: bulkApplicable(request.action, w.phase, !!w.suspended),
-      result: null,
-      error: null,
-    })
+    const needsData = request.action === 'retry' || request.action === 'resubmit'
+    const item = (w: WorkflowItem): BulkItem => {
+      const deleted = needsData && !this.#dataAvailable(w)
+      return {
+        name: w.name,
+        job_id: w.job_id,
+        workflow_kind: w.workflow_kind,
+        phase: w.phase,
+        finished_at: w.finished_at,
+        applicable: !deleted && bulkApplicable(request.action, w.phase, !!w.suspended),
+        result: null,
+        error: null,
+        reason: deleted ? inputsDeletedReason : null,
+      }
+    }
     if (request.dry_run) {
       return delay({ dry_run: true, action: request.action, items: matches.map(item) })
     }

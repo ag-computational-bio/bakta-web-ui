@@ -56,6 +56,23 @@ const versionHistory = [
 ]
 
 export const day = 86_400_000
+// days after a job until its S3 data is deleted, like DATA_RETENTION_DAYS of the backend
+export const retentionDays = 30
+
+/**
+ * Sets when the S3 data of a job is deleted: the retention days after the job
+ * finished, or after it was created when it never finished.
+ */
+export function withRetention<T extends Pick<JobRecord, 'created_at' | 'finished_at'>>(
+  job: T,
+  now = Date.now(),
+): T & Pick<JobRecord, 'data_expires_at' | 'data_available'> {
+  const expires = Date.parse(job.finished_at ?? job.created_at) + retentionDays * day
+  return Object.assign(job, {
+    data_expires_at: new Date(expires).toISOString(),
+    data_available: now < expires,
+  })
+}
 
 function iso(ms: number): string {
   return new Date(ms).toISOString()
@@ -123,39 +140,43 @@ function createJob(createdMs: number, now: number): JobRecord {
   const version = versionHistory.find((v) => iso(createdMs) < v.until) ?? versionHistory[0]
   const withBaktfold = kind === 'baktfold' || kind === 'bakta_baktfold'
   const id = uuid()
-  return {
-    id,
-    environment,
-    workflow_kind: kind,
-    api_version: createdMs < now - 400 * day && rnd() < 0.7 ? 'v1' : 'v2',
-    status,
-    outcome,
-    name: rnd() < 0.8 ? `${genus} ${species} ${strain ?? 'isolate'}` : null,
-    genus: fromFasta ? genus : null,
-    species: fromFasta ? species : null,
-    strain: fromFasta ? strain : null,
-    sequence_count: fromFasta ? sequences : null,
-    total_length: fromFasta ? totalLength : null,
-    config: fromFasta ? mockConfig(genus, species, strain, contigs === 1) : null,
-    bakta_version: kind === 'baktfold' ? null : version.bakta,
-    bakta_db_version: kind === 'baktfold' ? null : version.db,
-    baktfold_version: withBaktfold ? '0.3.0' : null,
-    baktfold_db_version: withBaktfold ? '0.3' : null,
-    workflow_name: status === 'created' ? null : `${kind.replace('_', '-')}-job-${id.slice(0, 8)}`,
-    created_at: iso(createdMs),
-    submitted_at: status === 'created' ? null : iso(submittedMs),
-    started_at: startedMs == null ? null : iso(startedMs),
-    finished_at: finishedMs == null ? null : iso(finishedMs),
-    runtime_seconds: finishedMs == null ? null : runtimeSeconds,
-    queue_seconds: startedMs == null ? null : queue,
-    error_message:
-      outcome === 'failed'
-        ? 'bakta exited with code 1'
-        : outcome === 'error'
-          ? 'pod was evicted'
-          : null,
-    updated_at: iso(finishedMs ?? startedMs ?? createdMs),
-  }
+  return withRetention(
+    {
+      id,
+      environment,
+      workflow_kind: kind,
+      api_version: createdMs < now - 400 * day && rnd() < 0.7 ? 'v1' : 'v2',
+      status,
+      outcome,
+      name: rnd() < 0.8 ? `${genus} ${species} ${strain ?? 'isolate'}` : null,
+      genus: fromFasta ? genus : null,
+      species: fromFasta ? species : null,
+      strain: fromFasta ? strain : null,
+      sequence_count: fromFasta ? sequences : null,
+      total_length: fromFasta ? totalLength : null,
+      config: fromFasta ? mockConfig(genus, species, strain, contigs === 1) : null,
+      bakta_version: kind === 'baktfold' ? null : version.bakta,
+      bakta_db_version: kind === 'baktfold' ? null : version.db,
+      baktfold_version: withBaktfold ? '0.3.0' : null,
+      baktfold_db_version: withBaktfold ? '0.3' : null,
+      workflow_name:
+        status === 'created' ? null : `${kind.replace('_', '-')}-job-${id.slice(0, 8)}`,
+      created_at: iso(createdMs),
+      submitted_at: status === 'created' ? null : iso(submittedMs),
+      started_at: startedMs == null ? null : iso(startedMs),
+      finished_at: finishedMs == null ? null : iso(finishedMs),
+      runtime_seconds: finishedMs == null ? null : runtimeSeconds,
+      queue_seconds: startedMs == null ? null : queue,
+      error_message:
+        outcome === 'failed'
+          ? 'bakta exited with code 1'
+          : outcome === 'error'
+            ? 'pod was evicted'
+            : null,
+      updated_at: iso(finishedMs ?? startedMs ?? createdMs),
+    },
+    now,
+  )
 }
 
 function mockConfig(genus: string, species: string, strain: string | null, complete: boolean) {

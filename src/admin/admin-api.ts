@@ -248,6 +248,9 @@ const JobListItemSchema = z.object({
   created_at: time,
   finished_at: optionalTime,
   runtime_seconds: optionalNumber,
+  // the S3 data (inputs, results, archived logs) is deleted at data_expires_at
+  data_expires_at: time,
+  data_available: z.boolean(),
   workflow_name: optionalText,
   // the phase of the live Argo workflow, null when none exists
   workflow_phase: optionalText,
@@ -287,6 +290,8 @@ export const JobRecordSchema = z.object({
   queue_seconds: optionalNumber,
   error_message: optionalText,
   updated_at: time,
+  data_expires_at: time,
+  data_available: z.boolean(),
 })
 export type JobRecord = z.infer<typeof JobRecordSchema>
 
@@ -391,6 +396,8 @@ export const BulkResultSchema = z.object({
       applicable: z.boolean(),
       result: z.enum(['done', 'skipped', 'failed']).nullish(),
       error: optionalText,
+      // why the action does not apply, null when it applies
+      reason: optionalText,
     }),
   ),
 })

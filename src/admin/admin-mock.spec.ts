@@ -75,7 +75,8 @@ describe('mock admin api', () => {
     expect(run.items.map((w) => w.name)).toEqual(names)
     expect(run.items.every((w) => w.result === 'done')).toBe(true)
     const after = await api.bulk({ filter, action: 'retry', dry_run: true })
-    expect(after.items).toEqual([])
+    // only the workflow whose data is gone is left
+    expect(after.items.map((w) => w.name)).toEqual(['bakta-job-1.11.0-old'])
   })
 
   it('lists workflows without a job record', async () => {
@@ -91,5 +92,55 @@ describe('mock admin api', () => {
     expect(stats.sequence_histogram[0]).toMatchObject({ min_sequences: 1, max_sequences: 1 })
     expect(stats.size_histogram.reduce((sum, b) => sum + b.jobs, 0)).toBe(stats.jobs)
     expect(stats.largest).toHaveLength(10)
+  })
+})
+
+describe('mock data retention', () => {
+  const day = 86_400_000
+
+  it('sets the expiry 30 days after the job finished or was created', async () => {
+    const page = await api.jobs({ ...all, limit: 500 })
+    for (const job of page.items) {
+      const reference = Date.parse(job.finished_at ?? job.created_at)
+      expect(Date.parse(job.data_expires_at)).toBe(reference + 30 * day)
+      expect(job.data_available).toBe(Date.now() < reference + 30 * day)
+    }
+    expect(page.items.some((j) => !j.data_available)).toBe(true)
+  })
+
+  it('refuses what needs the deleted data', async () => {
+    const mock = createMockAdminApi()
+    const page = await mock.jobs({ ...all, status: ['failed'], limit: 500 })
+    const job = page.items.find((j) => !j.data_available)!
+    await expect(mock.retry(job.id)).rejects.toMatchObject({ status: 409 })
+    await expect(mock.resubmit(job.id)).rejects.toMatchObject({
+      status: 409,
+      message: 'Input data was deleted after the retention period',
+    })
+    await expect(mock.jobLogs(job.id)).rejects.toMatchObject({ status: 410 })
+    expect(await mock.deleteJob(job.id, true)).toEqual({
+      deleted_workflow: false,
+      purged_objects: 0,
+    })
+  })
+
+  it('marks retry of a workflow without data as not applicable', async () => {
+    const mock = createMockAdminApi()
+    const preview = await mock.bulk({
+      filter: { ...all, q: '1.11.0-old' },
+      action: 'retry',
+      dry_run: true,
+    })
+    expect(preview.items).toHaveLength(1)
+    expect(preview.items[0]).toMatchObject({
+      applicable: false,
+      reason: 'Input data deleted after the retention period',
+    })
+    const deletion = await mock.bulk({
+      filter: { ...all, q: '1.11.0-old' },
+      action: 'delete',
+      dry_run: true,
+    })
+    expect(deletion.items[0]).toMatchObject({ applicable: true, reason: null })
   })
 })
