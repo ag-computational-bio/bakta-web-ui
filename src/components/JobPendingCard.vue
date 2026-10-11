@@ -2,6 +2,16 @@
   <div class="py-4">
     <div class="border rounded-3 p-4">
       <div class="d-flex align-items-center gap-3 mb-3">
+        <!-- once a step runs, its own spinner shows the progress -->
+        <div
+          v-if="displayStatus !== 'RUNNING'"
+          class="spinner-border"
+          :class="`text-${jobStatusClass}`"
+          role="status"
+          style="width: 1.5rem; height: 1.5rem"
+        >
+          <span class="visually-hidden">Waiting...</span>
+        </div>
         <div class="flex-grow-1">
           <div class="fw-semibold">Your job is not finished yet.</div>
           <div class="text-secondary small">
