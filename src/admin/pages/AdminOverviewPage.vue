@@ -102,7 +102,15 @@ import Notification from '@/components/Notification.vue'
 import { formatWorkflowKind, type WorkflowKind } from '@/model/job'
 import { computed, ref, watch } from 'vue'
 import type { GroupBy, Interval, StatsSummary, Timeseries, VersionStats } from '../admin-api'
-import { filters, firstBucket, intervalNote, loadChart, statsFilter } from '../admin-filters'
+import {
+  filters,
+  firstBucket,
+  intervalNote,
+  loadChart,
+  previousFilter,
+  previousLabel,
+  statsFilter,
+} from '../admin-filters'
 import { handleAdminError, useAdminApi } from '../admin-session'
 import { groupSeries } from '../chart-colors'
 import { bucketValues, chartPeriods } from '../chart-data'
@@ -112,6 +120,7 @@ import ListPagination from '../components/ListPagination.vue'
 import StatTile from '../components/StatTile.vue'
 import SeriesChart from '../components/SeriesChart.vue'
 import {
+  changeText,
   formatBp,
   formatCount,
   formatDateTime,
@@ -131,6 +140,8 @@ const api = useAdminApi()
 const interval = ref<Interval>('day')
 const groupBy = ref<GroupBy>('workflow_kind')
 const summary = ref<StatsSummary>()
+// the summary of the period before, for the change of the tiles
+const previous = ref<StatsSummary>()
 const grouped = ref<Timeseries>()
 const overall = ref<Timeseries>()
 const versions = ref<VersionStats['items']>([])
@@ -144,27 +155,37 @@ const loading = ref(false)
 
 const tiles = computed(() => {
   const s = summary.value
+  const p = previous.value
+  const period = previousLabel(filters.range)
+  const failed = (x?: StatsSummary) => x && x.jobs_failed + x.jobs_error
   return [
-    { label: 'Jobs', value: formatCount(s?.jobs_total) },
+    {
+      label: 'Jobs',
+      value: formatCount(s?.jobs_total),
+      hint: s?.total_input_bp ? `${formatBp(s.total_input_bp)} input` : undefined,
+      change: changeText(s?.jobs_total, p?.jobs_total, period),
+    },
     {
       label: 'Success rate',
       value: formatPercent(s?.success_rate),
       hint: s && `of ${formatCount(s.jobs_finished)} finished jobs`,
+      change: changeText(s?.success_rate, p?.success_rate, period, true),
     },
     {
       label: 'Failed',
-      value: formatCount(s && s.jobs_failed + s.jobs_error),
-      hint: s && `${formatCount(s.jobs_error)} of them with errors`,
+      value: formatCount(failed(s)),
+      hint: s?.jobs_error ? `${formatCount(s.jobs_error)} of them with errors` : undefined,
+      change: changeText(failed(s), failed(p), period),
     },
-    { label: 'Active', value: formatCount(s?.jobs_active), hint: 'waiting or running' },
-    { label: 'Median runtime', value: formatDuration(s?.runtime_seconds.p50) },
-    { label: 'p90 runtime', value: formatDuration(s?.runtime_seconds.p90) },
     {
-      label: 'Queue time',
-      value: formatDuration(s?.queue_seconds.p50),
-      hint: s && `median, p90 ${formatDuration(s.queue_seconds.p90)}`,
+      label: 'Median runtime',
+      value: formatDuration(s?.runtime_seconds.p50),
+      hint:
+        s?.queue_seconds.p50 != null
+          ? `queue time ${formatDuration(s.queue_seconds.p50)}`
+          : undefined,
+      change: changeText(s?.runtime_seconds.p50, p?.runtime_seconds.p50, period),
     },
-    { label: 'Total input', value: formatBp(s?.total_input_bp) },
   ]
 })
 
@@ -184,8 +205,10 @@ async function load() {
   loading.value = true
   error.value = undefined
   try {
-    const [s, chart, v] = await Promise.all([
+    const before = previousFilter(filter)
+    const [s, p, chart, v] = await Promise.all([
       api.summary(filter),
+      before ? api.summary(before) : undefined,
       loadChart(
         (i) =>
           Promise.all([
@@ -199,6 +222,7 @@ async function load() {
     // an older answer must not replace the data of a newer request
     if (current !== request) return
     summary.value = s
+    previous.value = p
     interval.value = chart.interval
     ;[grouped.value, overall.value] = chart.data
     versions.value = [...v.items].sort((a, b) =>

@@ -246,3 +246,24 @@ export function argoNote(status: string, phase: string | null | undefined): stri
   if (!phase) return status === 'submitted' || status === 'running' ? 'Argo: gone' : ''
   return statusPhase[status] === phase ? '' : `Argo: ${phase}`
 }
+
+/**
+ * The change against an earlier value, like "+12% vs previous 30 days". Rates
+ * change in percentage points. Empty when there is nothing to compare with.
+ */
+export function changeText(
+  value: number | null | undefined,
+  previous: number | null | undefined,
+  period: string,
+  rate = false,
+): string {
+  if (value == null || previous == null) return ''
+  let change: number
+  if (rate) change = (value - previous) * 100
+  else if (previous === 0) return ''
+  else change = ((value - previous) / previous) * 100
+  const rounded = Math.round(change * 10) / 10
+  const sign = rounded > 0 ? '+' : rounded < 0 ? '-' : '±'
+  const unit = rate ? ' points' : '%'
+  return `${sign}${new Intl.NumberFormat('en-GB').format(Math.abs(rounded))}${unit} vs ${period}`
+}

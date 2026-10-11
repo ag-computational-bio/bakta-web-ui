@@ -3,6 +3,8 @@ import {
   chartInterval,
   filterQuery,
   filters,
+  previousFilter,
+  previousLabel,
   rangeDescription,
   readFilterQuery,
   statsFilter,
@@ -87,5 +89,26 @@ describe('rangeDescription', () => {
     expect(rangeDescription('7d', now)).toBe('4 Oct 2026 to today')
     expect(rangeDescription('12m', now)).toBe('11 Oct 2025 to today')
     expect(rangeDescription('all', now)).toBe('Every job')
+  })
+})
+
+describe('previousFilter', () => {
+  it('takes the period of the same length before the range', () => {
+    expect(
+      previousFilter(
+        { environment: 'production', from: '2026-10-01T00:00:00Z', to: '2026-10-11T00:00:00Z' },
+        now,
+      ),
+    ).toEqual({
+      environment: 'production',
+      from: '2026-09-21T00:00:00.000Z',
+      to: '2026-10-01T00:00:00.000Z',
+    })
+    expect(previousFilter({ environment: 'all', from: '2026-10-04T12:00:00Z' }, now)?.from).toBe(
+      '2026-09-27T12:00:00.000Z',
+    )
+    expect(previousFilter({ environment: 'all' }, now)).toBeUndefined()
+    expect(previousLabel('30d')).toBe('previous 30 days')
+    expect(previousLabel('custom')).toBe('previous period')
   })
 })

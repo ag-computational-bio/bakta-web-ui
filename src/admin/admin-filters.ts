@@ -60,6 +60,31 @@ export function statsFilter(now = new Date()): StatsFilter {
 }
 
 /**
+ * The period of the same length right before the filter, for a comparison.
+ * None for a range without a start, like all time.
+ */
+export function previousFilter(filter: StatsFilter, now = new Date()): StatsFilter | undefined {
+  if (!filter.from) return undefined
+  const from = Date.parse(filter.from)
+  const to = filter.to ? Date.parse(filter.to) : now.getTime()
+  return {
+    environment: filter.environment,
+    from: new Date(from - (to - from)).toISOString(),
+    to: new Date(from).toISOString(),
+  }
+}
+
+/**
+ * The name of the period before a time range, like "previous 30 days".
+ */
+export function previousLabel(range: TimeRange): string {
+  const label = timeRanges.find((r) => r.value === range)?.label ?? ''
+  return range === 'custom' || range === 'all'
+    ? 'previous period'
+    : label.replace('Last', 'previous')
+}
+
+/**
  * The start of a preset time range, none for all time and a custom range.
  */
 function rangeStart(range: TimeRange, now: Date): Date | undefined {

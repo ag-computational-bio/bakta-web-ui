@@ -5,7 +5,12 @@
   <Notification v-if="error" class="mb-3" type="danger" :message="error" />
 
   <div class="row g-3 mb-4" :class="{ loading }">
-    <div v-for="tile in tiles" :key="tile.label" class="col-6 col-lg-3">
+    <!-- once loaded, tiles without a value are left out -->
+    <div
+      v-for="tile in stats ? tiles.filter((t) => t.value !== '-') : tiles"
+      :key="tile.label"
+      class="col-6 col-lg-3"
+    >
       <StatTile v-bind="tile" />
     </div>
   </div>

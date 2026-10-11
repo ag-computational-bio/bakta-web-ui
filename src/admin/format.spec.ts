@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   argoNote,
   bpRange,
+  changeText,
   configEntries,
   formatDuration,
   formatPercent,
@@ -135,5 +136,16 @@ describe('argoNote', () => {
     expect(argoNote('deleted', 'Succeeded')).toBe('Argo: Succeeded')
     expect(argoNote('running', null)).toBe('Argo: gone')
     expect(argoNote('succeeded', null)).toBe('')
+  })
+})
+
+describe('changeText', () => {
+  it('compares with the previous period', () => {
+    expect(changeText(112, 100, 'previous 30 days')).toBe('+12% vs previous 30 days')
+    expect(changeText(90, 100, 'previous 7 days')).toBe('-10% vs previous 7 days')
+    expect(changeText(5, 5, 'previous period')).toBe('±0% vs previous period')
+    expect(changeText(0.95, 0.9, 'previous 30 days', true)).toBe('+5 points vs previous 30 days')
+    expect(changeText(3, 0, 'previous 30 days')).toBe('')
+    expect(changeText(3, undefined, 'previous 30 days')).toBe('')
   })
 })
