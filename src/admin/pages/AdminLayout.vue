@@ -90,7 +90,7 @@ watch(
 )
 watch(
   () => [filters.range, filters.customFrom, filters.customTo],
-  () => router.replace({ query: { ...route.query, ...filterQuery() } }),
+  () => router.replace({ hash: route.hash, query: { ...route.query, ...filterQuery() } }),
 )
 
 const tabs = computed(() => [

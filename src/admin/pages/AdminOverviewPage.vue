@@ -2,6 +2,14 @@
   <AdminFilterBar />
   <Notification v-if="error" class="mb-3" type="danger" :message="error" />
 
+  <!-- what an admin should look at, hidden when everything is fine -->
+  <div v-if="attention.length" class="d-flex flex-wrap align-items-center gap-2 mb-3">
+    <span class="section-label mb-0">Needs attention</span>
+    <RouterLink v-for="item in attention" :key="item.text" :to="item.to" class="attention-item">
+      <i class="bi" :class="item.icon" aria-hidden="true"></i>{{ item.text }}
+    </RouterLink>
+  </div>
+
   <div class="row g-3 mb-4" :class="{ loading }">
     <div v-for="tile in tiles" :key="tile.label" class="col-6 col-lg-3">
       <StatTile v-bind="tile" />
@@ -101,8 +109,10 @@
 import Notification from '@/components/Notification.vue'
 import { formatWorkflowKind, type WorkflowKind } from '@/model/job'
 import { computed, ref, watch } from 'vue'
+import type { RouteLocationRaw } from 'vue-router'
 import type { GroupBy, Interval, StatsSummary, Timeseries, VersionStats } from '../admin-api'
 import {
+  filterQuery,
   filters,
   firstBucket,
   intervalNote,
@@ -142,6 +152,9 @@ const groupBy = ref<GroupBy>('workflow_kind')
 const summary = ref<StatsSummary>()
 // the summary of the period before, for the change of the tiles
 const previous = ref<StatsSummary>()
+// the active jobs right now, with the creation time of the oldest
+const active = ref<{ total: number; oldest?: string }>()
+const orphans = ref(0)
 const grouped = ref<Timeseries>()
 const overall = ref<Timeseries>()
 const versions = ref<VersionStats['items']>([])
@@ -189,6 +202,42 @@ const tiles = computed(() => {
   ]
 })
 
+// active jobs only need attention when one of them waits or runs this long
+const longActiveSeconds = 2 * 3600
+
+const attention = computed(() => {
+  const items: { text: string; icon: string; to: RouteLocationRaw }[] = []
+  const s = summary.value
+  const failed = s ? s.jobs_failed + s.jobs_error : 0
+  if (failed) {
+    items.push({
+      text: `${formatCount(failed)} failed ${failed === 1 ? 'job' : 'jobs'} in this range`,
+      icon: 'bi-x-circle text-danger',
+      to: { path: '/admin/jobs', query: { ...filterQuery(), status: 'failed,error' } },
+    })
+  }
+  const a = active.value
+  if (a?.oldest && (Date.now() - Date.parse(a.oldest)) / 1000 > longActiveSeconds) {
+    const age = formatDuration((Date.now() - Date.parse(a.oldest)) / 1000)
+    items.push({
+      text: `${formatCount(a.total)} active ${a.total === 1 ? 'job' : 'jobs'}, the oldest for ${age}`,
+      icon: 'bi-hourglass-split text-warning-emphasis',
+      to: {
+        path: '/admin/jobs',
+        query: { range: 'all', status: 'submitted,running', sort: '-created_at' },
+      },
+    })
+  }
+  if (orphans.value) {
+    items.push({
+      text: `${formatCount(orphans.value)} ${orphans.value === 1 ? 'workflow' : 'workflows'} without a job record`,
+      icon: 'bi-question-circle text-secondary',
+      to: { path: '/admin/jobs', query: filterQuery(), hash: '#orphans' },
+    })
+  }
+  return items
+})
+
 const periods = computed(() =>
   overall.value ? chartPeriods(overall.value.buckets, statsFilter(), interval.value) : [],
 )
@@ -206,9 +255,12 @@ async function load() {
   error.value = undefined
   try {
     const before = previousFilter(filter)
-    const [s, p, chart, v] = await Promise.all([
+    const environment = filters.environment
+    const [s, p, a, o, chart, v] = await Promise.all([
       api.summary(filter),
       before ? api.summary(before) : undefined,
+      api.jobs({ environment, status: ['submitted', 'running'], sort: '-created_at', limit: 1 }),
+      api.workflows({ environment, orphans: true }),
       loadChart(
         (i) =>
           Promise.all([
@@ -223,6 +275,8 @@ async function load() {
     if (current !== request) return
     summary.value = s
     previous.value = p
+    active.value = { total: a.total, oldest: a.items[0]?.created_at }
+    orphans.value = o.length
     interval.value = chart.interval
     ;[grouped.value, overall.value] = chart.data
     versions.value = [...v.items].sort((a, b) =>
@@ -241,5 +295,23 @@ watch([filters, groupBy], load, { immediate: true })
 <style scoped>
 .loading {
   opacity: 0.6;
+}
+.attention-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.75rem;
+  border: 1px solid var(--bs-border-color);
+  border-radius: var(--bs-border-radius);
+  background-color: var(--bs-body-bg);
+  color: var(--bs-body-color);
+  text-decoration: none;
+  font-size: var(--bakta-font-size-md);
+}
+.attention-item:hover,
+.attention-item:focus-visible {
+  border-color: var(--bs-primary-border-subtle);
+  background-color: var(--bs-primary-bg-subtle);
+  color: var(--bs-primary-text-emphasis);
 }
 </style>

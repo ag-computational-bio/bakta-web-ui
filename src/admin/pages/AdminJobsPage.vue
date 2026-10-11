@@ -256,7 +256,7 @@ import StatusBadge from '@/components/StatusBadge.vue'
 import { formatWorkflowKind, workflowShieldProps, WorkflowKinds } from '@/model/job'
 import { formatStatus } from '@/model/status-style'
 import { Dropdown } from 'bootstrap'
-import { computed, ref, watch } from 'vue'
+import { computed, nextTick, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import {
   AdminJobStatuses,
@@ -362,7 +362,9 @@ async function load() {
   const current = ++request
   loading.value = true
   error.value = undefined
+  // the hash stays, it can point to the workflows section
   router.replace({
+    hash: route.hash,
     query: {
       ...filterQuery(),
       q: search.value || undefined,
@@ -391,6 +393,8 @@ async function load() {
     // after a delete the page can be beyond the end, then the last page loads
     const last = clampPage(page.value, result.total, pageSize.value)
     if (last !== page.value) page.value = last
+    // the list moves the workflows section down, so a link to it scrolls again
+    nextTick(() => orphans.value?.reveal())
   } catch (e) {
     if (current === request) error.value = handleAdminError(e)
   } finally {
