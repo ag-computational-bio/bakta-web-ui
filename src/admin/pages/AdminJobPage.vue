@@ -12,7 +12,7 @@
   <template v-if="detail">
     <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
       <div class="d-flex flex-wrap align-items-center gap-2">
-        <h3 class="section-title mb-0 font-monospace">{{ job.id }}</h3>
+        <h3 class="section-title mb-0">{{ job.id }}</h3>
         <StatusBadge :status="job.status" />
         <Shield v-bind="workflowShieldProps(job.workflow_kind)">
           {{ formatWorkflowKind(job.workflow_kind) }}
@@ -54,7 +54,7 @@
     </div>
 
     <div class="row g-3 mb-4">
-      <div v-for="panel in panels" :key="panel.title" class="col-md-6 col-xl-3">
+      <div v-for="panel in panels" :key="panel.title" class="col-md-6">
         <section class="panel h-100">
           <h4 class="section-label">{{ panel.title }}</h4>
           <DisplayTuple
@@ -86,7 +86,7 @@
       <p v-if="!workflow" class="text-secondary mb-0">The workflow no longer exists in Argo.</p>
       <template v-else>
         <div class="d-flex flex-wrap align-items-center gap-3 mb-3">
-          <span class="font-monospace">{{ workflow.name }}</span>
+          <span>{{ workflow.name }}</span>
           <StatusBadge :status="phaseStatus(workflow.phase)" />
           <span v-if="workflow.message" class="text-secondary">{{ workflow.message }}</span>
         </div>
@@ -108,7 +108,7 @@
                 <td>{{ node.display_name }}</td>
                 <td>{{ node.type }}</td>
                 <td><StatusBadge :status="phaseStatus(node.phase)" /></td>
-                <td class="font-monospace small">{{ node.pod_name ?? '-' }}</td>
+                <td class="small">{{ node.pod_name ?? '-' }}</td>
                 <td class="text-nowrap">{{ formatDateTime(node.started_at) }}</td>
                 <td class="text-end text-nowrap">
                   {{ formatDuration(seconds(node.started_at, node.finished_at)) }}

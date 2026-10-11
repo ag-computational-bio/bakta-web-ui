@@ -63,8 +63,8 @@
           </thead>
           <tbody>
             <tr v-for="w in preview" :key="w.name">
-              <td class="font-monospace small">{{ w.name }}</td>
-              <td class="font-monospace small">{{ w.job_id?.slice(0, 8) ?? '-' }}</td>
+              <td class="small">{{ w.name }}</td>
+              <td class="small">{{ w.job_id?.slice(0, 8) ?? '-' }}</td>
               <td><StatusBadge :status="phaseStatus(w.phase)" /></td>
               <td class="text-nowrap">{{ formatDateTime(w.finished_at) }}</td>
             </tr>

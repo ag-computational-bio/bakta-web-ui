@@ -40,12 +40,7 @@
         <tbody>
           <tr v-for="job in jobs" :key="job.id" @click="open(job.id)">
             <td>
-              <RouterLink
-                :to="detailLink(job.id)"
-                class="font-monospace"
-                :title="job.id"
-                @click.stop
-              >
+              <RouterLink :to="detailLink(job.id)" :title="job.id" @click.stop>
                 {{ job.id.slice(0, 8) }}
               </RouterLink>
             </td>

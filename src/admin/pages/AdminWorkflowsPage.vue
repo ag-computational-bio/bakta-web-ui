@@ -33,12 +33,11 @@
         </thead>
         <tbody>
           <tr v-for="w in workflows" :key="w.name">
-            <td class="font-monospace small" :title="w.template ?? undefined">{{ w.name }}</td>
+            <td class="small" :title="w.template ?? undefined">{{ w.name }}</td>
             <td>
               <RouterLink
                 v-if="w.job_id"
                 :to="{ name: 'AdminJob', params: { id: w.job_id } }"
-                class="font-monospace"
                 :title="w.job_id"
               >
                 {{ w.job_id.slice(0, 8) }}
