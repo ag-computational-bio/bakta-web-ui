@@ -208,3 +208,10 @@ export function outcomeText(job: { status: string; outcome?: string | null }): s
   if (!job.outcome || (job.status !== 'deleted' && job.status !== 'expired')) return ''
   return `outcome: ${job.outcome}`
 }
+
+export function sequenceRange(min: number, max: number | null | undefined): RangeLabels {
+  const unit = (n: number) => (n === 1 ? 'sequence' : 'sequences')
+  if (max == null) return { label: `${min} and more sequences`, tick: `≥ ${min}` }
+  if (min === max) return { label: `${min} ${unit(min)}`, tick: String(min) }
+  return { label: `${min} to ${max} sequences`, tick: `${min}-${max}` }
+}

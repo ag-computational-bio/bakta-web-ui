@@ -9,6 +9,7 @@ import {
   periods,
   phaseStatus,
   secondsRange,
+  sequenceRange,
   truncDate,
 } from './format'
 
@@ -102,6 +103,9 @@ describe('bucket ranges', () => {
     expect(secondsRange(14400, null)).toEqual({ label: '4 h and more', tick: '≥ 4 h' })
     expect(bpRange(1e6, 2e6).label).toBe('1 to 2 Mbp')
     expect(bpRange(12e6, null).label).toBe('12 Mbp and more')
+    expect(sequenceRange(1, 1)).toEqual({ label: '1 sequence', tick: '1' })
+    expect(sequenceRange(2, 5).label).toBe('2 to 5 sequences')
+    expect(sequenceRange(2001, null).tick).toBe('≥ 2001')
   })
 })
 

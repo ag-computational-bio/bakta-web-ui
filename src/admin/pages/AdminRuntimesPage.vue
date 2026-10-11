@@ -1,6 +1,6 @@
 <template>
   <AdminFilterBar>
-    <ChipGroup v-model="kind" :options="kindOptions" label="Workflow" />
+    <ChipGroup v-model="kind" :options="kindFilterOptions" label="Workflow" />
   </AdminFilterBar>
   <Notification v-if="error" class="mb-3" type="danger" :message="error" />
 
@@ -146,11 +146,17 @@
 <script setup lang="ts">
 import Notification from '@/components/Notification.vue'
 import Shield from '@/components/Shield.vue'
-import { formatWorkflowKind, WorkflowKinds, workflowShieldProps } from '@/model/job'
+import { formatWorkflowKind, workflowShieldProps } from '@/model/job'
 import { computed, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import type { Interval, RuntimeStats, StatsSummary, Timeseries } from '../admin-api'
-import { defaultInterval, filters, intervalOptions, statsFilter } from '../admin-filters'
+import {
+  defaultInterval,
+  filters,
+  intervalOptions,
+  kindFilterOptions,
+  statsFilter,
+} from '../admin-filters'
 import { handleAdminError, useAdminApi } from '../admin-session'
 import { lightColor } from '../chart-colors'
 import { bucketValues, chartPeriods } from '../chart-data'
@@ -172,11 +178,6 @@ import {
 
 type KindRow = RuntimeStats['by_workflow_kind'][number]
 
-// '' stands for all workflow kinds
-const kindOptions = [
-  { value: '', label: 'All' },
-  ...WorkflowKinds.map((value) => ({ value, label: formatWorkflowKind(value) })),
-]
 const kindColumns: { key: Exclude<keyof KindRow, 'workflow_kind' | 'jobs'>; label: string }[] = [
   { key: 'min', label: 'Min' },
   { key: 'p25', label: 'p25' },

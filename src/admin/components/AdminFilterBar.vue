@@ -1,5 +1,5 @@
 <template>
-  <div class="d-flex flex-wrap align-items-center gap-3 mb-4">
+  <div class="d-flex flex-wrap align-items-center gap-3" :class="$slots.default ? 'mb-3' : 'mb-4'">
     <ChipGroup v-model="filters.environment" :options="environments" label="Environment" />
     <div class="vr d-none d-md-block"></div>
     <ChipGroup v-model="filters.range" :options="timeRanges" label="Time range" />
@@ -18,10 +18,10 @@
         aria-label="To"
       />
     </div>
-    <template v-if="$slots.default">
-      <div class="vr d-none d-md-block"></div>
-      <slot></slot>
-    </template>
+  </div>
+  <!-- more filters of a page, like the workflow kind -->
+  <div v-if="$slots.default" class="mb-4">
+    <slot></slot>
   </div>
 </template>
 

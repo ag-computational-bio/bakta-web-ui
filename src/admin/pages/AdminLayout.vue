@@ -18,8 +18,9 @@
     </div>
 
     <template v-if="session.status === 'ready'">
-      <ul class="nav nav-tabs mb-4">
-        <li v-for="tab in tabs" :key="tab.label" class="nav-item">
+      <!-- on small screens the tabs scroll sideways instead of being cut off -->
+      <ul class="nav nav-tabs flex-nowrap overflow-x-auto overflow-y-hidden mb-4">
+        <li v-for="tab in tabs" :key="tab.label" class="nav-item text-nowrap">
           <RouterLink :to="tab.to" class="nav-link" :class="{ active: tab.active }">
             {{ tab.label }}
           </RouterLink>
@@ -81,6 +82,7 @@ const route = useRoute()
 const tabs = computed(() => [
   { label: 'Overview', to: '/admin', active: route.name === 'AdminOverview' },
   { label: 'Runtimes', to: '/admin/runtimes', active: route.name === 'AdminRuntimes' },
+  { label: 'Input sizes', to: '/admin/inputs', active: route.name === 'AdminInputs' },
   {
     label: 'Jobs',
     to: '/admin/jobs',

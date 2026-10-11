@@ -82,6 +82,11 @@ const routes = [
         component: () => import('@/admin/pages/AdminRuntimesPage.vue'),
       },
       {
+        path: 'inputs',
+        name: 'AdminInputs',
+        component: () => import('@/admin/pages/AdminInputsPage.vue'),
+      },
+      {
         path: 'jobs',
         name: 'AdminJobs',
         component: () => import('@/admin/pages/AdminJobsPage.vue'),

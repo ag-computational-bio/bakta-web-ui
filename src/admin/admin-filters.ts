@@ -1,3 +1,4 @@
+import { formatWorkflowKind, WorkflowKinds } from '@/model/job'
 import { reactive } from 'vue'
 import type { Environment, Interval, StatsFilter } from './admin-api'
 
@@ -19,6 +20,12 @@ export const environments: { value: Environment; label: string }[] = [
   { value: 'production', label: 'Production' },
   { value: 'staging', label: 'Staging' },
   { value: 'all', label: 'All' },
+]
+
+// the workflow kind filter of the statistics tabs, '' stands for all kinds
+export const kindFilterOptions = [
+  { value: '', label: 'All' },
+  ...WorkflowKinds.map((value) => ({ value, label: formatWorkflowKind(value) })),
 ]
 
 export const filters = reactive({
