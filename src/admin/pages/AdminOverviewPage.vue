@@ -50,7 +50,7 @@
       <div class="card p-4 h-100">
         <h3 class="section-title">By workflow kind</h3>
         <div class="table-responsive">
-          <table class="table table-striped align-middle mb-0">
+          <table class="table table-striped align-middle text-nowrap mb-0">
             <thead>
               <tr>
                 <th>Workflow</th>
@@ -79,7 +79,7 @@
       <div class="card p-4 h-100">
         <h3 class="section-title">Versions</h3>
         <div class="table-responsive">
-          <table class="table table-striped align-middle mb-0">
+          <table class="table table-striped align-middle text-nowrap mb-0">
             <thead>
               <tr>
                 <th>Bakta</th>
