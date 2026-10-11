@@ -1,6 +1,6 @@
 <template>
   <div class="py-4">
-    <div class="border rounded-3 p-4">
+    <div class="card p-4">
       <div class="d-flex align-items-center gap-3 mb-3">
         <!-- once a step runs, its own spinner shows the progress -->
         <div
@@ -72,7 +72,7 @@
             <pre
               v-if="stage.status === 'running' && openLogs.has(stage.stage)"
               ref="logBlocks"
-              class="log-block mt-2 mb-0 p-3 rounded-2"
+              class="log-block mt-2 mb-0 p-3 rounded-3"
               >{{ stage.content || 'No log output yet.' }}</pre
             >
           </div>

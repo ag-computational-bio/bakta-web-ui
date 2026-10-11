@@ -169,8 +169,3 @@
   </div>
 </template>
 <script setup lang="ts"></script>
-<style scoped>
-.shield {
-  font-size: 1.3em;
-}
-</style>

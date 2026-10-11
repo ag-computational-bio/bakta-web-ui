@@ -86,6 +86,15 @@ a {
   --bs-card-inner-border-radius: calc(var(--bs-border-radius-lg) - 1px);
   box-shadow: var(--bakta-shadow);
 }
+/* grey boxes inside cards, like the stat panels and the option groups */
+.panel {
+  padding: 1rem 1.25rem;
+  border-radius: var(--bs-border-radius-lg);
+  background-color: var(--bakta-surface);
+}
+.bg-surface {
+  background-color: var(--bakta-surface);
+}
 .no-border {
   --bs-card-spacer-x: 0;
   border-color: transparent;
@@ -195,6 +204,7 @@ a {
 /* Alerts */
 .alert {
   --bs-alert-border-radius: var(--bs-border-radius-lg);
+  --bs-alert-padding-x: 1.25rem;
   --bs-alert-padding-y: 0.75rem;
 }
 

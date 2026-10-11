@@ -205,7 +205,7 @@
       </div>
     </div>
 
-    <div class="card px-4 py-3 mt-4">
+    <div class="card p-4 mt-4">
       <details class="advanced-options">
         <summary
           class="text-secondary fw-semibold d-flex align-items-center justify-content-between"
@@ -218,7 +218,7 @@
         </summary>
         <div class="row g-3 mt-2">
           <div class="col-md-6 col-xl-4">
-            <div class="rounded-3 p-3 bg-body-tertiary h-100">
+            <div class="panel h-100">
               <div class="form-check mb-0">
                 <input id="meta" v-model="meta" class="form-check-input" type="checkbox" />
                 <label class="form-check-label" for="meta">Metagenome mode</label>
@@ -230,7 +230,7 @@
             </div>
           </div>
           <div class="col-md-6 col-xl-4">
-            <div class="rounded-3 p-3 bg-body-tertiary h-100">
+            <div class="panel h-100">
               <label class="form-label mb-1 me-1" for="plasmid">Plasmid</label>
               <HelpTip text="Name of the plasmid, if the input is a single plasmid." />
               <input
@@ -238,12 +238,12 @@
                 v-model="plasmid"
                 class="form-control"
                 type="text"
-                placeholder="Plasmid name (optional)"
+                placeholder="e.g. pOSAK1"
               />
             </div>
           </div>
           <div class="col-md-6 col-xl-4">
-            <div class="rounded-3 p-3 bg-body-tertiary h-100">
+            <div class="panel h-100">
               <label class="form-label mb-1 me-1" for="locus-tag-increment"
                 >Locus tag increment</label
               >
@@ -261,7 +261,7 @@
           </div>
 
           <div class="col-12">
-            <div class="rounded-3 p-3 bg-body-tertiary">
+            <div class="panel">
               <div class="mb-3">
                 <h3 class="subsection-title mb-0">Additional evidence files</h3>
                 <div class="small text-secondary">Only applied when a file is provided.</div>
@@ -344,7 +344,7 @@
           </div>
 
           <div class="col-12">
-            <div class="rounded-3 p-3 bg-body-tertiary">
+            <div class="panel">
               <h3 class="subsection-title mb-0">Skip features</h3>
               <div class="small text-secondary mb-3">
                 Select annotations you want Bakta to skip.
@@ -718,7 +718,6 @@ function updateSkipOption(key: SkipOptionKey, evt: Event) {
 .advanced-options > summary {
   list-style: none;
   cursor: pointer;
-  padding: 0.5rem 0;
 }
 
 .advanced-options > summary::-webkit-details-marker,

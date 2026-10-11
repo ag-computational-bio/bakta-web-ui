@@ -68,9 +68,6 @@
 </template>
 <script setup lang="ts"></script>
 <style scoped>
-.shield {
-  font-size: 1.3em;
-}
 .container > * {
   max-width: 52rem;
 }

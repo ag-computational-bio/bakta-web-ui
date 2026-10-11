@@ -39,7 +39,7 @@
 
         <div class="row g-4">
           <div class="col-lg-4">
-            <div class="card p-3 h-100">
+            <div class="card p-4 h-100">
               <h2 class="section-title">Job summary</h2>
               <DisplayTuple
                 v-if="job?.name || result?.name"
@@ -61,7 +61,7 @@
           </div>
 
           <div class="col-lg-8 d-flex flex-column gap-4">
-            <div v-if="result" class="card p-3">
+            <div v-if="result" class="card p-4">
               <h2 class="section-title">Downloads</h2>
               <BaktaDownloads :job="result" />
             </div>
