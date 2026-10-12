@@ -118,7 +118,10 @@ function computePlotData(sequence: Sequence, features: Feature[]): PlotData {
 const highlight = ref<Feature | GcTooltipData | GcSkewTooltipData>()
 const tooltipEl = useTemplateRef('tooltip')
 
-function updateTooltip(f: Feature | GcTooltipData | GcSkewTooltipData | undefined, evt: any) {
+function updateTooltip(
+  f: Feature | GcTooltipData | GcSkewTooltipData | undefined,
+  evt: MouseEvent,
+) {
   highlight.value = f
   const [x, y] = [evt.clientX, evt.clientY]
   updateTooltipPosition(x, y, f != undefined)
@@ -208,7 +211,7 @@ function updatePlot() {
     .tickFormat((d) => formatBp(d as number, bpScale(scale.domain()[1])))
   createOrGetGroup(plotG, 'ruler').attr('transform', 'translate(0,20)').call(axis)
   if (initCall) {
-    svg.call(zoom.transform as any, d3.zoomIdentity.translate(0, 30))
+    svg.call(zoom.transform, d3.zoomIdentity.translate(0, 30))
   }
 
   const featureColor = (f: Feature) => baktaHelper.lookupCogColorForFeature(f)

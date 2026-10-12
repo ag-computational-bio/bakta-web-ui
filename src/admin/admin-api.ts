@@ -1,0 +1,678 @@
+import { stripLogEndMarkers } from '@/model/bakta-api'
+import { WorkflowKindSchema } from '@/model/job'
+import { StageStatuses, type WorkflowLogs } from '@/model/submit'
+import { z } from 'zod'
+import { AdminCache, NotCachedError } from './admin-cache'
+
+/*
+ * Client for the admin API of the backend. The contract is
+ * docs/admin-api.md in the bakta-web-backend repository.
+ */
+
+export const Environments = ['production', 'staging', 'all'] as const
+export type Environment = (typeof Environments)[number]
+
+export const AdminJobStatuses = [
+  'created',
+  'submitted',
+  'running',
+  'succeeded',
+  'failed',
+  'error',
+  'deleted',
+  'expired',
+] as const
+export const AdminJobStatusSchema = z.enum(AdminJobStatuses)
+export type AdminJobStatus = z.infer<typeof AdminJobStatusSchema>
+
+// the final workflow result, kept when the status later becomes deleted or expired
+export const OutcomeSchema = z.enum(['succeeded', 'failed', 'error']).nullish()
+
+export const WorkflowPhases = ['Pending', 'Running', 'Succeeded', 'Failed', 'Error'] as const
+export type WorkflowPhase = (typeof WorkflowPhases)[number]
+
+export const Intervals = ['day', 'week', 'month', 'year'] as const
+export type Interval = (typeof Intervals)[number]
+
+export const GroupBys = ['none', 'workflow_kind', 'status', 'api_version'] as const
+export type GroupBy = (typeof GroupBys)[number]
+
+export const JobSorts = [
+  'created_at',
+  '-created_at',
+  'runtime_seconds',
+  '-runtime_seconds',
+  'total_length',
+  '-total_length',
+] as const
+export type JobSort = (typeof JobSorts)[number]
+
+const time = z.string()
+const optionalTime = z.string().nullish()
+const optionalNumber = z.number().nullish()
+const optionalText = z.string().nullish()
+
+export const AdminUserSchema = z.object({
+  username: z.string(),
+  name: optionalText,
+  email: optionalText,
+  groups: z.array(z.string()),
+})
+export type AdminUser = z.infer<typeof AdminUserSchema>
+
+const PercentilesSchema = z.object({
+  avg: optionalNumber,
+  p50: optionalNumber,
+  p90: optionalNumber,
+  p99: optionalNumber,
+})
+export type Percentiles = z.infer<typeof PercentilesSchema>
+
+export const StatsSummarySchema = z.object({
+  jobs_total: z.number(),
+  jobs_finished: z.number(),
+  jobs_succeeded: z.number(),
+  jobs_failed: z.number(),
+  jobs_error: z.number(),
+  jobs_active: z.number(),
+  success_rate: optionalNumber,
+  runtime_seconds: PercentilesSchema,
+  queue_seconds: PercentilesSchema,
+  total_input_bp: optionalNumber,
+  by_origin: z.array(z.object({ origin: z.string().nullable(), jobs_total: z.number() })).nullish(),
+  by_workflow_kind: z.array(
+    z.object({
+      workflow_kind: z.string(),
+      jobs_total: z.number(),
+      // the finished, succeeded, failed and error jobs count by outcome
+      jobs_finished: z.number(),
+      jobs_succeeded: z.number(),
+      jobs_failed: z.number(),
+      jobs_error: z.number(),
+      runtime_seconds: PercentilesSchema,
+    }),
+  ),
+})
+export type StatsSummary = z.infer<typeof StatsSummarySchema>
+
+const BucketSchema = z.object({
+  period_start: time,
+  group: z.string().nullable(),
+  jobs_total: z.number(),
+  jobs_succeeded: z.number(),
+  jobs_failed: z.number(),
+  jobs_error: z.number().nullish(),
+  runtime_p50: optionalNumber,
+  runtime_p90: optionalNumber,
+  runtime_avg: optionalNumber,
+  total_input_bp: optionalNumber,
+  input_p50_bp: optionalNumber,
+  input_avg_bp: optionalNumber,
+})
+export type Bucket = z.infer<typeof BucketSchema>
+
+export const TimeseriesSchema = z.object({
+  interval: z.enum(Intervals),
+  group_by: z.enum(GroupBys),
+  buckets: z.array(BucketSchema),
+})
+export type Timeseries = z.infer<typeof TimeseriesSchema>
+
+const RuntimeValuesSchema = z.object({
+  jobs: z.number(),
+  min: optionalNumber,
+  p10: optionalNumber,
+  p25: optionalNumber,
+  p50: optionalNumber,
+  p75: optionalNumber,
+  p90: optionalNumber,
+  p95: optionalNumber,
+  p99: optionalNumber,
+  max: optionalNumber,
+  avg: optionalNumber,
+  stddev: optionalNumber,
+})
+
+export const RuntimeStatsSchema = z.object({
+  jobs: z.number(),
+  // all selected workflow kinds together
+  overall: RuntimeValuesSchema.nullable(),
+  by_workflow_kind: z.array(RuntimeValuesSchema.extend({ workflow_kind: z.string() })),
+  histogram: z.array(
+    z.object({ min_seconds: z.number(), max_seconds: optionalNumber, jobs: z.number() }),
+  ),
+  by_input_size: z.array(
+    z.object({
+      min_bp: z.number(),
+      max_bp: optionalNumber,
+      jobs: z.number(),
+      runtime_p50: optionalNumber,
+      runtime_p90: optionalNumber,
+      runtime_avg: optionalNumber,
+    }),
+  ),
+  seconds_per_mbp: z.object({ p50: optionalNumber, avg: optionalNumber }),
+  queue_seconds: z.object({
+    avg: optionalNumber,
+    p50: optionalNumber,
+    p90: optionalNumber,
+    p99: optionalNumber,
+    max: optionalNumber,
+  }),
+  slowest: z.array(
+    z.object({
+      id: z.string(),
+      workflow_kind: z.string(),
+      organism: optionalText,
+      total_length: optionalNumber,
+      runtime_seconds: z.number(),
+      created_at: time,
+    }),
+  ),
+})
+export type RuntimeStats = z.infer<typeof RuntimeStatsSchema>
+
+export const InputStatsSchema = z.object({
+  jobs: z.number(),
+  total_bp: optionalNumber,
+  total_length: z.object({
+    min: optionalNumber,
+    p10: optionalNumber,
+    p25: optionalNumber,
+    p50: optionalNumber,
+    p75: optionalNumber,
+    p90: optionalNumber,
+    p99: optionalNumber,
+    max: optionalNumber,
+    avg: optionalNumber,
+  }),
+  sequence_count: z.object({
+    min: optionalNumber,
+    p50: optionalNumber,
+    p90: optionalNumber,
+    p99: optionalNumber,
+    max: optionalNumber,
+    avg: optionalNumber,
+  }),
+  size_histogram: z.array(
+    z.object({ min_bp: z.number(), max_bp: optionalNumber, jobs: z.number() }),
+  ),
+  sequence_histogram: z.array(
+    z.object({ min_sequences: z.number(), max_sequences: optionalNumber, jobs: z.number() }),
+  ),
+  by_workflow_kind: z.array(
+    z.object({
+      workflow_kind: z.string(),
+      jobs: z.number(),
+      total_bp: optionalNumber,
+      p50_bp: optionalNumber,
+      avg_bp: optionalNumber,
+      p50_sequences: optionalNumber,
+    }),
+  ),
+  largest: z.array(
+    z.object({
+      id: z.string(),
+      workflow_kind: z.string(),
+      organism: optionalText,
+      total_length: z.number(),
+      sequence_count: optionalNumber,
+      status: AdminJobStatusSchema,
+      created_at: time,
+    }),
+  ),
+})
+export type InputStats = z.infer<typeof InputStatsSchema>
+
+export const VersionStatsSchema = z.object({
+  items: z.array(
+    z.object({
+      bakta_version: optionalText,
+      bakta_db_version: optionalText,
+      baktfold_version: optionalText,
+      jobs_total: z.number(),
+      first_seen: optionalTime,
+      last_seen: optionalTime,
+    }),
+  ),
+})
+export type VersionStats = z.infer<typeof VersionStatsSchema>
+
+const JobListItemSchema = z.object({
+  id: z.string(),
+  environment: z.string(),
+  workflow_kind: WorkflowKindSchema,
+  // the website that sent the job, "Unknown" for API or CLI use
+  origin: optionalText,
+  status: AdminJobStatusSchema,
+  outcome: OutcomeSchema,
+  organism: optionalText,
+  sequence_count: optionalNumber,
+  total_length: optionalNumber,
+  created_at: time,
+  finished_at: optionalTime,
+  runtime_seconds: optionalNumber,
+  // the S3 data (inputs, results, archived logs) is deleted at data_expires_at
+  data_expires_at: time,
+  data_available: z.boolean(),
+  workflow_name: optionalText,
+  // the phase of the live Argo workflow, null when none exists
+  workflow_phase: optionalText,
+})
+export type JobListItem = z.infer<typeof JobListItemSchema>
+
+export const JobPageSchema = z.object({
+  total: z.number(),
+  items: z.array(JobListItemSchema),
+})
+export type JobPage = z.infer<typeof JobPageSchema>
+
+export const JobRecordSchema = z.object({
+  id: z.string(),
+  environment: z.string(),
+  workflow_kind: WorkflowKindSchema,
+  api_version: z.string(),
+  origin: optionalText,
+  status: AdminJobStatusSchema,
+  outcome: OutcomeSchema,
+  name: optionalText,
+  genus: optionalText,
+  species: optionalText,
+  strain: optionalText,
+  sequence_count: optionalNumber,
+  total_length: optionalNumber,
+  config: z.record(z.string(), z.unknown()).nullish(),
+  bakta_version: optionalText,
+  bakta_db_version: optionalText,
+  baktfold_version: optionalText,
+  baktfold_db_version: optionalText,
+  workflow_name: optionalText,
+  created_at: time,
+  submitted_at: optionalTime,
+  started_at: optionalTime,
+  finished_at: optionalTime,
+  runtime_seconds: optionalNumber,
+  queue_seconds: optionalNumber,
+  error_message: optionalText,
+  updated_at: time,
+  data_expires_at: time,
+  data_available: z.boolean(),
+})
+export type JobRecord = z.infer<typeof JobRecordSchema>
+
+const WorkflowNodeSchema = z.object({
+  name: z.string(),
+  display_name: z.string(),
+  type: z.string(),
+  phase: z.string(),
+  pod_name: optionalText,
+  started_at: optionalTime,
+  finished_at: optionalTime,
+  message: optionalText,
+})
+export type WorkflowNode = z.infer<typeof WorkflowNodeSchema>
+
+const LiveWorkflowSchema = z.object({
+  name: z.string(),
+  phase: z.string(),
+  started_at: optionalTime,
+  finished_at: optionalTime,
+  message: optionalText,
+  suspended: z.boolean().nullish(),
+  nodes: z.array(WorkflowNodeSchema),
+})
+export type LiveWorkflow = z.infer<typeof LiveWorkflowSchema>
+
+export const JobDetailSchema = z.object({
+  job: JobRecordSchema,
+  workflow: LiveWorkflowSchema.nullable(),
+})
+export type JobDetail = z.infer<typeof JobDetailSchema>
+
+const LogsSchema = z.object({
+  workflow_kind: WorkflowKindSchema,
+  stages: z.array(
+    z.object({ stage: z.string(), status: z.enum(StageStatuses), content: z.string() }),
+  ),
+})
+
+export const ActionResultSchema = z.object({
+  workflow_name: z.string(),
+  phase: z.string(),
+})
+export type ActionResult = z.infer<typeof ActionResultSchema>
+
+export const DeleteResultSchema = z.object({
+  deleted_workflow: z.boolean(),
+  purged_objects: z.number(),
+})
+export type DeleteResult = z.infer<typeof DeleteResultSchema>
+
+const WorkflowItemSchema = z.object({
+  name: z.string(),
+  job_id: optionalText,
+  workflow_kind: optionalText,
+  phase: z.string(),
+  template: optionalText,
+  environment: optionalText,
+  started_at: optionalTime,
+  finished_at: optionalTime,
+  message: optionalText,
+  suspended: z.boolean().nullish(),
+})
+export type WorkflowItem = z.infer<typeof WorkflowItemSchema>
+
+export const WorkflowListSchema = z.object({
+  items: z.array(WorkflowItemSchema),
+  // all matching workflows, also those not in items, missing on older backends
+  total: z.number().nullish(),
+})
+export type WorkflowList = { items: WorkflowItem[]; total: number }
+
+export const BulkActions = ['delete', 'stop', 'retry', 'resume', 'resubmit'] as const
+export type BulkAction = (typeof BulkActions)[number]
+
+export type WorkflowQuery = {
+  environment: Environment
+  phases?: WorkflowPhase[]
+  // only workflows without a job record
+  orphans?: boolean
+}
+
+export type BulkRequest = {
+  filter: {
+    q?: string
+    phases?: WorkflowPhase[]
+    workflow_kinds?: string[]
+    finished_before_hours?: number
+    environment?: Environment
+  }
+  action: BulkAction
+  dry_run: boolean
+  // in a real run the names from the dry run, so exactly these are processed
+  workflow_names?: string[]
+  // at most this many workflows, newest first (backend default 1000, at most 5000)
+  limit?: number
+}
+
+export const BulkResultSchema = z.object({
+  dry_run: z.boolean(),
+  action: z.enum(BulkActions),
+  // all matching workflows and whether items has fewer of them
+  total: z.number().nullish(),
+  truncated: z.boolean().nullish(),
+  items: z.array(
+    z.object({
+      name: z.string(),
+      job_id: optionalText,
+      workflow_kind: optionalText,
+      phase: z.string(),
+      finished_at: optionalTime,
+      applicable: z.boolean(),
+      result: z.enum(['done', 'skipped', 'failed']).nullish(),
+      error: optionalText,
+      // why the action does not apply, null when it applies
+      reason: optionalText,
+    }),
+  ),
+})
+export type BulkResult = z.infer<typeof BulkResultSchema>
+export type BulkItem = BulkResult['items'][number]
+
+export type StatsFilter = {
+  environment: Environment
+  from?: string
+  to?: string
+}
+
+export type JobQuery = StatsFilter & {
+  status?: AdminJobStatus[]
+  workflowKind?: string[]
+  workflowPhase?: WorkflowPhase[]
+  q?: string
+  limit?: number
+  offset?: number
+  sort?: JobSort
+}
+
+export interface AdminApi {
+  me(): Promise<AdminUser>
+  summary(filter: StatsFilter): Promise<StatsSummary>
+  timeseries(filter: StatsFilter, interval: Interval, groupBy: GroupBy): Promise<Timeseries>
+  versions(filter: StatsFilter): Promise<VersionStats>
+  runtimes(filter: StatsFilter, workflowKind?: string): Promise<RuntimeStats>
+  inputs(filter: StatsFilter, workflowKind?: string): Promise<InputStats>
+  jobs(query: JobQuery): Promise<JobPage>
+  job(id: string): Promise<JobDetail>
+  jobLogs(id: string): Promise<WorkflowLogs>
+  retry(id: string): Promise<ActionResult>
+  resubmit(id: string): Promise<ActionResult>
+  stop(id: string): Promise<ActionResult>
+  resume(id: string): Promise<ActionResult>
+  deleteJob(id: string, purgeData: boolean): Promise<DeleteResult>
+  workflows(query: WorkflowQuery): Promise<WorkflowList>
+  bulk(request: BulkRequest): Promise<BulkResult>
+  // the same requests, answered only from the cache: they fail without a recent answer
+  cached?: AdminApi
+}
+
+/**
+ * An error answer of the admin API. The status tells a missing login (401)
+ * apart from a missing admin group (403).
+ */
+export class AdminApiError extends Error {
+  status: number
+
+  constructor(status: number, message: string) {
+    super(message)
+    this.status = status
+  }
+}
+
+type Query = Record<string, string | number | boolean | string[] | undefined>
+
+export function queryString(query: Query): string {
+  const params = new URLSearchParams()
+  for (const [key, value] of Object.entries(query)) {
+    if (value == undefined || value === '') continue
+    if (Array.isArray(value)) {
+      if (value.length > 0) params.set(key, value.join(','))
+    } else {
+      params.set(key, String(value))
+    }
+  }
+  const text = params.toString()
+  return text ? '?' + text : ''
+}
+
+function filterQuery(filter: StatsFilter): Query {
+  return { environment: filter.environment, from: filter.from, to: filter.to }
+}
+
+export function toWorkflowLogs(payload: unknown): WorkflowLogs {
+  const logs = LogsSchema.parse(payload)
+  return {
+    workflowKind: logs.workflow_kind,
+    stages: logs.stages.map((stage) => ({
+      ...stage,
+      content: stripLogEndMarkers(stage.content),
+    })),
+  }
+}
+
+class HttpAdminApi implements AdminApi {
+  #baseUrl: string
+  #token: (renew?: boolean) => Promise<string | undefined>
+  #cache: AdminCache
+  #cacheOnly: boolean
+  cached?: AdminApi
+
+  constructor(
+    baseUrl: string,
+    token: (renew?: boolean) => Promise<string | undefined>,
+    cache: AdminCache,
+    cacheOnly = false,
+  ) {
+    this.#baseUrl = baseUrl
+    this.#token = token
+    this.#cache = cache
+    this.#cacheOnly = cacheOnly
+    if (!cacheOnly) this.cached = new HttpAdminApi(baseUrl, token, cache, true)
+  }
+
+  // GET requests go through the cache, other requests clear it afterwards
+  async #request(method: string, path: string, body?: unknown): Promise<unknown> {
+    if (this.#cacheOnly) {
+      const value = method === 'GET' ? this.#cache.peek(path) : undefined
+      if (value === undefined) throw new NotCachedError(path)
+      return value
+    }
+    if (method === 'GET') return this.#cache.fetch(path, () => this.#send(method, path))
+    return this.#send(method, path, body).finally(() => {
+      // a bulk dry run changes nothing
+      if (!(body && typeof body === 'object' && 'dry_run' in body && body.dry_run)) {
+        this.#cache.clear()
+      }
+    })
+  }
+
+  // "renewed" is the token of the second try after a 401 answer
+  async #send(method: string, path: string, body?: unknown, renewed?: string): Promise<unknown> {
+    const token = renewed ?? (await this.#token())
+    // no token after the renewal failed: the login is lost, so the cache is cleared
+    if (!token) this.#cache.clear()
+    const headers: Record<string, string> = { Accept: 'application/json' }
+    if (token) headers.Authorization = `Bearer ${token}`
+    if (body != undefined) headers['Content-Type'] = 'application/json'
+    const response = await window.fetch(this.#baseUrl + path, {
+      method,
+      headers,
+      body: body == undefined ? undefined : JSON.stringify(body),
+    })
+    const text = await response.text()
+    let payload: unknown = undefined
+    try {
+      payload = text ? JSON.parse(text) : undefined
+    } catch {
+      payload = text
+    }
+    if (response.ok) return payload
+    // the token may have expired on the way: renew it and try once more
+    if (response.status === 401 && renewed == undefined) {
+      const fresh = await this.#token(true)
+      if (!fresh) this.#cache.clear()
+      if (fresh && fresh !== token) return this.#send(method, path, body, fresh)
+    }
+    const message =
+      payload && typeof payload === 'object' && 'error' in payload
+        ? String(payload.error)
+        : `${response.status} ${response.statusText}`
+    throw new AdminApiError(response.status, message)
+  }
+
+  async me() {
+    return AdminUserSchema.parse(await this.#request('GET', '/me'))
+  }
+
+  async summary(filter: StatsFilter) {
+    const path = '/stats/summary' + queryString(filterQuery(filter))
+    return StatsSummarySchema.parse(await this.#request('GET', path))
+  }
+
+  async timeseries(filter: StatsFilter, interval: Interval, groupBy: GroupBy) {
+    const query = { ...filterQuery(filter), interval, group_by: groupBy }
+    const path = '/stats/timeseries' + queryString(query)
+    return TimeseriesSchema.parse(await this.#request('GET', path))
+  }
+
+  async versions(filter: StatsFilter) {
+    const path = '/stats/versions' + queryString(filterQuery(filter))
+    return VersionStatsSchema.parse(await this.#request('GET', path))
+  }
+
+  async runtimes(filter: StatsFilter, workflowKind?: string) {
+    const query = { ...filterQuery(filter), workflow_kind: workflowKind }
+    const path = '/stats/runtimes' + queryString(query)
+    return RuntimeStatsSchema.parse(await this.#request('GET', path))
+  }
+
+  async inputs(filter: StatsFilter, workflowKind?: string) {
+    const query = { ...filterQuery(filter), workflow_kind: workflowKind }
+    const path = '/stats/inputs' + queryString(query)
+    return InputStatsSchema.parse(await this.#request('GET', path))
+  }
+
+  async jobs(query: JobQuery) {
+    const path =
+      '/jobs' +
+      queryString({
+        ...filterQuery(query),
+        status: query.status,
+        workflow_kind: query.workflowKind,
+        workflow_phase: query.workflowPhase,
+        q: query.q,
+        limit: query.limit,
+        offset: query.offset,
+        sort: query.sort,
+      })
+    return JobPageSchema.parse(await this.#request('GET', path))
+  }
+
+  async job(id: string) {
+    return JobDetailSchema.parse(await this.#request('GET', `/jobs/${encodeURIComponent(id)}`))
+  }
+
+  async jobLogs(id: string) {
+    return toWorkflowLogs(await this.#request('GET', `/jobs/${encodeURIComponent(id)}/logs`))
+  }
+
+  async #action(id: string, action: 'retry' | 'resubmit' | 'stop' | 'resume') {
+    const path = `/jobs/${encodeURIComponent(id)}/${action}`
+    return ActionResultSchema.parse(await this.#request('POST', path))
+  }
+
+  retry(id: string) {
+    return this.#action(id, 'retry')
+  }
+
+  resubmit(id: string) {
+    return this.#action(id, 'resubmit')
+  }
+
+  stop(id: string) {
+    return this.#action(id, 'stop')
+  }
+
+  resume(id: string) {
+    return this.#action(id, 'resume')
+  }
+
+  async deleteJob(id: string, purgeData: boolean) {
+    const path = `/jobs/${encodeURIComponent(id)}` + queryString({ purge_data: purgeData })
+    return DeleteResultSchema.parse(await this.#request('DELETE', path))
+  }
+
+  async workflows(query: WorkflowQuery) {
+    const path =
+      '/workflows' +
+      queryString({
+        environment: query.environment,
+        phase: query.phases,
+        orphans: query.orphans || undefined,
+      })
+    const list = WorkflowListSchema.parse(await this.#request('GET', path))
+    return { items: list.items, total: list.total ?? list.items.length }
+  }
+
+  async bulk(request: BulkRequest) {
+    return BulkResultSchema.parse(await this.#request('POST', '/workflows/bulk', request))
+  }
+}
+
+export function createHttpAdminApi(
+  baseUrl: string,
+  token: (renew?: boolean) => Promise<string | undefined>,
+  cache = new AdminCache(),
+): AdminApi {
+  return new HttpAdminApi(baseUrl, token, cache)
+}

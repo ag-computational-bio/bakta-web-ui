@@ -45,7 +45,7 @@ export function calcGcContent(
       col.add(v, e >= 0 && e < s.length);
     } else {
       if (e < s.length) col.add(v);
-      else col.dropStart();
+      else if (e >= windowSize) col.dropStart(); // only drop once the window is full
     }
 
     if (e > 0 && e % stepSize == 0) {
@@ -108,7 +108,7 @@ export function calcGcSkew(
       col.add(v, e >= 0 && e < s.length);
     } else {
       if (e < s.length) col.add(v);
-      else if (e > stepSize) col.dropStart();
+      else if (e >= windowSize) col.dropStart(); // only drop once the window is full
     }
 
     if (steps == 1 && e == s.length - 1) {

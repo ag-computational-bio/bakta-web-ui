@@ -1,42 +1,67 @@
 <template>
   <div class="container flex-grow-1">
-    <Notification v-if="error" class="mb-2" type="warning" :message="error" />
-    <template v-if="log == undefined">
-      <div class="alert alert-secondary mb-2" v-if="polling">
-        Automatically updating job list
-        <div v-if="loading" class="spinner-border spinner-border-sm text-secondary" role="status">
-          <span class="visually-hidden">Loading...</span>
+    <Notification v-if="error" class="mb-3" type="warning" :message="error" />
+    <template v-if="logs == undefined">
+      <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+        <h2 class="section-title mb-0">Your jobs</h2>
+        <div class="d-flex align-items-center gap-3">
+          <span v-if="polling" class="small text-secondary d-flex align-items-center gap-2">
+            <span v-if="loading" class="spinner-border spinner-border-sm" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </span>
+            Updating automatically
+          </span>
+          <button
+            v-if="hasNotFoundJobs"
+            class="btn btn-outline-secondary btn-sm"
+            @click="removeUnknownJobs"
+          >
+            Remove outdated jobs
+          </button>
         </div>
       </div>
-      <div v-if="hasNotFoundJobs" class="d-flex flex-row-reverse row-cols-lg-auto align-items-end">
-        <button class="btn btn-secondary" @click="removeUnknownJobs">
-          Remove 'NOT_FOUND' jobs from list
-        </button>
+      <div v-if="!loaded" class="card text-center p-5">
+        <div class="spinner-border text-primary mx-auto" role="status"></div>
+        <p class="text-secondary mt-3 mb-0">Loading your jobs...</p>
       </div>
-      <JobsTable
-        :jobs="jobs"
-        @delete:job="deleteJob"
-        @show:logs="showLogs"
-        class="mt-2"
-        :showDelete="true"
-        :showJobLog="true"
-      />
-      <div v-if="!hasJobs">No jobs found</div>
+      <div v-else-if="hasJobs" class="card overflow-hidden">
+        <JobsTable
+          :jobs="jobs"
+          @delete:job="deleteJob"
+          @show:logs="showLogs"
+          :showDelete="true"
+          :showJobLog="true"
+        />
+      </div>
+      <div v-else class="card text-center p-5">
+        <i class="bi bi-inbox fs-1 text-secondary"></i>
+        <p class="fw-semibold mt-2 mb-1">No jobs found</p>
+        <p class="text-secondary">Jobs you submit from this browser are listed here.</p>
+        <div>
+          <RouterLink to="/submit" class="btn btn-primary">Submit a job</RouterLink>
+        </div>
+      </div>
     </template>
     <div v-else>
-      <div class="w-100 d-flex justify-content-between my-2">
-        <h5>Job logs</h5>
-        <button class="btn btn-sm btn-secondary" @click="log = undefined">
-          <i class="bi bi-x"></i>
+      <div class="w-100 d-flex justify-content-between align-items-center mb-3">
+        <h2 class="section-title mb-0">Job logs</h2>
+        <button
+          class="btn btn-sm btn-outline-secondary"
+          title="Close logs"
+          @click="logs = undefined"
+        >
+          <i class="bi bi-x-lg"></i>
         </button>
       </div>
-      <pre class="border p-2 rounded-2">{{ log }}</pre>
+      <WorkflowLogViewer :logs="logs" />
     </div>
   </div>
 </template>
 <script setup lang="ts">
+import WorkflowLogViewer from '@/components/WorkflowLogViewer.vue'
 import Notification from '@/components/Notification.vue'
 import { type JobList } from '@/model/bakta-service'
+import type { WorkflowLogs } from '@/model/submit'
 import { useBaktaService } from '@/page/page'
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import JobsTable from './JobsTable.vue'
@@ -44,6 +69,8 @@ import { usePollManager } from './poll-manager'
 
 const jobs = ref<JobList>([])
 const loading = ref(false)
+// stays false until the first job list arrives, so an empty list is not shown too early
+const loaded = ref(false)
 const bakta = useBaktaService()
 const hasJobs = computed(() => jobs.value.length > 0)
 const hasNotFoundJobs = computed(() => jobs.value.some((j) => j.jobStatus === 'NOT_FOUND'))
@@ -84,10 +111,13 @@ function updateJobs(): Promise<JobList> {
         return bs.valueOf() - as.valueOf()
       })
       jobs.value = x
-      loading.value = false
       return x
     })
     .catch((err) => (error.value = err))
+    .finally(() => {
+      loading.value = false
+      loaded.value = true
+    })
 }
 
 function deleteJob(jobID: string) {
@@ -101,12 +131,12 @@ function showLogs(jobID: string) {
   error.value = undefined
   bakta
     .logs(jobID)
-    .then(showLog)
+    .then(showLogsPanel)
     .catch((err) => (error.value = err))
 }
-const log = ref<string>()
-function showLog(l: string) {
-  log.value = l
+const logs = ref<WorkflowLogs>()
+function showLogsPanel(value: WorkflowLogs) {
+  logs.value = value
 }
 onMounted(() => {
   start()

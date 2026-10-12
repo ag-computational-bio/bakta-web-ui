@@ -6,6 +6,8 @@ import Submit from '@/pages/submit-job/SubmitJobPage.vue'
 import ShowOwnResultPage from '@/pages/show-own-result-file/ShowOwnResultPage.vue'
 import { createRouter, createWebHistory } from 'vue-router'
 import ListJobsPage from './pages/show-job-list/ListJobsPage.vue'
+import RedirectJobPage from './pages/show-results/RedirectJobPage.vue'
+import ShowBaktaProteinsResultPage from './pages/show-results/ShowBaktaProteinsResultPage.vue'
 import ShowResultPage from './pages/show-results/ShowResultPage.vue'
 
 const routes = [
@@ -37,7 +39,17 @@ const routes = [
   {
     path: '/job/:id',
     name: 'Job',
+    component: RedirectJobPage,
+  },
+  {
+    path: '/job/:id/bakta',
+    name: 'JobBakta',
     component: ShowResultPage,
+  },
+  {
+    path: '/job/:id/proteins',
+    name: 'JobProteins',
+    component: ShowBaktaProteinsResultPage,
   },
   {
     path: '/viewer',
@@ -48,6 +60,45 @@ const routes = [
     path: '/submit',
     name: 'Submit',
     component: Submit,
+  },
+  // the hidden admin area, loaded only when opened
+  {
+    path: '/admin/callback',
+    name: 'AdminCallback',
+    component: () => import('@/admin/pages/AdminCallbackPage.vue'),
+  },
+  {
+    path: '/admin',
+    component: () => import('@/admin/pages/AdminLayout.vue'),
+    children: [
+      {
+        path: '',
+        name: 'AdminOverview',
+        component: () => import('@/admin/pages/AdminOverviewPage.vue'),
+      },
+      {
+        path: 'runtimes',
+        name: 'AdminRuntimes',
+        component: () => import('@/admin/pages/AdminRuntimesPage.vue'),
+      },
+      {
+        path: 'inputs',
+        name: 'AdminInputs',
+        component: () => import('@/admin/pages/AdminInputsPage.vue'),
+      },
+      {
+        path: 'jobs',
+        name: 'AdminJobs',
+        component: () => import('@/admin/pages/AdminJobsPage.vue'),
+      },
+      {
+        path: 'jobs/:id',
+        name: 'AdminJob',
+        component: () => import('@/admin/pages/AdminJobPage.vue'),
+      },
+      // the workflows are part of the job list now
+      { path: 'workflows', redirect: '/admin/jobs' },
+    ],
   },
   {
     path: '/:catchAll(.*)',

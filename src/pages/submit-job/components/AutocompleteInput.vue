@@ -1,6 +1,7 @@
 <template>
   <div class="autocomplete-input form-control">
     <input
+      :id="inputId"
       ref="inputField"
       type="text"
       class="form-control no-form"
@@ -37,6 +38,7 @@ const props = defineProps<{
   modelValue: string
   lookupFn: LookupCompletionFunction
   placeholder: string
+  inputId?: string
 }>()
 const options = ref<string[]>([])
 const selectedIndex = ref(0)
@@ -99,25 +101,30 @@ const inputField = ref<HTMLInputElement>()
   width: 100%;
   padding: 0;
 
+  &:focus-within {
+    border-color: var(--bakta-focus-border);
+    box-shadow: 0 0 0 0.2rem var(--bs-focus-ring-color);
+  }
   input:focus {
-    border-bottom: none;
+    border: none;
+    box-shadow: none;
   }
   .autocomplete-input-list {
     position: absolute;
     max-height: 10rem;
     overflow-y: auto;
     z-index: 9;
-    border-color: lightgray;
-    border-style: solid;
-    border-width: 1px;
+    margin-top: 0.25rem;
+    border: 1px solid var(--bs-border-color);
     border-radius: var(--bs-border-radius);
+    box-shadow: var(--bakta-shadow);
     width: 100%;
     div {
       padding-left: 0.75rem;
-      background-color: white;
+      background-color: var(--bs-body-bg);
     }
     .active {
-      background-color: aliceblue;
+      background-color: var(--bs-primary-bg-subtle);
     }
   }
 }

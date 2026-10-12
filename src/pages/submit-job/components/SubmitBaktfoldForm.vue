@@ -1,0 +1,62 @@
+<template>
+  <div class="mt-4">
+    <div class="card p-4">
+      <h2 class="section-title">Bakta JSON input</h2>
+      <p class="text-secondary mb-3">
+        Upload a Bakta JSON result file to run Baktfold as a standalone workflow.
+      </p>
+      <div class="d-flex align-items-center mb-2">
+        <label class="form-label mb-0 me-1" for="bakta-json">Bakta JSON</label>
+        <HelpTip
+          text="The JSON file from the results of a Bakta job. You can download it on the result page."
+        />
+      </div>
+      <input
+        id="bakta-json"
+        class="form-control"
+        type="file"
+        accept=".json"
+        @change="updateBaktaJson"
+      />
+
+      <div v-if="modelValue.baktaJson" class="small text-secondary mt-2">
+        <i class="bi bi-file-earmark-check me-1"></i>
+        {{ modelValue.baktaJson.name }}
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+import HelpTip from '@/components/HelpTip.vue'
+import type { BaktfoldJobRequest } from '@/model/bakta-service'
+import { computed, watch } from 'vue'
+
+const props = defineProps<{
+  modelValue: BaktfoldJobRequest
+}>()
+
+const emit = defineEmits<{
+  (e: 'update:modelValue', v: BaktfoldJobRequest): void
+  (e: 'update:valid', v: boolean): void
+}>()
+
+const valid = computed(() => props.modelValue.baktaJson != null)
+
+watch(
+  () => valid.value,
+  (value) => emit('update:valid', value),
+  { immediate: true },
+)
+
+function updateBaktaJson(evt: Event) {
+  if (!(evt.target instanceof HTMLInputElement)) return
+  const file =
+    evt.target.files == null || evt.target.files.length === 0 ? null : evt.target.files.item(0)
+  emit('update:modelValue', {
+    ...props.modelValue,
+    baktaJson: file,
+    jobName: file?.name ?? '',
+  })
+}
+</script>

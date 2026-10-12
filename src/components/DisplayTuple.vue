@@ -1,6 +1,6 @@
 <template>
-  <div class="row">
-    <div class="label text-end" :class="labelClass">{{ label }}</div>
+  <div class="row py-1">
+    <div class="label" :class="labelClass">{{ label }}</div>
     <div class="value" :class="valueClass">{{ value }}</div>
   </div>
 </template>
@@ -15,19 +15,19 @@ const props = withDefaults(
     break?: number
   }>(),
   {
-    break: 4,
+    break: 5,
   },
 )
 const labelClass = computed(() => 'col-' + props.break)
 const valueClass = computed(() => 'col-' + (12 - props.break))
 </script>
 
-<style>
+<style scoped>
 .label {
-  font-weight: bold;
+  color: var(--bs-secondary-color);
 }
 .value {
-  font-weight: bold;
-  color: gray;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
 }
 </style>

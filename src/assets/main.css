@@ -1,0 +1,365 @@
+/*
+ * Bakta theme. Loaded after Bootstrap, so it only overrides what differs.
+ * The page stays white like the original design. The blue is a calmer
+ * version of the Bootstrap blue, and the grays have a slight cool tint.
+ */
+:root {
+  --bs-primary: #35629b;
+  --bs-primary-rgb: 53, 98, 155;
+  --bs-primary-text-emphasis: #1f3d66;
+  --bs-primary-bg-subtle: #dbe7f5;
+  --bs-primary-border-subtle: #b3cbe8;
+
+  --bs-link-color: #2f5f96;
+  --bs-link-color-rgb: 47, 95, 150;
+  --bs-link-hover-color: #234a76;
+  --bs-link-hover-color-rgb: 35, 74, 118;
+
+  --bs-body-color: #1f2933;
+  --bs-body-color-rgb: 31, 41, 51;
+  --bs-secondary-color: #5f6b7a;
+  --bs-border-color: #e1e6ee;
+  --bs-focus-ring-color: rgba(53, 98, 155, 0.25);
+
+  --bs-border-radius: 0.5rem;
+  --bs-border-radius-sm: 0.375rem;
+  --bs-border-radius-lg: 0.875rem;
+
+  --bakta-surface: #f5f7fa;
+  --bakta-shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
+  --bakta-primary-hover: #2c5384;
+  --bakta-primary-active: #264873;
+  --bakta-focus-border: #7fa2cc;
+  --bakta-tooltip-bg: #2b3544;
+
+  /* small text sizes, from labels and counts up to dense tables */
+  --bakta-font-size-xs: 0.8rem;
+  --bakta-font-size-sm: 0.875rem;
+  --bakta-font-size-md: 0.9375rem;
+}
+
+html,
+body,
+#app {
+  height: 100%;
+}
+
+/* small text uses the small size tokens, so it stays easy to read */
+small,
+.small {
+  font-size: var(--bakta-font-size-md);
+}
+
+/* the result overview and the job follow page are read the most, so their text is one step larger */
+.text-large {
+  font-size: 1.0625rem;
+}
+
+body {
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-weight: 600;
+  color: var(--bs-body-color);
+}
+h1,
+h2,
+h3 {
+  letter-spacing: -0.015em;
+}
+h5 {
+  font-size: 1.05rem;
+}
+
+a {
+  text-underline-offset: 0.15em;
+}
+
+/* Layout */
+.page {
+  min-height: 100%;
+}
+.page-main {
+  padding-block: 2.5rem 3rem;
+}
+
+/* Cards and panels */
+.card {
+  --bs-card-border-color: var(--bs-border-color);
+  --bs-card-cap-bg: var(--bakta-surface);
+  --bs-card-border-radius: var(--bs-border-radius-lg);
+  --bs-card-inner-border-radius: calc(var(--bs-border-radius-lg) - 1px);
+  box-shadow: var(--bakta-shadow);
+}
+/* grey boxes inside cards, like the stat panels and the option groups */
+.panel {
+  padding: 1rem 1.25rem;
+  border-radius: var(--bs-border-radius-lg);
+  background-color: var(--bakta-surface);
+}
+.bg-surface {
+  background-color: var(--bakta-surface);
+}
+.no-border {
+  --bs-card-spacer-x: 0;
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+}
+
+/* Buttons */
+.btn {
+  --bs-btn-border-radius: var(--bs-border-radius);
+  --bs-btn-font-weight: 500;
+}
+.btn-sm {
+  --bs-btn-font-size: var(--bakta-font-size-md);
+}
+/* neutral actions keep their outline and use the light blue highlight instead of dark grey */
+.btn-outline-secondary {
+  --bs-btn-color: var(--bs-secondary-color);
+  --bs-btn-border-color: var(--bs-secondary-border-subtle);
+  --bs-btn-hover-color: var(--bs-primary-text-emphasis);
+  --bs-btn-hover-bg: var(--bs-primary-bg-subtle);
+  --bs-btn-hover-border-color: var(--bs-primary-border-subtle);
+  --bs-btn-active-color: var(--bs-primary-text-emphasis);
+  --bs-btn-active-bg: var(--bs-primary-border-subtle);
+  --bs-btn-active-border-color: var(--bs-primary-border-subtle);
+  --bs-btn-focus-shadow-rgb: var(--bs-primary-rgb);
+}
+/* icon only actions like share and copy: no background until hover, then the light blue highlight */
+.btn-icon {
+  --bs-btn-color: var(--bs-secondary-color);
+  --bs-btn-bg: transparent;
+  --bs-btn-border-color: transparent;
+  --bs-btn-hover-color: var(--bs-primary-text-emphasis);
+  --bs-btn-hover-bg: var(--bs-primary-bg-subtle);
+  --bs-btn-hover-border-color: var(--bs-primary-bg-subtle);
+  --bs-btn-active-color: var(--bs-primary-text-emphasis);
+  --bs-btn-active-bg: var(--bs-primary-border-subtle);
+  --bs-btn-active-border-color: var(--bs-primary-border-subtle);
+  --bs-btn-focus-shadow-rgb: var(--bs-primary-rgb);
+}
+.btn-primary {
+  --bs-btn-bg: var(--bs-primary);
+  --bs-btn-border-color: var(--bs-primary);
+  --bs-btn-hover-bg: var(--bakta-primary-hover);
+  --bs-btn-hover-border-color: var(--bakta-primary-hover);
+  --bs-btn-active-bg: var(--bakta-primary-active);
+  --bs-btn-active-border-color: var(--bakta-primary-active);
+  --bs-btn-disabled-bg: var(--bs-primary);
+  --bs-btn-disabled-border-color: var(--bs-primary);
+  --bs-btn-focus-shadow-rgb: 53, 98, 155;
+}
+.btn-outline-primary {
+  --bs-btn-color: var(--bs-primary);
+  --bs-btn-border-color: var(--bs-primary);
+  --bs-btn-hover-bg: var(--bs-primary);
+  --bs-btn-hover-border-color: var(--bs-primary);
+  --bs-btn-active-bg: var(--bakta-primary-active);
+  --bs-btn-active-border-color: var(--bakta-primary-active);
+  --bs-btn-disabled-color: var(--bs-primary);
+  --bs-btn-disabled-border-color: var(--bs-primary);
+  --bs-btn-focus-shadow-rgb: 53, 98, 155;
+}
+.btn-link {
+  --bs-btn-color: var(--bs-link-color);
+  --bs-btn-hover-color: var(--bs-link-hover-color);
+  --bs-btn-active-color: var(--bs-link-hover-color);
+  --bs-btn-focus-shadow-rgb: 53, 98, 155;
+}
+
+/* Form controls: small controls keep the same corners as normal ones */
+.form-control-sm,
+.form-select-sm {
+  border-radius: var(--bs-border-radius);
+  font-size: var(--bakta-font-size-md);
+}
+.form-label {
+  font-weight: 500;
+}
+.form-control:focus,
+.form-select:focus,
+.form-check-input:focus {
+  border-color: var(--bakta-focus-border);
+  box-shadow: 0 0 0 0.2rem var(--bs-focus-ring-color);
+}
+.form-check-input:checked {
+  background-color: var(--bs-primary);
+  border-color: var(--bs-primary);
+}
+
+/*
+ * Tabs with an underline. Shared by the submit page and the result views.
+ * On small screens the tabs scroll sideways instead of wrapping.
+ */
+.nav-tabs {
+  --bs-nav-tabs-border-width: 0;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  border-bottom: 0;
+  box-shadow: inset 0 -1px 0 var(--bs-border-color);
+  scrollbar-width: none;
+}
+.nav-tabs::-webkit-scrollbar {
+  display: none;
+}
+.nav-tabs .nav-link {
+  flex: none;
+  margin-bottom: 0;
+  padding: 0.75rem 1rem;
+  border: 0;
+  border-radius: 0;
+  background-color: transparent;
+  box-shadow: inset 0 -2px 0 transparent;
+  font-weight: 500;
+  white-space: nowrap;
+  color: var(--bs-secondary-color);
+  transition:
+    color 0.15s,
+    box-shadow 0.15s;
+}
+.nav-tabs .nav-link:hover:not(.active) {
+  box-shadow: inset 0 -2px 0 var(--bs-border-color);
+  color: var(--bs-body-color);
+}
+.nav-tabs .nav-link.active {
+  box-shadow: inset 0 -2px 0 var(--bs-primary);
+  font-weight: 600;
+  color: var(--bs-primary);
+}
+.nav-tabs .nav-link:focus-visible {
+  outline: 2px solid rgba(var(--bs-primary-rgb), 0.5);
+  outline-offset: -3px;
+  box-shadow: none;
+}
+
+/* Badges: the same small radius as the feature type chips and workflow shields */
+.badge {
+  --bs-badge-font-size: var(--bakta-font-size-xs);
+  --bs-badge-border-radius: var(--bs-border-radius-sm);
+  --bs-badge-padding-x: 0.75em;
+  --bs-badge-padding-y: 0.45em;
+}
+
+/* Accordions look like the other bordered boxes */
+.accordion {
+  --bs-accordion-border-radius: var(--bs-border-radius-lg);
+  --bs-accordion-inner-border-radius: calc(var(--bs-border-radius-lg) - 1px);
+}
+
+/* Alerts */
+.alert {
+  --bs-alert-border-radius: var(--bs-border-radius-lg);
+  --bs-alert-padding-x: 1.25rem;
+  --bs-alert-padding-y: 0.75rem;
+}
+
+/* Tables */
+.table {
+  --bs-table-border-color: var(--bs-border-color);
+  --bs-table-striped-bg: var(--bakta-surface);
+  font-size: var(--bakta-font-size-md);
+}
+.table > thead > tr > th {
+  border-bottom-width: 1px;
+  font-size: var(--bakta-font-size-sm);
+  font-weight: 600;
+}
+
+/* Pagination (used by the annotation table) */
+.pagination {
+  --bs-pagination-font-size: var(--bakta-font-size-md);
+  --bs-pagination-color: var(--bs-link-color);
+  --bs-pagination-hover-color: var(--bs-link-hover-color);
+  --bs-pagination-focus-color: var(--bs-link-hover-color);
+  --bs-pagination-focus-box-shadow: 0 0 0 0.2rem var(--bs-focus-ring-color);
+  --bs-pagination-active-bg: var(--bs-primary);
+  --bs-pagination-active-border-color: var(--bs-primary);
+}
+
+/* Filter chips, like the feature type filter of the annotation table */
+.feature-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+}
+.feature-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.375rem 0.5rem 0.375rem 0.875rem;
+  border: 1px solid var(--bs-border-color);
+  border-radius: var(--bs-border-radius-sm);
+  background-color: var(--bs-body-bg);
+  color: var(--bs-body-color);
+  font-size: var(--bakta-font-size-md);
+}
+.feature-chip:hover {
+  border-color: var(--bs-primary-border-subtle);
+  background-color: var(--bakta-surface);
+}
+.feature-chip .count {
+  padding: 0.0625rem 0.5rem;
+  border-radius: calc(var(--bs-border-radius-sm) - 0.125rem);
+  background-color: var(--bakta-surface);
+  color: var(--bs-secondary-color);
+  font-size: var(--bakta-font-size-xs);
+  font-variant-numeric: tabular-nums;
+}
+.feature-chip.active {
+  border-color: var(--bs-primary);
+  background-color: var(--bs-primary);
+  color: var(--bs-white);
+}
+.feature-chip.active .count {
+  background-color: rgba(var(--bs-white-rgb), 0.2);
+  color: var(--bs-white);
+}
+
+/* Progress */
+.progress {
+  --bs-progress-bar-bg: var(--bs-primary);
+  --bs-progress-border-radius: var(--bs-border-radius-pill);
+}
+
+/*
+ * Headings. section-title for sections of a page or card, subsection-title for
+ * groups inside a section, section-label for small upper case labels above
+ * panels.
+ */
+.section-title {
+  margin-bottom: 0.75rem;
+  font-size: 1.15rem;
+}
+.subsection-title {
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+}
+.section-label {
+  font-size: var(--bakta-font-size-sm);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--bs-secondary-color);
+  margin-bottom: 0.5rem;
+}
+
+/* Tooltips behind the help icons */
+.tooltip {
+  --bs-tooltip-max-width: 18rem;
+  --bs-tooltip-padding-x: 0.75rem;
+  --bs-tooltip-padding-y: 0.5rem;
+  --bs-tooltip-font-size: var(--bakta-font-size-sm);
+  --bs-tooltip-bg: var(--bakta-tooltip-bg);
+}
+.tooltip-inner {
+  text-align: left;
+}

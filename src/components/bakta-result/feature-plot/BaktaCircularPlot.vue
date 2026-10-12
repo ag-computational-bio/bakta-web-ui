@@ -54,7 +54,7 @@ const props = withDefaults(
 
 let svg: d3.Selection<SVGSVGElement, undefined, null, undefined>
 let plotG: d3.Selection<SVGGElement, undefined, null, undefined> | undefined
-let zoom: d3.ZoomBehavior<Element, unknown> | undefined
+let zoom: d3.ZoomBehavior<SVGSVGElement, undefined> | undefined
 
 /**
  * Main scale for most circular positioning in radians
@@ -170,7 +170,10 @@ function computePlotData(sequence: Sequence, features: Feature[]): PlotData {
 const highlight = ref<Feature | GcTooltipData | GcSkewTooltipData>()
 const tooltipEl = useTemplateRef('tooltip')
 
-function updateTooltip(f: Feature | GcTooltipData | GcSkewTooltipData | undefined, evt: any) {
+function updateTooltip(
+  f: Feature | GcTooltipData | GcSkewTooltipData | undefined,
+  evt: MouseEvent,
+) {
   highlight.value = f
   const [x, y] = [evt.clientX, evt.clientY]
   updateTooltipPosition(x, y, f != undefined)
@@ -207,13 +210,10 @@ function updatePlot(immediately: boolean) {
     if (plotG) plotG.attr('transform', e.transform.toString())
   }
   if (zoom === undefined) {
-    zoom = d3.zoom().on('zoom', handleZoom)
+    zoom = d3.zoom<SVGSVGElement, undefined>().on('zoom', handleZoom)
   }
   if (svg == undefined) {
-    svg = d3
-      .create('svg')
-      .call(updateSvg)
-      .call(zoom as any)
+    svg = d3.create('svg').call(updateSvg).call(zoom)
   } else if (immediately) svg.call(updateSvg)
   else svg.transition().call(updateSvg)
 
@@ -324,12 +324,11 @@ function updatePlot(immediately: boolean) {
 }
 
 function zoomToCenter() {
-  if (svg && zoom) {
-    svg.call(
-      zoom.transform as any,
-      d3.zoomIdentity.translate(props.size.width / 2, props.size.height / 2),
-    )
+  if (svg == undefined || zoom == undefined) {
+    return
   }
+
+  svg.call(zoom.transform, d3.zoomIdentity.translate(props.size.width / 2, props.size.height / 2))
 }
 
 const canvas = useTemplateRef('canvas')

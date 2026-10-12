@@ -4,13 +4,13 @@ export const BaktaGenomeSchema = z.object({
   genus: z.string().nullable(),
   species: z.string().nullable(),
   strain: z.string().nullable(),
-  complete: z.boolean(),
-  gram: z.string(),
-  translation_table: z.number(),
+  complete: z.boolean().optional(),
+  gram: z.string().optional(),
+  translation_table: z.number().optional(),
 })
 
 export const BaktaStatsSchema = z.object({
-  no_sequences: z.number(),
+  no_sequences: z.number().optional(),
   size: z.number(),
   gc: z.number(),
   n_ratio: z.number(),
@@ -20,7 +20,8 @@ export const BaktaStatsSchema = z.object({
 
 export const BaktaFeatureSchema = z.object({
   type: z.string(),
-  contig: z.string(),
+  contig: z.string().optional(),
+  sequence: z.string().optional(),
   start: z.number(),
   stop: z.number(),
   strand: z.string(),
@@ -41,13 +42,14 @@ export const BaktaFeatureSchema = z.object({
 
 export const BaktaSequenceSchema = z.object({
   id: z.string(),
-  description: z.string(),
-  sequence: z.string(),
+  description: z.string().optional(),
+  sequence: z.string().optional(),
+  nt: z.string().optional(),
   length: z.number(),
   complete: z.boolean(),
   type: z.string(),
-  topology: z.string(),
-  simple_id: z.string(),
+  topology: z.string().optional(),
+  simple_id: z.string().optional(),
 })
 
 export const BaktaRunSchema = z.object({
@@ -65,8 +67,8 @@ export const BaktaResultSchema = z.object({
   stats: BaktaStatsSchema,
   features: z.array(BaktaFeatureSchema),
   sequences: z.array(BaktaSequenceSchema),
-  run: BaktaRunSchema,
-  version: BaktaVersionSchema,
+  run: BaktaRunSchema.optional(),
+  version: BaktaVersionSchema.optional(),
 })
 
 export type BaktaGenome = z.infer<typeof BaktaGenomeSchema>

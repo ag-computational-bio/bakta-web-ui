@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/vue3'
 
-import { expect, fn, userEvent } from '@storybook/test'
+import { expect, fn, userEvent } from 'storybook/test'
 import FastaFileChooser from './FastaFileChooser.vue'
 const meta: Meta<typeof FastaFileChooser> = { component: FastaFileChooser }
 

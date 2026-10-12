@@ -1,29 +1,26 @@
 import type { ColorEntry } from '@/cog-helper'
 import type { Feature } from '@/model/result-data'
 
-const BaktaFeatureTypes = [
-  'tRNA',
-  'tmRNA',
-  'rRNA',
-  'ncRNA',
-  'ncRNA-region',
-  'crispr',
-  'crispr-repeat',
-  'crispr-spacer',
-  'orf',
-  'sorf',
-  'cds',
-  'signal-peptide',
-  'gap',
-  'oriC',
-  'oriV',
-  'oriT',
-  'is',
-  'mite',
-  'unknown',
-] as const
-
-export type FeatureType = (typeof BaktaFeatureTypes)[number]
+export type FeatureType =
+  | 'tRNA'
+  | 'tmRNA'
+  | 'rRNA'
+  | 'ncRNA'
+  | 'ncRNA-region'
+  | 'crispr'
+  | 'crispr-repeat'
+  | 'crispr-spacer'
+  | 'orf'
+  | 'sorf'
+  | 'cds'
+  | 'signal-peptide'
+  | 'gap'
+  | 'oriC'
+  | 'oriV'
+  | 'oriT'
+  | 'is'
+  | 'mite'
+  | 'unknown'
 const defaultColor = '#CCCCCC'
 
 export const featureColors: ColorEntry[] = [

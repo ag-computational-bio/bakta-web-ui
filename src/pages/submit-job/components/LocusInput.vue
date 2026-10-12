@@ -1,29 +1,18 @@
 <template>
   <input
-    ref="input"
     class="form-control"
+    :class="{ 'is-invalid': error }"
     type="text"
     id="locus"
-    placeholder="Locus prefix, i.e. sequence id prefix (optional)"
+    placeholder="e.g. contig"
     v-model="modelValue"
-    :oninput="validate"
   />
+  <div v-if="error" class="invalid-feedback">{{ error }}</div>
 </template>
 <script setup lang="ts">
-import { useTemplateRef } from 'vue'
+import { computed } from 'vue'
+import { locusError } from '@/model/locus-validation'
 
-const modelValue = defineModel({ required: true })
-const input = useTemplateRef('input')
-const locusValidation = {
-  regex: '^$|^[#.*A-Za-z0-9_-]{1,20}$',
-  message: 'Only alphanumeric charaters and _-*.# allowed, max 20 chars',
-}
-
-function validate() {
-  if (input.value) {
-    if (input.value.value.match(locusValidation.regex)) input.value.setCustomValidity('')
-    else input.value.setCustomValidity(locusValidation.message)
-    input.value.reportValidity()
-  }
-}
+const modelValue = defineModel<string | null>({ required: true })
+const error = computed(() => locusError(modelValue.value))
 </script>

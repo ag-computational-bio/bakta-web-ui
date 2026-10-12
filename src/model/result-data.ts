@@ -1,4 +1,4 @@
-import { z, type SafeParseReturnType } from 'zod'
+import { z } from 'zod'
 import {
   BaktaResultSchema_1_10,
   type BaktaFeature_1_10,
@@ -59,6 +59,8 @@ const AllBaktaResultSchemas = z.union([
   BaktaResultSchema_1_9,
 ])
 
+type SafeParseResult<T> = { success: true; data: T } | { success: false; error: z.ZodError }
+
 /**
  * Translates bakta json coordinates to gff3 coordinates.
  *
@@ -94,7 +96,7 @@ function toFeature(f: BaktaFeature | BaktaFeature_1_10, seqLen: number): Feature
     gene: f.gene,
     locus: f.locus,
     product: f.product,
-    sequence: 'contig' in f ? f.contig : f.sequence,
+    sequence: f.contig ?? f.sequence ?? '',
     start: coords[0],
     stop: coords[1],
     strand: f.strand,
@@ -107,7 +109,7 @@ function toSequence(f: BaktaSequence | BaktaSequence_1_10): Sequence {
     id: f.id,
     complete: f.complete,
     length: f.length,
-    nt: 'sequence' in f ? f.sequence : f.nt,
+    nt: f.sequence ?? f.nt ?? '',
     type: f.type,
   }
   return v
@@ -118,7 +120,7 @@ function toResult(input: BaktaResult | BaktaResult_1_9 | BaktaResult_1_10): Resu
   const seqIdx: Record<string, number> = {}
   for (const s of sequences) seqIdx[s.id] = s.length
   const features = input.features.map((f) =>
-    toFeature(f, seqIdx['contig' in f ? f.contig : f.sequence]),
+    toFeature(f, seqIdx[f.contig ?? f.sequence ?? '']),
   )
 
   return {
@@ -140,9 +142,9 @@ function toResult(input: BaktaResult | BaktaResult_1_9 | BaktaResult_1_10): Resu
   }
 }
 
-export function safeParseResult(o: unknown): SafeParseReturnType<unknown, Result> {
+export function safeParseResult(o: unknown): SafeParseResult<Result> {
   const r = AllBaktaResultSchemas.safeParse(o)
-  if (!r.success) return { ...r }
+  if (!r.success) return { success: false, error: r.error }
   const converted = toResult(r.data)
   return { success: true, data: converted }
 }
@@ -150,5 +152,5 @@ export function safeParseResult(o: unknown): SafeParseReturnType<unknown, Result
 export function parseBaktaData(o: unknown): Result {
   const d = safeParseResult(o)
   if (d.success) return d.data
-  throw d.error.errors
+  throw d.error.issues
 }

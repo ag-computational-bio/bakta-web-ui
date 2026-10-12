@@ -1,64 +1,81 @@
-# vue-project
+# Bakta Web UI
 
-This template should help get you started developing with Vue 3 in Vite.
+The web frontend of [Bakta Web](https://bakta.computational.bio), a free service for the rapid and standardized annotation of bacterial genomes, MAGs and plasmids with [Bakta](https://github.com/oschwengers/bakta).
 
-## Recommended IDE Setup
+The frontend is a Vue 3 single page application. It talks to the [Bakta Web backend](https://github.com/ag-computational-bio/bakta-web-backend), which runs the annotation jobs on a Kubernetes cluster.
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+## Features
 
-## Type Support for `.vue` Imports in TS
+- Submit jobs for three workflows:
+  - Bakta genome annotation, optionally followed by Baktfold
+  - standalone Baktfold for an existing Bakta result
+  - Bakta Proteins for protein sequences
+- Follow running jobs with their workflow steps and live logs.
+- Keep a list of your own jobs in the browser. No account is needed.
+- Explore results in the browser:
+  - job statistics with clickable feature counts
+  - an annotation table with a feature type filter
+  - a genome viewer
+  - a circular plot with SVG download
+- Download all result files.
+- Open Bakta JSON result files in the viewer. The file stays in your browser and is not uploaded.
 
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
+## Configuration
 
-## Customize configuration
+The app reads the backend URL at startup from `config/config.json`, so one build works for every environment:
 
-See [Vite Configuration Reference](https://vite.dev/config/).
+```json
+{
+  "api": "https://api.staging.bakta.computational.bio/api/v2"
+}
+```
 
-## Project Setup
+For local development, `public/config/config.json` points to the staging backend.
+
+### Admin area
+
+The hidden admin area under `/admin` shows job statistics, the job list with details, and the Argo workflows with actions like retry, stop, delete and cleanup. It is not linked in the navigation. Admins sign in with Keycloak (Authorization Code flow with PKCE, public client `bakta-admin`), and the backend checks for the admin group. The API contract is `docs/admin-api.md` in the backend repository.
+
+The optional `admin` key configures it:
+
+```json
+{
+  "api": "https://api.bakta.computational.bio/api/v2",
+  "admin": {
+    "oidcAuthority": "https://auth.bakta.computational.bio/realms/bakta",
+    "clientId": "bakta-admin"
+  }
+}
+```
+
+- `oidcAuthority`: the Keycloak realm issuer. Without it, the admin area shows that it is not configured.
+- `clientId`: the Keycloak client, `bakta-admin` by default.
+- `api`: the admin API URL. By default the version at the end of `api` is replaced, so `.../api/v2` becomes `.../api/admin`.
+- `mock`: set `"mock": true` to use fake data generated in the browser and to skip the login. Use it only for development and previews, never in a deployed config.
+
+## Development
 
 ```sh
 npm install
+npm run dev          # development server with hot reload
+npm run build        # type check and production build
+npm run lint         # ESLint
+npm run format       # Prettier
+npm run test:unit    # Vitest
+npm run test:e2e     # Playwright, run `npx playwright install` once before
+npm run storybook    # component stories
 ```
 
-### Compile and Hot-Reload for Development
+## Deployment
 
-```sh
-npm run dev
-```
+The `Dockerfile` builds the app and serves it with nginx. Pushes to `main` and version tags (`v*`) build and publish the image `harbor.computational.bio.uni-giessen.de/bakta/bakta-web-ui`.
 
-### Type-Check, Compile and Minify for Production
+## Citation
 
-```sh
-npm run build
-```
+If you use Bakta Web, please cite:
 
-### Run Unit Tests with [Vitest](https://vitest.dev/)
+Beyvers S., Jelonek L., Goesmann A., Schwengers O. (2025). Bakta Web – rapid and standardized genome annotation on scalable infrastructures. Nucleic Acids Research, gkaf335. [doi:10.1093/nar/gkaf335](https://doi.org/10.1093/nar/gkaf335)
 
-```sh
-npm run test:unit
-```
+## License
 
-### Run End-to-End Tests with [Playwright](https://playwright.dev)
-
-```sh
-# Install browsers for the first run
-npx playwright install
-
-# When testing on CI, must build the project first
-npm run build
-
-# Runs the end-to-end tests
-npm run test:e2e
-# Runs the tests only on Chromium
-npm run test:e2e -- --project=chromium
-# Runs the tests of a specific file
-npm run test:e2e -- tests/example.spec.ts
-# Runs the tests in debug mode
-npm run test:e2e -- --debug
-```
-
-### Lint with [ESLint](https://eslint.org/)
-
-```sh
-npm run lint
-```
+GPL-3.0, see [LICENSE](LICENSE).

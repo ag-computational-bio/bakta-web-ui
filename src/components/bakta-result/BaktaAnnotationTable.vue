@@ -1,23 +1,49 @@
 <template>
-  <DataTable
-    class="table table-striped"
-    :columns="columns"
-    :data="table"
-    :configuration="dataTableConfig"
-    tableId="bakta-annotation"
-  />
+  <div class="feature-filter mb-3" role="group" aria-label="Filter by feature type">
+    <button
+      v-for="t in featureTypes"
+      :key="t.type"
+      type="button"
+      class="feature-chip"
+      :class="{ active: type === t.type }"
+      :aria-pressed="type === t.type"
+      @click="type = t.type"
+    >
+      {{ t.label }}<span class="count">{{ t.count }}</span>
+    </button>
+  </div>
+  <div class="annotation-table">
+    <DataTable
+      ref="dataTable"
+      class="table table-striped"
+      :columns="columns"
+      :data="table"
+      :options="dataTableConfig"
+      tableId="bakta-annotation"
+    />
+  </div>
 </template>
 
 <script setup lang="ts">
+import bakta from '@/bakta-helper'
 import type { Result } from '@/model/result-data'
 import DataTablesCore from 'datatables.net-bs5'
+import 'datatables.net-bs5/css/dataTables.bootstrap5.css'
 import DataTable from 'datatables.net-vue3'
 
-import { computed } from 'vue'
+import { computed, nextTick, ref, unref, watch } from 'vue'
 DataTable.use(DataTablesCore)
 const props = defineProps<{
   data: Result
 }>()
+const type = defineModel<string>('type', { default: '' })
+const dataTable = ref<InstanceType<typeof DataTable>>()
+
+// another feature type starts on the first page, the old page may not exist anymore
+watch(type, async () => {
+  await nextTick()
+  unref(dataTable.value?.dt)?.page(0).draw(false)
+})
 
 const dataTableConfig = {
   scrollY: '70vh',
@@ -27,6 +53,7 @@ const dataTableConfig = {
   processing: true,
   deferRender: true,
   lengthMenu: [50, 100, 250],
+  orderClasses: false,
 }
 
 const columns = [
@@ -61,8 +88,19 @@ const columns = [
   { data: 'dbxrefs', title: 'DbXrefs' },
 ]
 
+const featureTypes = computed(() => [
+  { type: '', count: props.data.features.length, label: 'All' },
+  ...Object.entries(bakta.featureCount(props.data))
+    .filter(([, count]) => count > 0)
+    .map(([type, count]) => ({ type, count, label: bakta.featureTypeLabel(type) }))
+    .sort((a, b) => b.count - a.count),
+])
+
 const table = computed(() => {
-  return props.data.features.map((x) => ({
+  const features = type.value
+    ? props.data.features.filter((x) => x.type === type.value)
+    : props.data.features
+  return features.map((x) => ({
     contig: x.sequence || '',
     type: x.type || '',
     start: x.start || '',
@@ -76,15 +114,42 @@ const table = computed(() => {
           // url is hard coded for the moment. Should be moved to rest-api module
           .map(
             (x) =>
-              '<a target="_" href=https://psos-staging.computational.bio/api/v1/dbxref/redirect/' +
+              '<a class="dbxref" target="_blank" rel="noopener" href="https://psos-staging.computational.bio/api/v1/dbxref/redirect/' +
               x +
-              '>' +
+              '">' +
               x +
               '</a>',
           )
-          .join('<br> ')
+          .join(' ')
       : '',
   }))
 })
 </script>
-<style scoped></style>
+<style>
+/* the table controls (page size, search, paging) use the same size as the table text */
+.annotation-table .dt-container {
+  font-size: var(--bakta-font-size-md);
+}
+/* plain row colors instead of the per cell shadow, which shows thin lines between cells */
+.annotation-table table.table.dataTable.table-striped > tbody > tr > * {
+  box-shadow: none;
+}
+.annotation-table table.table.dataTable.table-striped > tbody > tr:nth-of-type(odd) > * {
+  background-color: var(--bakta-surface);
+}
+.annotation-table .table td {
+  font-variant-numeric: tabular-nums;
+}
+.dbxref {
+  display: inline-block;
+  margin: 0 0.25rem 0.25rem 0;
+  padding: 0.125rem 0.5rem;
+  border-radius: var(--bs-border-radius-sm);
+  background-color: var(--bs-primary-bg-subtle);
+  font-size: var(--bakta-font-size-sm);
+  text-decoration: none;
+}
+.dbxref:hover {
+  background-color: var(--bs-primary-border-subtle);
+}
+</style>

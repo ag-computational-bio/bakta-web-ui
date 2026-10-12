@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/vue3'
 
-import { expect } from '@storybook/test'
+import { expect } from 'storybook/test'
 import ProgressBar from './ProgressBar.vue'
 const meta: Meta<typeof ProgressBar> = {
   component: ProgressBar,

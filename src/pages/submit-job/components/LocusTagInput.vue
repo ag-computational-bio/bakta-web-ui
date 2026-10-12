@@ -2,41 +2,25 @@
   <input
     ref="input"
     class="form-control"
+    :class="{ 'is-invalid': error }"
     type="text"
     id="locustag"
-    placeholder="Locus tag prefix, i.e. feature id prefix (optional)"
+    placeholder="e.g. ESAKAI"
     v-model="modelValue"
-    :pattern="locusTagValidation.regex"
-    :oninput="validate"
   />
+  <div v-if="error" class="invalid-feedback">{{ error }}</div>
+  <div v-else class="form-text">{{ locusTagHelp(compliant) }}</div>
 </template>
 <script setup lang="ts">
-import { computed, useTemplateRef } from 'vue'
+import { computed } from 'vue'
+import { locusTagError, locusTagHelp } from '@/model/locus-validation'
 
-const modelValue = defineModel({ required: true })
+const modelValue = defineModel<string | null>({ required: true })
 const props = withDefaults(
   defineProps<{
     compliant: boolean
   }>(),
   {},
 )
-const input = useTemplateRef('input')
-const defaultLocusTagValidation = {
-  regex: '^$|^[A-Z][A-Z0-9]{2,11}$',
-  message: 'Only uppercase alphanumeric characters allowed, 3-12 chars',
-}
-const insdcLocusTagValidation = {
-  regex: '^$|^[A-Z][A-Z0-9]{2,11}$',
-  message: 'Only uppercase alphanumeric characters allowed, 3-12 chars',
-}
-const locusTagValidation = computed(() =>
-  props.compliant ? insdcLocusTagValidation : defaultLocusTagValidation,
-)
-function validate() {
-  if (input.value) {
-    if (input.value.value.match(locusTagValidation.value.regex)) input.value.setCustomValidity('')
-    else input.value.setCustomValidity(locusTagValidation.value.message)
-    input.value.reportValidity()
-  }
-}
+const error = computed(() => locusTagError(modelValue.value, props.compliant))
 </script>

@@ -1,6 +1,6 @@
 <template>
-  <h5 v-if="data.type === 'gc'">GC content</h5>
-  <h5 v-if="data.type === 'gc-skew'">GC skew</h5>
+  <h3 v-if="data.type === 'gc'" class="subsection-title">GC content</h3>
+  <h3 v-if="data.type === 'gc-skew'" class="subsection-title">GC skew</h3>
   <table class="table table-sm">
     <tbody>
       <tr>

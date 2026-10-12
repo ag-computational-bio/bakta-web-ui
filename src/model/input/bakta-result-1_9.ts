@@ -20,8 +20,8 @@ export const BaktaResultSchema_1_9 = z.object({
   stats: BaktaStatsSchema,
   features: z.array(BaktaFeatureSchema),
   sequences: z.array(BaktaSequenceSchema),
-  run: BaktaRunSchema,
-  version: BaktaVersionSchema_1_9,
+  run: BaktaRunSchema.optional(),
+  version: BaktaVersionSchema_1_9.optional(),
 })
 
 export type BaktaResult_1_9 = z.infer<typeof BaktaResultSchema_1_9>

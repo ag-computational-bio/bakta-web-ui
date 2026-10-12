@@ -28,13 +28,17 @@ const emit = defineEmits<{
 
 const options = ref([
   {
+    value: 11,
+    label: 'The Bacterial, Archaeal and Plant Plastid Code',
+  },
+  {
     value: 4,
     label:
       'The Mold, Protozoan, and Coelenterate Mitochondrial Code and the Mycoplasma/Spiroplasma Code',
   },
   {
-    value: 11,
-    label: 'The Bacterial, Archaeal and Plant Plastid Code',
+    value: 25,
+    label: 'The Candidate Division SR1 and Gracilibacteria Code',
   },
 ])
 </script>

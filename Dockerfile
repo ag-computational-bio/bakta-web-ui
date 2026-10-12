@@ -1,12 +1,15 @@
-FROM mcr.microsoft.com/playwright:v1.52.0-noble as builder
+FROM mcr.microsoft.com/playwright:v1.64.0-noble AS builder
 
-COPY . /src
-WORKDIR /src
+WORKDIR /app
+# install the dependencies first, so this layer is reused when only the source changes
+COPY package.json package-lock.json ./
 RUN npm ci
+COPY . .
 RUN npx vitest --run
 RUN npm run build
 
-FROM nginx:stable-alpine
+# the slim variant keeps the core modules nginx.conf needs (static files, proxy) and drops the rest
+FROM nginx:stable-alpine-slim
 
 LABEL org.opencontainers.image.authors="lukas.jelonek@computational.bio.uni-giessen.de"
 LABEL org.opencontainers.image.url='https://github.com/ag-computational-bio/bakta-web-ui'
@@ -15,4 +18,4 @@ LABEL org.opencontainers.image.title='Bakta Web Frontend'
 LABEL org.opencontainers.image.description='Web frontend for bakta: Rapid & comprehensive annotation of bacterial genomes & plasmids'
 
 COPY nginx.conf /etc/nginx/conf.d/default.conf
-COPY --from=builder /src/dist /usr/share/nginx/html
+COPY --from=builder /app/dist /usr/share/nginx/html

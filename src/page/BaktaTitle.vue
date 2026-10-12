@@ -1,41 +1,26 @@
 <template>
-  <div>
-    <h1>
-      Bakta Web
-      <span class="float-end version"> ({{ versionString }}) </span>
-    </h1>
-    <h3>Rapid &amp; standardized annotation of bacterial genomes, MAGs &amp; plasmids</h3>
+  <div class="brand-text">
+    <h1 class="brand-name">Bakta Web</h1>
+    <p class="tagline">
+      Rapid &amp; standardized annotation of bacterial genomes, MAGs &amp; plasmids
+    </p>
   </div>
 </template>
-<script setup lang="ts">
-import type { Version } from '@/model/Version'
-import { computed } from 'vue'
-
-const props = withDefaults(
-  defineProps<{
-    version: Version
-  }>(),
-  {},
-)
-
-const versionString = computed(() => {
-  const toolVersion = props.version?.toolVersion ?? 'unknown'
-  const dbVersion = props.version?.dbVersion ?? 'unknown'
-  return `Software: ${toolVersion}| DB: ${dbVersion}`
-})
-</script>
 <style scoped>
-h1 {
-  text-align: left;
-  font-weight: bold;
+.brand-text {
+  min-width: 0;
 }
-h3 {
-  text-align: left;
-  color: gray;
+.brand-name {
+  margin: 0;
+  font-size: 1.65rem;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
 }
-.version {
-  font-size: 0.3em;
-  color: gray;
-  padding-right: 1.5em;
+.tagline {
+  margin: 0.25rem 0 0;
+  font-size: var(--bakta-font-size-md);
+  line-height: 1.3;
+  color: var(--bs-secondary-color);
 }
 </style>

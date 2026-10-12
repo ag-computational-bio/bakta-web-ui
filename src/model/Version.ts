@@ -1,7 +1,17 @@
 import { z, type ZodType } from 'zod'
 
-export type Version = { toolVersion: string; dbVersion: string }
+export type Version = {
+  backendVersion: string
+  baktaVersion: string
+  baktaDbVersion: string
+  baktfoldVersion: string
+  baktfoldDbVersion: string
+}
+
 export const VersionSchema: ZodType<Version> = z.object({
-  toolVersion: z.string(),
-  dbVersion: z.string(),
+  backendVersion: z.string(),
+  baktaVersion: z.string(),
+  baktaDbVersion: z.string(),
+  baktfoldVersion: z.string(),
+  baktfoldDbVersion: z.string(),
 })

@@ -31,6 +31,8 @@ function job(id: string, status: JobStatus = 'ERROR'): JobInfo {
     name: id,
     started: new Date().toISOString(),
     updated: new Date().toISOString(),
+    workflowKind: 'bakta',
+    resultKind: 'bakta',
   }
 }
 
@@ -56,14 +58,34 @@ const fixtures = {
 }
 
 describe('bakta service', () => {
-  it('uploads inputs as bytes without a content type', async () => {
+  const uploadHeaders = [undefined, {}]
+  it.each(uploadHeaders)('preserves upload bytes without Content-Type', async (headers) => {
     const storage = new SimpleJobStorage()
     const api: BaktaApi = createBaktaApi('')
+    const query = '?X-Amz-SignedHeaders=host'
     api.initJob = vi.fn().mockResolvedValue({
       job: fixtures.A,
-      uploadLinkFasta: 'https://example.com/fasta',
-      uploadLinkProdigal: 'https://example.com/prodigal',
-      uploadLinkReplicons: 'https://example.com/replicons',
+      workflowKind: 'bakta',
+      uploads: [
+        {
+          uploadKind: 'genome_fasta',
+          required: true,
+          url: 'https://example.com/fasta' + query,
+          headers,
+        },
+        {
+          uploadKind: 'replicons_table',
+          required: false,
+          url: 'https://example.com/replicons' + query,
+          headers,
+        },
+        {
+          uploadKind: 'prodigal_training_file',
+          required: false,
+          url: 'https://example.com/prodigal' + query,
+          headers,
+        },
+      ],
     })
     api.startJob = vi.fn().mockResolvedValue(undefined)
     const uploads: Request[] = []
@@ -95,9 +117,12 @@ describe('bakta service', () => {
       }),
     )
 
-    expect(uploads[0].headers.get('Content-Type')).toBeNull()
-    expect(uploads[1].headers.get('Content-Type')).toBeNull()
-    expect(uploads[2].headers.get('Content-Type')).toBeNull()
+    expect(api.startJob).toHaveBeenCalledWith(
+      expect.objectContaining({ inputStats: { sequenceCount: 1, totalLength: 4 } }),
+    )
+    expect(uploads[0].headers.get('Content-Type')).toBe(null)
+    expect(uploads[1].headers.get('Content-Type')).toBe(null)
+    expect(uploads[2].headers.get('Content-Type')).toBe(null)
     expect(new Uint8Array(await uploads[0].arrayBuffer())).toEqual(
       new TextEncoder().encode('>sequence\nACGT'),
     )
@@ -209,6 +234,8 @@ describe('bakta service', () => {
       const api: BaktaApi = createBaktaApi('')
       const res: JobResult = {
         jobID: 'A',
+        workflowKind: 'bakta',
+        resultKind: 'bakta',
         name: 'A',
         ResultFiles: {},
         started: new Date().toISOString(),

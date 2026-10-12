@@ -16,7 +16,7 @@ export interface TrackGenerator {
    * Is fired when a feature is hightlighted
    * @param fn
    */
-  onHighlight(fn: (f: Feature | undefined, evt: any) => void): TrackGenerator
+  onHighlight(fn: (f: Feature | undefined, evt: MouseEvent) => void): TrackGenerator
 }
 
 class FeatureTrackGenerator implements TrackGenerator {
@@ -26,7 +26,7 @@ class FeatureTrackGenerator implements TrackGenerator {
   features: Feature[]
   #colorFn: (f: Feature) => string = () => 'darkgray'
   #strokeFn: (f: Feature) => string = () => 'none'
-  #onHightlight: ((f: Feature | undefined, evt: any) => void) | undefined = undefined
+  #onHightlight: ((f: Feature | undefined, evt: MouseEvent) => void) | undefined = undefined
 
   /**
    * Height of the feature track in px.
@@ -61,7 +61,7 @@ class FeatureTrackGenerator implements TrackGenerator {
     return this
   }
 
-  onHighlight(fn: (f: Feature | undefined, evt: any) => void): TrackGenerator {
+  onHighlight(fn: (f: Feature | undefined, evt: MouseEvent) => void): TrackGenerator {
     this.#onHightlight = fn
     return this
   }

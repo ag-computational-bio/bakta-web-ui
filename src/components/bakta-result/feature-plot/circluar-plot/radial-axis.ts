@@ -43,11 +43,11 @@ class RadialAxisGenerator implements AxisGenerator {
   }
 
   _apply(rulerG: d3.Selection<SVGGElement, undefined, null, undefined>) {
-    const radiansScale = this.scale
-    const radius = this.radius
-    const tickFormatter = this._tickFormat
-    const conf = this
-    const useTransition = conf.#transition
+    const { scale: radiansScale, radius, _tickFormat: tickFormatter } = this
+    const useTransition = this.#transition
+    const minorTickLength = this.minorTickLength
+    const majorTickLength = this.majorTickLength
+    const tickLabelSize = this.tickLabelSize
 
     const innerRadius = radius - this.labelMargin - this.tickLabelSize - this.majorTickLength
 
@@ -89,7 +89,7 @@ class RadialAxisGenerator implements AxisGenerator {
       g.attr('data-tick', (d) => d)
       g.attr('d', (d) => {
         const p = d3.arc()({
-          outerRadius: innerRadius + conf.minorTickLength,
+          outerRadius: innerRadius + minorTickLength,
           innerRadius: innerRadius,
           startAngle: radiansScale(d),
           endAngle: radiansScale(d),
@@ -115,7 +115,7 @@ class RadialAxisGenerator implements AxisGenerator {
       g.attr('data-tick', (d) => d)
       g.attr('d', (d) => {
         const p = d3.arc()({
-          outerRadius: innerRadius + conf.majorTickLength,
+          outerRadius: innerRadius + majorTickLength,
           innerRadius: innerRadius,
           startAngle: radiansScale(d) - 0.00125,
           endAngle: radiansScale(d) + 0.00125,
@@ -144,10 +144,9 @@ class RadialAxisGenerator implements AxisGenerator {
       g.attr('text-anchor', 'middle')
       g.attr(
         'transform',
-        (d) =>
-          `rotate(${degreeScale(radiansScale(d))}), translate(0,${-radius + conf.tickLabelSize})`,
+        (d) => `rotate(${degreeScale(radiansScale(d))}), translate(0,${-radius + tickLabelSize})`,
       )
-      g.attr('font-size', conf.tickLabelSize)
+      g.attr('font-size', tickLabelSize)
       g.text((d) => tickFormatter(d, tickRange))
     }
 

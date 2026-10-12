@@ -9,32 +9,47 @@
         {{ e.label }}
       </button>
     </li>
-    <li v-if="showShareButton" class="nav-item ms-auto">
-      <button class="nav-link" @click="putLinkToClipboard" title="Copy link to clipboard">
+    <li v-if="showShareButton" class="nav-item ms-auto d-flex align-items-center">
+      <button
+        class="btn btn-icon btn-sm"
+        type="button"
+        @click="putLinkToClipboard"
+        title="Copy link to clipboard"
+      >
         <i class="bi bi-share"></i>
       </button>
     </li>
-    <li v-if="showAddJobButton" class="nav-item">
+    <li
+      v-if="showAddJobButton"
+      class="nav-item d-flex align-items-center"
+      :class="{ 'ms-auto': !showShareButton }"
+    >
       <button
-        class="nav-link text-secondary"
+        class="btn btn-icon btn-sm ms-1"
+        type="button"
         @click="addJobToJoblist"
-        title="Add this job your joblist"
+        title="Add this job to your job list"
       >
         <i class="bi bi-save2"></i>
       </button>
     </li>
   </ul>
-  <div class="p-3 pb-5 pt-3 border border-top-0 my-0 py-0 mb-4">
-    <BaktaStats v-if="currentTab === 'job'" :data="bakta" :job="job" />
+  <div class="card p-4 mt-3 mb-4">
+    <BaktaStats
+      v-if="currentTab === 'job'"
+      :data="bakta"
+      :job="job"
+      @select:type="showFeatureType"
+    />
     <BaktaGenomeViewer v-if="currentTab === 'browser'" :data="bakta" />
-    <BaktaAnnotationTable v-if="currentTab === 'table'" :data="bakta" />
+    <BaktaAnnotationTable v-if="currentTab === 'table'" v-model:type="featureType" :data="bakta" />
     <FeaturePlotViewer v-if="currentTab === 'circular'" :bakta="bakta" />
     <BaktaDownloads v-if="currentTab === 'download'" :job="job" />
   </div>
   <div
     v-if="showShareButton"
     ref="copyToast"
-    class="text-bg-secondary toast position-absolute px-2 py-1 bottom-0 end-0"
+    class="bg-primary-subtle text-primary-emphasis toast position-absolute px-2 py-1 bottom-0 end-0"
     role="alert"
     aria-live="assertive"
     aria-atomic="true"
@@ -43,7 +58,7 @@
   </div>
   <div
     ref="addedToast"
-    class="text-bg-secondary toast position-absolute px-2 py-1 bottom-0 end-0"
+    class="bg-primary-subtle text-primary-emphasis toast position-absolute px-2 py-1 bottom-0 end-0"
     role="alert"
     aria-live="assertive"
     aria-atomic="true"
@@ -52,7 +67,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import type { JobResult } from '@/model/job'
+import { listDownloadResultFiles, type JobResult } from '@/model/job'
 import type { Result } from '@/model/result-data'
 import BaktaGenomeViewer from './BaktaGenomeViewer.vue'
 import BaktaAnnotationTable from './BaktaAnnotationTable.vue'
@@ -98,7 +113,7 @@ const tabs = computed<TabDefinition[]>(() => {
     },
   ]
 
-  if (Object.keys(props.job.ResultFiles).length > 1)
+  if (listDownloadResultFiles(props.job.ResultFiles).length > 0)
     tabs.push({
       key: 'download',
       label: 'Downloads',
@@ -106,6 +121,11 @@ const tabs = computed<TabDefinition[]>(() => {
   return tabs
 })
 const currentTab = ref<tabs>('job')
+const featureType = ref('')
+function showFeatureType(type: string) {
+  featureType.value = type
+  currentTab.value = 'table'
+}
 const toast = useTemplateRef('copyToast')
 function putLinkToClipboard() {
   window.navigator.clipboard.writeText(window.location.href)

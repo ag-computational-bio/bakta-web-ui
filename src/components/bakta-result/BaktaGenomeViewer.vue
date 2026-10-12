@@ -1,5 +1,5 @@
 <template>
-  <div ref="igvref"></div>
+  <div ref="igvref" class="genome-viewer"></div>
 </template>
 
 <script setup lang="ts">
@@ -104,6 +104,7 @@ function setupIgv() {
       wholeGenomeView: false,
     },
     loadDefaultGenomes: false,
+    search: false,
   }
   igv.createBrowser(igvref.value, config).then((x) => {
     igvObj.value = x
@@ -151,3 +152,10 @@ watch(() => props.data, refresh)
 onMounted(setupIgv)
 onBeforeUnmount(destroyIgv)
 </script>
+
+<style scoped>
+.genome-viewer {
+  max-width: 100%;
+  overflow-x: auto;
+}
+</style>
