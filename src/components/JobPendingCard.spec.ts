@@ -5,10 +5,12 @@ import JobPendingCard from './JobPendingCard.vue'
 
 const stages = (content: string): StageLog[] => [{ stage: 'annotate', status: 'running', content }]
 
-// jsdom has no layout, so the log gets a fixed size: 1000 px of text in a 100 px box
+// the short log does not overflow, so it gets a fixed size: 1000 px of text in a 100 px box.
+// scrollTop is a plain value, so the browser does not reset it to 0.
 function layout(el: HTMLElement) {
   Object.defineProperty(el, 'scrollHeight', { configurable: true, value: 1000 })
   Object.defineProperty(el, 'clientHeight', { configurable: true, value: 100 })
+  Object.defineProperty(el, 'scrollTop', { configurable: true, writable: true, value: 0 })
 }
 
 describe('JobPendingCard', () => {
