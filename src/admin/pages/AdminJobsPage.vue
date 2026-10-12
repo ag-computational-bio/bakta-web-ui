@@ -301,6 +301,7 @@ import {
   type WorkflowPhase,
 } from '../admin-api'
 import { filterQuery, filters, lastJobListQuery, statsFilter } from '../admin-filters'
+import { loadCachedFirst } from '../admin-cache'
 import { handleAdminError, useAdminApi } from '../admin-session'
 import { bulkScope } from '../bulk-preview'
 import '../admin-menu.css'
@@ -395,7 +396,23 @@ function detailLink(id: string) {
 }
 
 let request = 0
-async function load() {
+// the last requested list, so the same list is not requested twice in a row
+let lastRequest: string | undefined
+// "force" loads the list again, for example after an action
+async function load(force = false) {
+  const jobQuery = {
+    ...statsFilter(),
+    q: search.value.trim() || undefined,
+    status: statuses.value,
+    workflowKind: kinds.value,
+    workflowPhase: phases.value,
+    sort: sort.value,
+    limit: pageSize.value,
+    offset: (page.value - 1) * pageSize.value,
+  }
+  const key = JSON.stringify(jobQuery)
+  if (!force && key === lastRequest) return
+  lastRequest = key
   const current = ++request
   loading.value = true
   error.value = undefined
@@ -413,26 +430,28 @@ async function load() {
   // the hash stays, it can point to the workflows section
   router.replace({ hash: route.hash, query })
   try {
-    const result = await api.jobs({
-      ...statsFilter(),
-      q: search.value.trim() || undefined,
-      status: statuses.value,
-      workflowKind: kinds.value,
-      workflowPhase: phases.value,
-      sort: sort.value,
-      limit: pageSize.value,
-      offset: (page.value - 1) * pageSize.value,
-    })
-    if (current !== request) return
-    jobs.value = result.items
-    total.value = result.total
-    // after a delete the page can be beyond the end, then the last page loads
-    const last = clampPage(page.value, result.total, pageSize.value)
-    if (last !== page.value) page.value = last
-    // the list moves the workflows section down, so a link to it scrolls again
-    nextTick(() => orphans.value?.reveal())
+    // the previous rows stay until the new ones are there, a recent answer for the same list shows at once
+    await loadCachedFirst(
+      api,
+      (a) => a.jobs(jobQuery),
+      (result, cached) => {
+        // an older answer must not replace the data of a newer request
+        if (current !== request) return
+        jobs.value = result.items
+        total.value = result.total
+        if (cached) return
+        // after a delete the page can be beyond the end, then the last page loads
+        const last = clampPage(page.value, result.total, pageSize.value)
+        if (last !== page.value) page.value = last
+        // the list moves the workflows section down, so a link to it scrolls again
+        nextTick(() => orphans.value?.reveal())
+      },
+    )
   } catch (e) {
-    if (current === request) error.value = handleAdminError(e)
+    if (current !== request) return
+    error.value = handleAdminError(e)
+    // the same list can be tried again
+    lastRequest = undefined
   } finally {
     if (current === request) loading.value = false
   }
@@ -494,7 +513,7 @@ function openBulk(action: BulkAction) {
 }
 
 function reloadAll() {
-  load()
+  load(true)
   orphans.value?.load()
 }
 
@@ -517,7 +536,7 @@ async function runAction(job: JobListItem, action: WorkflowAction) {
       const r = await api[action](job.id)
       result.value = `${label}: workflow ${r.workflow_name} is now ${r.phase.toLowerCase()}.`
     }
-    await load()
+    await load(true)
   } catch (e) {
     error.value = handleAdminError(e)
   } finally {
@@ -534,7 +553,7 @@ watch(search, () => {
 watch([filters, sort, statuses, kinds, phases, pageSize], () =>
   page.value === 1 ? load() : (page.value = 1),
 )
-watch(page, load)
+watch(page, () => load())
 load()
 </script>
 
