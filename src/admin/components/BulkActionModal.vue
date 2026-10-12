@@ -277,7 +277,7 @@ const truncatedText = computed(() => {
   if (!p?.truncated) return ''
   const shown = formatCount(p.items.length)
   const of = p.total == null ? '' : ` of ${formatCount(p.total)}`
-  return `Only the newest ${shown}${of} matching workflows are shown and would be changed.`
+  return `Only the newest ${shown}${of} matching workflows are shown. Only the applicable ones among them would be changed.`
 })
 
 const usedFilters = computed(() => {
