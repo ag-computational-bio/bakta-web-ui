@@ -45,10 +45,12 @@ export const filters = reactive({
 
 /**
  * The query parameters of the current filters. "now" is a parameter for the tests.
+ * The start is taken from the full minute, so the same filters give the same
+ * request for a while and cached answers can be used.
  */
 export function statsFilter(now = new Date()): StatsFilter {
   const filter: StatsFilter = { environment: filters.environment }
-  const from = rangeStart(filters.range, now)
+  const from = rangeStart(filters.range, new Date(Math.floor(now.getTime() / 60_000) * 60_000))
   if (from) filter.from = from.toISOString()
   if (filters.range === 'custom') {
     if (filters.customFrom) filter.from = `${filters.customFrom}T00:00:00Z`

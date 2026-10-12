@@ -2,6 +2,7 @@ import { stripLogEndMarkers } from '@/model/bakta-api'
 import { WorkflowKindSchema } from '@/model/job'
 import { StageStatuses, type WorkflowLogs } from '@/model/submit'
 import { z } from 'zod'
+import { AdminCache, NotCachedError } from './admin-cache'
 
 /*
  * Client for the admin API of the backend. The contract is
@@ -441,6 +442,8 @@ export interface AdminApi {
   deleteJob(id: string, purgeData: boolean): Promise<DeleteResult>
   workflows(query: WorkflowQuery): Promise<WorkflowItem[]>
   bulk(request: BulkRequest): Promise<BulkResult>
+  // the same requests, answered only from the cache: they fail without a recent answer
+  cached?: AdminApi
 }
 
 /**
@@ -490,14 +493,41 @@ export function toWorkflowLogs(payload: unknown): WorkflowLogs {
 class HttpAdminApi implements AdminApi {
   #baseUrl: string
   #token: (renew?: boolean) => Promise<string | undefined>
+  #cache: AdminCache
+  #cacheOnly: boolean
+  cached?: AdminApi
 
-  constructor(baseUrl: string, token: (renew?: boolean) => Promise<string | undefined>) {
+  constructor(
+    baseUrl: string,
+    token: (renew?: boolean) => Promise<string | undefined>,
+    cache: AdminCache,
+    cacheOnly = false,
+  ) {
     this.#baseUrl = baseUrl
     this.#token = token
+    this.#cache = cache
+    this.#cacheOnly = cacheOnly
+    if (!cacheOnly) this.cached = new HttpAdminApi(baseUrl, token, cache, true)
+  }
+
+  // GET requests go through the cache, other requests clear it afterwards
+  async #request(method: string, path: string, body?: unknown): Promise<unknown> {
+    if (this.#cacheOnly) {
+      const value = method === 'GET' ? this.#cache.peek(path) : undefined
+      if (value === undefined) throw new NotCachedError(path)
+      return value
+    }
+    if (method === 'GET') return this.#cache.fetch(path, () => this.#send(method, path))
+    return this.#send(method, path, body).finally(() => {
+      // a bulk dry run changes nothing
+      if (!(body && typeof body === 'object' && 'dry_run' in body && body.dry_run)) {
+        this.#cache.clear()
+      }
+    })
   }
 
   // "renewed" is the token of the second try after a 401 answer
-  async #request(method: string, path: string, body?: unknown, renewed?: string): Promise<unknown> {
+  async #send(method: string, path: string, body?: unknown, renewed?: string): Promise<unknown> {
     const token = renewed ?? (await this.#token())
     const headers: Record<string, string> = { Accept: 'application/json' }
     if (token) headers.Authorization = `Bearer ${token}`
@@ -518,7 +548,7 @@ class HttpAdminApi implements AdminApi {
     // the token may have expired on the way: renew it and try once more
     if (response.status === 401 && renewed == undefined) {
       const fresh = await this.#token(true)
-      if (fresh && fresh !== token) return this.#request(method, path, body, fresh)
+      if (fresh && fresh !== token) return this.#send(method, path, body, fresh)
     }
     const message =
       payload && typeof payload === 'object' && 'error' in payload
@@ -628,6 +658,7 @@ class HttpAdminApi implements AdminApi {
 export function createHttpAdminApi(
   baseUrl: string,
   token: (renew?: boolean) => Promise<string | undefined>,
+  cache = new AdminCache(),
 ): AdminApi {
-  return new HttpAdminApi(baseUrl, token)
+  return new HttpAdminApi(baseUrl, token, cache)
 }

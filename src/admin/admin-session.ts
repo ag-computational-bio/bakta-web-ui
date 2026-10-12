@@ -1,6 +1,7 @@
 import { reactive } from 'vue'
 import { AdminApiError, createHttpAdminApi, type AdminApi, type AdminUser } from './admin-api'
 import type { AdminAuth } from './admin-auth'
+import { AdminCache } from './admin-cache'
 import { useAdminConfig } from './admin-config'
 
 /*
@@ -24,6 +25,8 @@ export const session = reactive<{
 }>({ status: 'loading', mock: false })
 
 let api: AdminApi | undefined
+// the answers of the admin API, dropped on logout
+const cache = new AdminCache()
 let auth: AdminAuth | undefined
 let started: Promise<void> | undefined
 
@@ -50,6 +53,7 @@ export function handleAdminError(error: unknown): string {
   if (error instanceof AdminApiError) {
     if (error.status === 401) session.status = 'signed-out'
     if (error.status === 403) session.status = 'forbidden'
+    if (error.status === 401 || error.status === 403) cache.clear()
   }
   return errorMessage(error)
 }
@@ -70,7 +74,7 @@ async function start(): Promise<void> {
       session.status = 'signed-out'
       return
     }
-    api = createHttpAdminApi(config.api, (renew) => oidc.accessToken(renew))
+    api = createHttpAdminApi(config.api, (renew) => oidc.accessToken(renew), cache)
   }
   try {
     session.user = await api.me()
@@ -123,6 +127,7 @@ export async function completeSignIn(): Promise<string> {
 }
 
 export async function signOut(): Promise<void> {
+  cache.clear()
   const oidc = await loadAuth()
   if (oidc == undefined) return
   try {
