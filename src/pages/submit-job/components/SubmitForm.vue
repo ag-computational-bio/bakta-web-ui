@@ -198,7 +198,7 @@
         <div class="col-md-6">
           <label class="form-label me-1" for="locustag">Locus tag prefix</label>
           <HelpTip
-            text="Prefix for feature IDs. Created automatically if empty. 3 to 12 characters: uppercase letters and digits, starting with a letter."
+            text="Prefix for feature IDs. Created automatically if empty."
           />
           <LocusTagInput v-model="locusTag" :compliant="compliant" />
         </div>
