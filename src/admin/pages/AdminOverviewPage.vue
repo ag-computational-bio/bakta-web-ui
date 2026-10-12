@@ -103,6 +103,27 @@
         />
       </div>
     </div>
+    <div class="col-xl-6">
+      <div class="card p-4 h-100">
+        <h3 class="section-title">By origin</h3>
+        <div class="table-responsive scroll-hint">
+          <table class="table table-striped align-middle text-nowrap mb-0">
+            <thead>
+              <tr>
+                <th>Origin</th>
+                <th class="text-end">Jobs</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="row in summary?.by_origin ?? []" :key="row.origin ?? ''">
+                <td>{{ formatOrigin(row.origin) }}</td>
+                <td class="text-end">{{ formatCount(row.jobs_total) }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -136,6 +157,7 @@ import {
   formatCount,
   formatDateTime,
   formatDuration,
+  formatOrigin,
   formatPercent,
   successRate,
   formatPeriod,

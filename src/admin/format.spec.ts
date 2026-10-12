@@ -5,6 +5,7 @@ import {
   changeText,
   configEntries,
   formatDuration,
+  formatOrigin,
   formatPercent,
   outcomeText,
   percentile,
@@ -159,5 +160,14 @@ describe('periodRange', () => {
     expect(periodRange(utc('2025-12-29'), 'week')).toBe('29 Dec 2025 to 4 Jan 2026')
     expect(periodRange(utc('2026-02-01'), 'month')).toBe('1 Feb to 28 Feb 2026')
     expect(periodRange(utc('2026-01-01'), 'year')).toBe('1 Jan to 31 Dec 2026')
+  })
+})
+
+describe('formatOrigin', () => {
+  it('names the unknown origin and the missing one', () => {
+    expect(formatOrigin('Unknown')).toBe('Unknown (API or CLI)')
+    expect(formatOrigin(null)).toBe('-')
+    expect(formatOrigin(undefined)).toBe('-')
+    expect(formatOrigin('bakta.computational.bio')).toBe('bakta.computational.bio')
   })
 })

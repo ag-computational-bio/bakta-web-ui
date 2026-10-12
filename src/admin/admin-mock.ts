@@ -48,6 +48,14 @@ function stats(values: (number | null | undefined)[]): Percentiles {
 
 const activeStatuses: AdminJobStatus[] = ['created', 'submitted', 'running']
 
+function origins(jobs: JobRecord[]) {
+  const counts = new Map<string | null, number>()
+  for (const j of jobs) counts.set(j.origin ?? null, (counts.get(j.origin ?? null) ?? 0) + 1)
+  return [...counts]
+    .map(([origin, jobs_total]) => ({ origin, jobs_total }))
+    .sort((a, b) => b.jobs_total - a.jobs_total)
+}
+
 function succeeded(job: JobRecord): boolean {
   return job.outcome === 'succeeded'
 }
@@ -177,6 +185,7 @@ class MockAdminApi implements AdminApi {
       runtime_seconds: stats(jobs.filter(succeeded).map((j) => j.runtime_seconds)),
       queue_seconds: stats(jobs.map((j) => j.queue_seconds)),
       total_input_bp: jobs.reduce((sum, j) => sum + (j.total_length ?? 0), 0),
+      by_origin: origins(jobs),
       by_workflow_kind: kinds.map((kind) => {
         const ofKind = jobs.filter((j) => j.workflow_kind === kind)
         return {

@@ -13,6 +13,11 @@ import type { Interval } from './admin-api'
 
 const missing = '-'
 
+export function formatOrigin(origin: string | null | undefined): string {
+  if (origin == null) return missing
+  return origin === 'Unknown' ? 'Unknown (API or CLI)' : origin
+}
+
 export function formatCount(n: number | null | undefined): string {
   if (n == undefined) return missing
   return new Intl.NumberFormat('en-GB').format(n)

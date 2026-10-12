@@ -78,6 +78,7 @@ export const StatsSummarySchema = z.object({
   runtime_seconds: PercentilesSchema,
   queue_seconds: PercentilesSchema,
   total_input_bp: optionalNumber,
+  by_origin: z.array(z.object({ origin: z.string().nullable(), jobs_total: z.number() })).nullish(),
   by_workflow_kind: z.array(
     z.object({
       workflow_kind: z.string(),
@@ -240,6 +241,8 @@ const JobListItemSchema = z.object({
   id: z.string(),
   environment: z.string(),
   workflow_kind: WorkflowKindSchema,
+  // the website that sent the job, "Unknown" for API or CLI use
+  origin: optionalText,
   status: AdminJobStatusSchema,
   outcome: OutcomeSchema,
   organism: optionalText,
@@ -268,6 +271,7 @@ export const JobRecordSchema = z.object({
   environment: z.string(),
   workflow_kind: WorkflowKindSchema,
   api_version: z.string(),
+  origin: optionalText,
   status: AdminJobStatusSchema,
   outcome: OutcomeSchema,
   name: optionalText,

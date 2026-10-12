@@ -218,6 +218,7 @@ import {
   formatCount,
   formatDateTime,
   formatDuration,
+  formatOrigin,
   outcomeText,
   phaseStatus,
 } from '../format'
@@ -304,6 +305,7 @@ const panels = computed(() => {
         { label: 'Name', value: j.name ?? '-' },
         { label: 'Environment', value: j.environment },
         { label: 'API version', value: j.api_version },
+        { label: 'Origin', value: formatOrigin(j.origin) },
         { label: 'Workflow', value: j.workflow_name ?? '-' },
       ],
     },
@@ -372,8 +374,7 @@ async function load() {
       if (e instanceof AdminApiError && e.status === 410) {
         logsDeleted.value = true
         logs.value = undefined
-      }
-      else logsError.value = handleAdminError(e)
+      } else logsError.value = handleAdminError(e)
     })
 }
 

@@ -107,6 +107,17 @@ function createJob(createdMs: number, now: number): JobRecord {
     ['production', 85],
     ['staging', 15],
   ])
+  const origin =
+    environment === 'staging'
+      ? pick<string>([
+          ['staging.bakta.computational.bio', 60],
+          ['http_localhost_5173', 30],
+          ['Unknown', 10],
+        ])
+      : pick<string>([
+          ['bakta.computational.bio', 75],
+          ['Unknown', 25],
+        ])
   const [genus, species, strain, length, contigs] = pick(organisms.map((o) => [o, 1]))
   const fromFasta = kind === 'bakta' || kind === 'bakta_baktfold'
   const totalLength = Math.round(length * (0.95 + rnd() * 0.1))
@@ -145,6 +156,7 @@ function createJob(createdMs: number, now: number): JobRecord {
       id,
       environment,
       workflow_kind: kind,
+      origin,
       api_version: createdMs < now - 400 * day && rnd() < 0.7 ? 'v1' : 'v2',
       status,
       outcome,
