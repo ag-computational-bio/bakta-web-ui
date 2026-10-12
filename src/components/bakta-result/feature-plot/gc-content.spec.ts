@@ -150,7 +150,8 @@ describe('gc content', () => {
       // 0++
       // ++1+
       expect(calcGcContent('ggca', 2, false)).to.deep.equal({
-        mean: 1,
+        mean: 3 / 4,
+        steps: 2,
         stepSize: 2,
         windowSize: 5,
         data: [
@@ -161,17 +162,19 @@ describe('gc content', () => {
     })
 
     it('should work when seq len is divisible by steps + 1', () => {
+      // stepsize round(5 / 2) = 3, windowsize = 7
       // 01234
       // ggcac
-      // 0++
-      // ++1++
+      // 0+++     => 3/4
+      // +++1+    => 4/5
       expect(calcGcContent('ggcac', 2, false)).to.deep.equal({
-        mean: 1,
-        stepSize: 2,
-        windowSize: 5,
+        mean: 4 / 5,
+        steps: 2,
+        stepSize: 3,
+        windowSize: 7,
         data: [
-          [0, 1],
-          [2, 4 / 5],
+          [0, 3 / 4],
+          [3, 4 / 5],
         ],
       })
     })
@@ -424,18 +427,19 @@ describe('gc skew', () => {
     })
 
     it('should work when seq len is divisible by steps + 1', () => {
+      // stepsize round(5 / 2) = 3, windowsize = 7
       // 01234
       // ggcac  2-2/2+2 = 0
-      // 0++    2-1/2+1 = 1/3
-      // ++1++  0
+      // 0+++   2-1/2+1 = 1/3
+      // +++1+  0
       expect(calcGcSkew('ggcac', 2, false)).to.deep.equal({
         mean: 0,
         steps: 2,
-        stepSize: 2,
-        windowSize: 5,
+        stepSize: 3,
+        windowSize: 7,
         data: [
           [0, 1 / 3],
-          [2, 0],
+          [3, 0],
         ],
       })
     })
