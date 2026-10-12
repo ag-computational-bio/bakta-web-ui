@@ -1,6 +1,6 @@
 FROM mcr.microsoft.com/playwright:v1.64.0-noble AS builder
 
-WORKDIR /src
+WORKDIR /app
 # install the dependencies first, so this layer is reused when only the source changes
 COPY package.json package-lock.json ./
 RUN npm ci
@@ -18,4 +18,4 @@ LABEL org.opencontainers.image.title='Bakta Web Frontend'
 LABEL org.opencontainers.image.description='Web frontend for bakta: Rapid & comprehensive annotation of bacterial genomes & plasmids'
 
 COPY nginx.conf /etc/nginx/conf.d/default.conf
-COPY --from=builder /src/dist /usr/share/nginx/html
+COPY --from=builder /app/dist /usr/share/nginx/html
