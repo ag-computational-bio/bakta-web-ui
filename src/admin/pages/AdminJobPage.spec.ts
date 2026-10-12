@@ -10,7 +10,6 @@ const api = { job: vi.fn(), jobLogs: vi.fn(), deleteJob: vi.fn() }
 vi.mock('vue-router', () => ({
   useRoute: () => route,
   useRouter: () => ({ back: vi.fn() }),
-  RouterLink: { template: '<a><slot /></a>' },
 }))
 vi.mock('../admin-session', () => ({ useAdminApi: () => api, handleAdminError: String }))
 // the Bootstrap modal is not needed here, the test decides when it confirms
@@ -49,6 +48,15 @@ function deferred<T>() {
 }
 
 const stubs = { WorkflowLogViewer: true, DisplayTuple: true }
+// the page renders its own link from the slot props of the global RouterLink
+const components = {
+  RouterLink: defineComponent({
+    props: ['to', 'custom'],
+    setup(_, { slots }) {
+      return () => slots.default?.({ href: '/admin/jobs', navigate: () => {} })
+    },
+  }),
+}
 
 // pages of earlier tests must not load again when the route changes
 enableAutoUnmount(afterEach)
@@ -64,7 +72,7 @@ describe('AdminJobPage', () => {
   it('keeps the newer job when the answer for the older one comes late', async () => {
     const a = deferred<JobDetail>()
     api.job.mockReturnValueOnce(a.promise).mockResolvedValueOnce(detail('b'))
-    const wrapper = mount(AdminJobPage, { global: { stubs } })
+    const wrapper = mount(AdminJobPage, { global: { stubs, components } })
     route.params.id = 'b'
     await flushPromises()
     a.resolve(detail('a'))
@@ -76,7 +84,7 @@ describe('AdminJobPage', () => {
     api.job.mockResolvedValue(detail('b'))
     api.deleteJob.mockResolvedValue({ deleted_workflow: true, purged_objects: 0 })
     route.params.id = 'b'
-    const wrapper = mount(AdminJobPage, { global: { stubs } })
+    const wrapper = mount(AdminJobPage, { global: { stubs, components } })
     await flushPromises()
     const remove = wrapper.findAll('button').find((b) => b.text() === 'Delete')!
     await remove.trigger('click')
@@ -87,7 +95,7 @@ describe('AdminJobPage', () => {
   it('does nothing when another job was opened during the confirmation', async () => {
     const confirmed = deferred<boolean>()
     api.job.mockResolvedValueOnce(detail('a')).mockReturnValueOnce(new Promise(() => {}))
-    const wrapper = mount(AdminJobPage, { global: { stubs } })
+    const wrapper = mount(AdminJobPage, { global: { stubs, components } })
     await flushPromises()
     confirmation.open = () => confirmed.promise
     const remove = wrapper.findAll('button').find((b) => b.text() === 'Delete')!
@@ -100,7 +108,7 @@ describe('AdminJobPage', () => {
 
   it('hides what needs the deleted data and does not ask for the logs', async () => {
     api.job.mockResolvedValue(detail('a', false))
-    const wrapper = mount(AdminJobPage, { global: { stubs } })
+    const wrapper = mount(AdminJobPage, { global: { stubs, components } })
     await flushPromises()
     const labels = wrapper.findAll('button').map((b) => b.text())
     expect(labels).not.toContain('Retry')
@@ -114,7 +122,7 @@ describe('AdminJobPage', () => {
   it('shows the logs note when the server answers 410', async () => {
     api.job.mockResolvedValue(detail('a'))
     api.jobLogs.mockRejectedValue(new AdminApiError(410, 'Logs were deleted'))
-    const wrapper = mount(AdminJobPage, { global: { stubs } })
+    const wrapper = mount(AdminJobPage, { global: { stubs, components } })
     await flushPromises()
     expect(wrapper.text()).toContain('The logs were deleted after the retention period.')
     expect(wrapper.text()).not.toContain('No logs available')
@@ -124,7 +132,7 @@ describe('AdminJobPage', () => {
     const failed = detail('a')
     Object.assign(failed.job, { status: 'failed', error_message: 'bakta exited with code 1' })
     api.job.mockResolvedValue(failed)
-    const wrapper = mount(AdminJobPage, { global: { stubs } })
+    const wrapper = mount(AdminJobPage, { global: { stubs, components } })
     await flushPromises()
     const labels = wrapper.findAll('button').map((b) => b.text())
     expect(labels).toEqual(expect.arrayContaining(['Resubmit', 'Delete']))
