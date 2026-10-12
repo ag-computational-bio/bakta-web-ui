@@ -108,6 +108,11 @@ describe('previousFilter', () => {
       '2026-09-27T12:00:00.000Z',
     )
     expect(previousFilter({ environment: 'all' }, now)).toBeUndefined()
+    // the same minute gives the same period
+    const filter = { environment: 'all' as const, from: '2026-10-04T12:00:00Z' }
+    expect(previousFilter(filter, new Date('2026-10-11T12:00:05Z'))).toEqual(
+      previousFilter(filter, new Date('2026-10-11T12:00:55Z')),
+    )
     expect(previousLabel('30d')).toBe('previous 30 days')
     expect(previousLabel('custom')).toBe('previous period')
   })

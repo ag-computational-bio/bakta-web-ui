@@ -71,7 +71,8 @@ export function statsFilter(now = new Date()): StatsFilter {
 export function previousFilter(filter: StatsFilter, now = new Date()): StatsFilter | undefined {
   if (!filter.from) return undefined
   const from = Date.parse(filter.from)
-  const to = filter.to ? Date.parse(filter.to) : now.getTime()
+  // the full minute, like in statsFilter, so the request repeats for a while
+  const to = filter.to ? Date.parse(filter.to) : Math.floor(now.getTime() / 60_000) * 60_000
   return {
     environment: filter.environment,
     from: new Date(from - (to - from)).toISOString(),
