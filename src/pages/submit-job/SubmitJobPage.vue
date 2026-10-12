@@ -30,22 +30,25 @@
         </li>
       </ul>
 
-      <SubmitForm
-        v-if="activeWorkflow === 'bakta'"
-        v-model="baktaRequest"
-        :show-baktfold-after="supportsBaktaBaktfold"
-        @update:valid="(evt) => (baktaValid = evt)"
-      />
-      <SubmitBaktfoldForm
-        v-if="activeWorkflow === 'baktfold'"
-        v-model="baktfoldRequest"
-        @update:valid="(evt) => (baktfoldValid = evt)"
-      />
-      <SubmitBaktaProteinsForm
-        v-if="activeWorkflow === 'bakta_proteins'"
-        v-model="baktaProteinsRequest"
-        @update:valid="(evt) => (baktaProteinsValid = evt)"
-      />
+      <!-- keeps each form as it was when switching tabs, so its fields and errors stay visible -->
+      <KeepAlive>
+        <SubmitForm
+          v-if="activeWorkflow === 'bakta'"
+          v-model="baktaRequest"
+          :show-baktfold-after="supportsBaktaBaktfold"
+          @update:valid="(evt) => (baktaValid = evt)"
+        />
+        <SubmitBaktfoldForm
+          v-else-if="activeWorkflow === 'baktfold'"
+          v-model="baktfoldRequest"
+          @update:valid="(evt) => (baktfoldValid = evt)"
+        />
+        <SubmitBaktaProteinsForm
+          v-else-if="activeWorkflow === 'bakta_proteins'"
+          v-model="baktaProteinsRequest"
+          @update:valid="(evt) => (baktaProteinsValid = evt)"
+        />
+      </KeepAlive>
 
       <div class="d-flex justify-content-end mb-5 mt-4">
         <button
