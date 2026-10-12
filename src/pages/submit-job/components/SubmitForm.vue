@@ -386,6 +386,7 @@ import AutocompleteInput from './AutocompleteInput.vue'
 import EditRepliconTable from './EditRepliconTable.vue'
 import FastaFileChooser from './FastaFileChooser.vue'
 import FastaSequenceInput from './FastaSequenceInput.vue'
+import { locusError, locusTagError } from '@/model/locus-validation'
 import LocusInput from './LocusInput.vue'
 import LocusTagInput from './LocusTagInput.vue'
 import SelectDermType from './SelectDermType.vue'
@@ -550,6 +551,7 @@ const idsAreINSDCCompliant = computed(() => {
 const valid = computed(() => {
   if (props.modelValue.sequence.length === 0) return false
   if (validationError.value.length > 0) return false
+  if (locusError(locus.value) || locusTagError(locusTag.value, compliant.value)) return false
   if (keepContigHeaders.value || compliant.value) return idsAreINSDCCompliant.value
   return true
 })
