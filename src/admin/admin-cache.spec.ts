@@ -187,4 +187,26 @@ describe('http admin api cache', () => {
     }
     expect(fetch).toHaveBeenCalledTimes(14)
   })
+
+  it('drops the cache when the token renewal failed', async () => {
+    const fetch = mockFetch()
+    let token: string | undefined = 'token'
+    const api = createHttpAdminApi('/api/admin', async () => token)
+    await api.jobs({ environment: 'all' })
+    expect((await api.cached!.jobs({ environment: 'all' })).total).toBe(1)
+    // no token and then a network error
+    token = undefined
+    fetch.mockRejectedValueOnce(new TypeError('network'))
+    await api.jobs({ environment: 'staging' }).catch(() => undefined)
+    await expect(api.cached!.jobs({ environment: 'all' })).rejects.toThrow()
+  })
+
+  it('drops the cache when the renewal after a 401 failed', async () => {
+    const fetch = mockFetch()
+    const api = createHttpAdminApi('/api/admin', async (renew) => (renew ? undefined : 'token'))
+    await api.jobs({ environment: 'all' })
+    fetch.mockResolvedValueOnce(new Response('{}', { status: 401 }))
+    await api.jobs({ environment: 'staging' }).catch(() => undefined)
+    await expect(api.cached!.jobs({ environment: 'all' })).rejects.toThrow()
+  })
 })

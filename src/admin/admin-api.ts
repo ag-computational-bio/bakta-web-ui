@@ -529,6 +529,8 @@ class HttpAdminApi implements AdminApi {
   // "renewed" is the token of the second try after a 401 answer
   async #send(method: string, path: string, body?: unknown, renewed?: string): Promise<unknown> {
     const token = renewed ?? (await this.#token())
+    // no token after the renewal failed: the login is lost, so the cache is cleared
+    if (!token) this.#cache.clear()
     const headers: Record<string, string> = { Accept: 'application/json' }
     if (token) headers.Authorization = `Bearer ${token}`
     if (body != undefined) headers['Content-Type'] = 'application/json'
@@ -548,6 +550,7 @@ class HttpAdminApi implements AdminApi {
     // the token may have expired on the way: renew it and try once more
     if (response.status === 401 && renewed == undefined) {
       const fresh = await this.#token(true)
+      if (!fresh) this.#cache.clear()
       if (fresh && fresh !== token) return this.#send(method, path, body, fresh)
     }
     const message =
