@@ -430,7 +430,7 @@ class MockAdminApi implements AdminApi {
     const items = this.#workflowItems(query.environment)
       .filter((w) => !query.orphans || !w.job_id)
       .filter((w) => !phases.length || phases.includes(w.phase as WorkflowPhase))
-    return delay(items)
+    return delay({ items, total: items.length })
   }
 
   #bulkMatches(request: BulkRequest): WorkflowItem[] {
@@ -444,6 +444,12 @@ class MockAdminApi implements AdminApi {
       .filter((w) => !workflow_kinds?.length || workflow_kinds.includes(w.workflow_kind ?? ''))
       .filter((w) => limit == null || (!!w.finished_at && Date.parse(w.finished_at) < limit))
       .filter((w) => !request.workflow_names || request.workflow_names.includes(w.name))
+  }
+
+  // newest first, at most limit of them like the backend
+  #bulkLimit(matches: WorkflowItem[], request: BulkRequest): WorkflowItem[] {
+    const newest = (w: WorkflowItem) => Date.parse(w.started_at ?? '') || 0
+    return [...matches].sort((a, b) => newest(b) - newest(a)).slice(0, request.limit ?? 1000)
   }
 
   async #bulkRun(action: BulkAction, w: WorkflowItem) {
@@ -466,7 +472,10 @@ class MockAdminApi implements AdminApi {
   }
 
   async bulk(request: BulkRequest) {
-    const matches = this.#bulkMatches(request)
+    const all = this.#bulkMatches(request)
+    const matches = this.#bulkLimit(all, request)
+    const total = all.length
+    const truncated = total > matches.length
     const needsData = request.action === 'retry' || request.action === 'resubmit'
     const item = (w: WorkflowItem): BulkItem => {
       const deleted = needsData && !this.#dataAvailable(w)
@@ -485,7 +494,13 @@ class MockAdminApi implements AdminApi {
       }
     }
     if (request.dry_run) {
-      return delay({ dry_run: true, action: request.action, items: matches.map(item) })
+      return delay({
+        dry_run: true,
+        action: request.action,
+        total,
+        truncated,
+        items: matches.map(item),
+      })
     }
     const names = request.workflow_names ?? matches.map((w) => w.name)
     const items = await Promise.all(
@@ -510,7 +525,7 @@ class MockAdminApi implements AdminApi {
         }
       }),
     )
-    return delay({ dry_run: false, action: request.action, items })
+    return delay({ dry_run: false, action: request.action, total, truncated, items })
   }
 }
 

@@ -55,6 +55,29 @@ describe('http admin api', () => {
     expect(JSON.parse(String(fetch.mock.calls[3][1]?.body))).toEqual(request)
   })
 
+  it('uses the total of the workflow list and falls back to the item count', async () => {
+    const item = { name: 'w1', phase: 'Failed' }
+    const fetch = vi.spyOn(window, 'fetch')
+    fetch.mockResolvedValueOnce(new Response(JSON.stringify({ items: [item], total: 2345 })))
+    fetch.mockResolvedValueOnce(new Response(JSON.stringify({ items: [item] })))
+    const api = createHttpAdminApi('/api/admin', () => Promise.resolve(undefined))
+    expect((await api.workflows({ environment: 'all' })).total).toBe(2345)
+    expect((await api.workflows({ environment: 'all' })).total).toBe(1)
+  })
+
+  it('parses a bulk result with and without total and truncated', async () => {
+    const fetch = vi.spyOn(window, 'fetch')
+    const base = { dry_run: true, action: 'stop', items: [] }
+    fetch.mockResolvedValueOnce(
+      new Response(JSON.stringify({ ...base, total: 5, truncated: true })),
+    )
+    fetch.mockResolvedValueOnce(new Response(JSON.stringify(base)))
+    const api = createHttpAdminApi('/api/admin', () => Promise.resolve(undefined))
+    const request = { filter: {}, action: 'stop' as const, dry_run: true }
+    expect(await api.bulk(request)).toMatchObject({ total: 5, truncated: true })
+    expect((await api.bulk(request)).truncated).toBeUndefined()
+  })
+
   it('keeps the status and message of errors', async () => {
     vi.spyOn(window, 'fetch').mockResolvedValue(
       new Response(JSON.stringify({ error: 'not an admin' }), { status: 403 }),

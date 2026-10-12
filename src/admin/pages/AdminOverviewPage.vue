@@ -345,7 +345,7 @@ async function loadOrphans() {
     await loadCachedFirst(
       api,
       (api) => api.workflows({ environment, orphans: true }),
-      (items) => current === orphanRequest && (orphans.value = items.length),
+      (list) => current === orphanRequest && (orphans.value = list.total),
     )
   } catch (e) {
     if (current === orphanRequest) error.value = handleAdminError(e)

@@ -89,6 +89,38 @@ describe('useBulkPreview', () => {
     expect(p.results.value?.[0].result).toBe('done')
   })
 
+  it('keeps the total of a cut preview', async () => {
+    const bulk = vi.fn(async (r: BulkRequest) => ({
+      action: r.action,
+      dry_run: r.dry_run,
+      total: 2345,
+      truncated: true,
+      items: [item('a')],
+    }))
+    const p = useBulkPreview({ bulk, jobs: vi.fn() }, String)
+    p.scope.value = bulkScope(list)
+    await p.load()
+    expect(p.preview.value).toMatchObject({ total: 2345, truncated: true })
+    await p.run()
+    expect(bulk.mock.calls[1][0].limit).toBeUndefined()
+  })
+
+  it('sends a limit when the shown names exceed the default', async () => {
+    const names = Array.from({ length: 1500 }, (_, i) => `w${i}`)
+    const bulk = vi.fn(async (r: BulkRequest) => ({
+      action: r.action,
+      dry_run: r.dry_run,
+      items: names.map((n) => item(n)),
+    }))
+    const p = useBulkPreview({ bulk, jobs: vi.fn() }, String)
+    p.action.value = 'retry'
+    p.scope.value = bulkScope(list)
+    await p.load()
+    await p.run()
+    expect(bulk.mock.calls[1][0].limit).toBe(1500)
+    expect(bulk.mock.calls[0][0].limit).toBeUndefined()
+  })
+
   it('drops a late preview of an earlier action', async () => {
     const first = deferred()
     const second = deferred()

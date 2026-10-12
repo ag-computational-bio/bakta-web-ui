@@ -79,10 +79,21 @@ describe('mock admin api', () => {
     expect(after.items.map((w) => w.name)).toEqual(['bakta-job-1.11.0-old'])
   })
 
+  it('cuts a bulk preview at the limit and reports the total', async () => {
+    const filter = { environment: 'all' as const }
+    const full = await api.bulk({ filter, action: 'retry', dry_run: true })
+    expect(full.truncated).toBe(false)
+    const cut = await api.bulk({ filter, action: 'retry', dry_run: true, limit: 2 })
+    expect(cut.items).toHaveLength(2)
+    expect(cut.total).toBe(full.items.length)
+    expect(cut.truncated).toBe(true)
+  })
+
   it('lists workflows without a job record', async () => {
     const orphans = await api.workflows({ environment: 'all', orphans: true })
-    expect(orphans.length).toBeGreaterThan(0)
-    expect(orphans.every((w) => !w.job_id)).toBe(true)
+    expect(orphans.items.length).toBeGreaterThan(0)
+    expect(orphans.items.every((w) => !w.job_id)).toBe(true)
+    expect(orphans.total).toBe(orphans.items.length)
   })
 
   it('has fixed input buckets that count all jobs with a length', async () => {

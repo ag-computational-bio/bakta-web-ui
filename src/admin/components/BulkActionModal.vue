@@ -50,6 +50,9 @@
 
           <template v-if="items">
             <p class="fw-semibold mb-2">{{ summary }}</p>
+            <p v-if="truncatedText && !results" class="small text-warning-emphasis mb-2">
+              {{ truncatedText }}
+            </p>
             <div v-if="items.length" class="table-responsive">
               <table class="table table-striped table-sm align-middle mb-0">
                 <thead>
@@ -267,6 +270,14 @@ const summary = computed(() => {
   const list = preview.value?.items ?? []
   if (!list.length) return 'No workflows match.'
   return `${formatCount(list.length)} match, ${formatCount(applicable.value.length)} can be ${text.value.done}`
+})
+
+const truncatedText = computed(() => {
+  const p = preview.value
+  if (!p?.truncated) return ''
+  const shown = formatCount(p.items.length)
+  const of = p.total == null ? '' : ` of ${formatCount(p.total)}`
+  return `Only the newest ${shown}${of} matching workflows are shown and would be changed.`
 })
 
 const usedFilters = computed(() => {

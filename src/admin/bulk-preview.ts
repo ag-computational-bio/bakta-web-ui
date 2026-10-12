@@ -65,7 +65,16 @@ export function bulkScope(list: JobListFilters): BulkScope {
   }
 }
 
-type Preview = { request: BulkRequest; items: BulkItem[] }
+type Preview = {
+  request: BulkRequest
+  items: BulkItem[]
+  // all matching workflows, more than items when the preview is cut
+  total?: number
+  truncated?: boolean
+}
+
+const defaultLimit = 1000
+const maxLimit = 5000
 
 const stillRunningReason = 'Still running, stop it first'
 const finishedPhases: WorkflowPhase[] = ['Succeeded', 'Failed', 'Error']
@@ -164,7 +173,12 @@ export function useBulkPreview(
       }
       const result = await api.bulk(req)
       if (current === token)
-        preview.value = { request: req, items: guardDelete(req.action, result.items) }
+        preview.value = {
+          request: req,
+          items: guardDelete(req.action, result.items),
+          total: result.total ?? undefined,
+          truncated: !!result.truncated,
+        }
     } catch (e) {
       if (current === token) error.value = handleError(e)
     } finally {
@@ -185,6 +199,10 @@ export function useBulkPreview(
         ...shown.request,
         dry_run: false,
         workflow_names: applicable.value.map((w) => w.name),
+      }
+      // more names than the default limit: the run must not be cut short
+      if (request.workflow_names!.length > defaultLimit) {
+        request.limit = Math.min(request.workflow_names!.length, maxLimit)
       }
       // a workflow can start again between preview and run, a delete keeps only finished ones
       if (request.action === 'delete') {

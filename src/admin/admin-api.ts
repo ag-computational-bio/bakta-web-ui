@@ -362,7 +362,12 @@ const WorkflowItemSchema = z.object({
 })
 export type WorkflowItem = z.infer<typeof WorkflowItemSchema>
 
-export const WorkflowListSchema = z.object({ items: z.array(WorkflowItemSchema) })
+export const WorkflowListSchema = z.object({
+  items: z.array(WorkflowItemSchema),
+  // all matching workflows, also those not in items, missing on older backends
+  total: z.number().nullish(),
+})
+export type WorkflowList = { items: WorkflowItem[]; total: number }
 
 export const BulkActions = ['delete', 'stop', 'retry', 'resume', 'resubmit'] as const
 export type BulkAction = (typeof BulkActions)[number]
@@ -386,11 +391,16 @@ export type BulkRequest = {
   dry_run: boolean
   // in a real run the names from the dry run, so exactly these are processed
   workflow_names?: string[]
+  // at most this many workflows, newest first (backend default 1000, at most 5000)
+  limit?: number
 }
 
 export const BulkResultSchema = z.object({
   dry_run: z.boolean(),
   action: z.enum(BulkActions),
+  // all matching workflows and whether items has fewer of them
+  total: z.number().nullish(),
+  truncated: z.boolean().nullish(),
   items: z.array(
     z.object({
       name: z.string(),
@@ -440,7 +450,7 @@ export interface AdminApi {
   stop(id: string): Promise<ActionResult>
   resume(id: string): Promise<ActionResult>
   deleteJob(id: string, purgeData: boolean): Promise<DeleteResult>
-  workflows(query: WorkflowQuery): Promise<WorkflowItem[]>
+  workflows(query: WorkflowQuery): Promise<WorkflowList>
   bulk(request: BulkRequest): Promise<BulkResult>
   // the same requests, answered only from the cache: they fail without a recent answer
   cached?: AdminApi
@@ -650,7 +660,8 @@ class HttpAdminApi implements AdminApi {
         phase: query.phases,
         orphans: query.orphans || undefined,
       })
-    return WorkflowListSchema.parse(await this.#request('GET', path)).items
+    const list = WorkflowListSchema.parse(await this.#request('GET', path))
+    return { items: list.items, total: list.total ?? list.items.length }
   }
 
   async bulk(request: BulkRequest) {

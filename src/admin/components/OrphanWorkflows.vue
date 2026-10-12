@@ -14,7 +14,7 @@
             :class="expanded ? 'bi-chevron-down' : 'bi-chevron-right'"
             aria-hidden="true"
           ></i
-          >Workflows without a job record ({{ workflows.length }})
+          >Workflows without a job record ({{ total }})
         </button>
       </h3>
       <button
@@ -63,6 +63,9 @@
           </tbody>
         </table>
       </div>
+      <p v-if="total > workflows.length" class="small text-secondary mt-2 mb-0">
+        Showing the newest {{ formatCount(workflows.length) }} of {{ formatCount(total) }}.
+      </p>
       <ListPagination
         v-model:page="page"
         v-model:page-size="pageSize"
@@ -86,7 +89,7 @@ import type { WorkflowItem } from '../admin-api'
 import { loadCachedFirst } from '../admin-cache'
 import { filters } from '../admin-filters'
 import { handleAdminError, useAdminApi } from '../admin-session'
-import { formatDateTime, phaseStatus } from '../format'
+import { formatCount, formatDateTime, phaseStatus } from '../format'
 import { useClientPages } from '../pagination'
 import '../admin-menu.css'
 import ConfirmModal from './ConfirmModal.vue'
@@ -100,6 +103,7 @@ import ListPagination from './ListPagination.vue'
 
 const api = useAdminApi()
 const workflows = ref<WorkflowItem[]>([])
+const total = ref(0)
 const busy = ref(false)
 const error = ref<string>()
 const confirmModal = ref<InstanceType<typeof ConfirmModal>>()
@@ -117,7 +121,11 @@ async function load() {
     await loadCachedFirst(
       api,
       (api) => api.workflows({ environment, orphans: true }),
-      (items) => current === request && (workflows.value = items),
+      (list) => {
+        if (current !== request) return
+        workflows.value = list.items
+        total.value = list.total
+      },
     )
     if (current !== request) return
     await nextTick()
