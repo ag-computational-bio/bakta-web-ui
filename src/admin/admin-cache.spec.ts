@@ -25,6 +25,28 @@ describe('AdminCache', () => {
     expect(cache.peek('/jobs')).toBeUndefined()
   })
 
+  it('drops expired answers of other keys when it stores an answer', async () => {
+    let now = 1000
+    const cache = new AdminCache(() => now)
+    await cache.fetch('/jobs/a/logs', async () => 'a')
+    now += cacheTime - 1
+    await cache.fetch('/jobs/b/logs', async () => 'b')
+    now += 1
+    await cache.fetch('/jobs/c/logs', async () => 'c')
+    // with the clock set back, a kept answer would be recent again
+    now = 1001
+    expect(cache.peek('/jobs/a/logs')).toBeUndefined()
+    expect(cache.peek('/jobs/b/logs')).toBe('b')
+    expect(cache.peek('/jobs/c/logs')).toBe('c')
+  })
+
+  it('does not keep a failed request and tries again', async () => {
+    const cache = new AdminCache()
+    await expect(cache.fetch('/jobs', () => Promise.reject(new Error('down')))).rejects.toThrow()
+    expect(cache.peek('/jobs')).toBeUndefined()
+    expect(await cache.fetch('/jobs', async () => 'a')).toBe('a')
+  })
+
   it('shares a running request for the same key', async () => {
     const cache = new AdminCache()
     const answer = deferred<string>()

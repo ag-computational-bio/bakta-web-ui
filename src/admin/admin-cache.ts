@@ -52,7 +52,12 @@ export class AdminCache {
     const promise = load()
       .then((value) => {
         if (generation === this.#generation) {
-          this.#entries.set(key, { value, time: this.#now() })
+          const now = this.#now()
+          // expired answers of other keys are dropped, so they do not pile up
+          for (const [other, entry] of this.#entries) {
+            if (now - entry.time >= cacheTime) this.#entries.delete(other)
+          }
+          this.#entries.set(key, { value, time: now })
         }
         return value
       })
