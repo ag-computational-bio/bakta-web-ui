@@ -83,6 +83,7 @@ import StatusBadge from '@/components/StatusBadge.vue'
 import { nextTick, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import type { WorkflowItem } from '../admin-api'
+import { loadCachedFirst } from '../admin-cache'
 import { filters } from '../admin-filters'
 import { handleAdminError, useAdminApi } from '../admin-session'
 import { formatDateTime, phaseStatus } from '../format'
@@ -110,10 +111,15 @@ const expanded = ref(route.hash === '#orphans')
 let request = 0
 async function load() {
   const current = ++request
+  const environment = filters.environment
   try {
-    const items = await api.workflows({ environment: filters.environment, orphans: true })
+    // a recent answer shows at once
+    await loadCachedFirst(
+      api,
+      (api) => api.workflows({ environment, orphans: true }),
+      (items) => current === request && (workflows.value = items),
+    )
     if (current !== request) return
-    workflows.value = items
     await nextTick()
     reveal()
   } catch (e) {

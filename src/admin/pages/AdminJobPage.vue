@@ -209,6 +209,7 @@ import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { AdminApiError, type JobDetail } from '../admin-api'
 import { filterQuery, lastJobListQuery } from '../admin-filters'
+import { loadCachedFirst } from '../admin-cache'
 import { handleAdminError, useAdminApi } from '../admin-session'
 import ConfirmModal from '../components/ConfirmModal.vue'
 import ListPagination from '../components/ListPagination.vue'
@@ -353,13 +354,17 @@ async function load() {
   error.value = undefined
   let d: JobDetail
   try {
-    d = await api.job(jobId)
+    // a recent answer shows at once, the logs load after the answer of the server
+    d = await loadCachedFirst(
+      api,
+      (api) => api.job(jobId),
+      (job) => current === request && (detail.value = job),
+    )
   } catch (e) {
     if (current === request) error.value = handleAdminError(e)
     return
   }
   if (current !== request) return
-  detail.value = d
   // archived logs are gone with the data, only a live workflow still has them
   if (!d.job.data_available && !d.workflow) {
     logsDeleted.value = true

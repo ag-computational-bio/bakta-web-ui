@@ -143,6 +143,7 @@ import {
   previousLabel,
   statsFilter,
 } from '../admin-filters'
+import { loadCachedFirst } from '../admin-cache'
 import { handleAdminError, useAdminApi } from '../admin-session'
 import { groupSeries } from '../chart-colors'
 import { bucketValues, chartPeriods } from '../chart-data'
@@ -287,36 +288,46 @@ async function load() {
   const counted = { query: failedQuery(), environment: filters.environment }
   loading.value = true
   error.value = undefined
+  const before = previousFilter(filter)
+  const environment = filters.environment
   try {
-    const before = previousFilter(filter)
-    const environment = filters.environment
-    const [s, p, a, f, o, chart, v] = await Promise.all([
-      api.summary(filter),
-      before ? api.summary(before) : undefined,
-      api.jobs({ environment, status: ['submitted', 'running'], sort: '-created_at', limit: 1 }),
-      api.jobs({ ...filter, environment, status: ['failed', 'error'], limit: 1 }),
-      api.workflows({ environment, orphans: true }),
-      loadChart(
-        (i) =>
-          Promise.all([
-            api.timeseries(filter, i, groupBy.value),
-            api.timeseries(filter, i, 'none'),
-          ]),
-        ([, o]) => firstBucket(o.buckets),
-      ),
-      api.versions(filter),
-    ])
-    // an older answer must not replace the data of a newer request
-    if (current !== request) return
-    summary.value = s
-    previous.value = p
-    active.value = { total: a.total, oldest: a.items[0]?.created_at }
-    failedNow.value = { total: f.total, ...counted }
-    orphans.value = o.length
-    interval.value = chart.interval
-    ;[grouped.value, overall.value] = chart.data
-    versions.value = [...v.items].sort((a, b) =>
-      (b.last_seen ?? '').localeCompare(a.last_seen ?? ''),
+    // a recent answer for the same filters shows at once
+    await loadCachedFirst(
+      api,
+      (api) =>
+        Promise.all([
+          api.summary(filter),
+          before ? api.summary(before) : undefined,
+          api.jobs({
+            environment,
+            status: ['submitted', 'running'],
+            sort: '-created_at',
+            limit: 1,
+          }),
+          api.jobs({ ...filter, environment, status: ['failed', 'error'], limit: 1 }),
+          loadChart(
+            (i) =>
+              Promise.all([
+                api.timeseries(filter, i, groupBy.value),
+                api.timeseries(filter, i, 'none'),
+              ]),
+            ([, o]) => firstBucket(o.buckets),
+          ),
+          api.versions(filter),
+        ]),
+      ([s, p, a, f, chart, v]) => {
+        // an older answer must not replace the data of a newer request
+        if (current !== request) return
+        summary.value = s
+        previous.value = p
+        active.value = { total: a.total, oldest: a.items[0]?.created_at }
+        failedNow.value = { total: f.total, ...counted }
+        interval.value = chart.interval
+        ;[grouped.value, overall.value] = chart.data
+        versions.value = [...v.items].sort((a, b) =>
+          (b.last_seen ?? '').localeCompare(a.last_seen ?? ''),
+        )
+      },
     )
   } catch (e) {
     if (current === request) error.value = handleAdminError(e)
@@ -325,7 +336,24 @@ async function load() {
   }
 }
 
+// the workflows without a job record load on their own, so the tiles do not wait for them
+let orphanRequest = 0
+async function loadOrphans() {
+  const current = ++orphanRequest
+  const environment = filters.environment
+  try {
+    await loadCachedFirst(
+      api,
+      (api) => api.workflows({ environment, orphans: true }),
+      (items) => current === orphanRequest && (orphans.value = items.length),
+    )
+  } catch (e) {
+    if (current === orphanRequest) error.value = handleAdminError(e)
+  }
+}
+
 watch([filters, groupBy], load, { immediate: true })
+watch(() => filters.environment, loadOrphans, { immediate: true })
 </script>
 
 <style scoped>

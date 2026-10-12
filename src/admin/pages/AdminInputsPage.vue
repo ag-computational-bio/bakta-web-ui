@@ -173,6 +173,7 @@ import {
   loadChart,
   statsFilter,
 } from '../admin-filters'
+import { loadCachedFirst } from '../admin-cache'
 import { handleAdminError, useAdminApi } from '../admin-session'
 import { lightColor, statColors } from '../chart-colors'
 import { bucketValues, chartPeriods } from '../chart-data'
@@ -276,19 +277,26 @@ async function load() {
   loading.value = true
   error.value = undefined
   try {
-    const [i, t] = await Promise.all([
-      api.inputs(filter, kind.value || undefined),
-      // with a workflow kind the series is grouped by kind, without one there is one group
-      loadChart(
-        (i) => api.timeseries(filter, i, kind.value ? 'workflow_kind' : 'none'),
-        (t) => firstBucket(t.buckets),
-      ),
-    ])
-    // an older answer must not replace the data of a newer request
-    if (current !== request) return
-    stats.value = i
-    interval.value = t.interval
-    series.value = t.data
+    // a recent answer for the same filters shows at once
+    await loadCachedFirst(
+      api,
+      (api) =>
+        Promise.all([
+          api.inputs(filter, kind.value || undefined),
+          // with a workflow kind the series is grouped by kind, without one there is one group
+          loadChart(
+            (i) => api.timeseries(filter, i, kind.value ? 'workflow_kind' : 'none'),
+            (t) => firstBucket(t.buckets),
+          ),
+        ]),
+      ([i, t]) => {
+        // an older answer must not replace the data of a newer request
+        if (current !== request) return
+        stats.value = i
+        interval.value = t.interval
+        series.value = t.data
+      },
+    )
   } catch (e) {
     if (current === request) error.value = handleAdminError(e)
   } finally {
