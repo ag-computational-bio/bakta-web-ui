@@ -7,9 +7,10 @@ import type { Environment, Interval, StatsFilter } from './admin-api'
  * overview and the job list show the same jobs.
  */
 
-export type TimeRange = '7d' | '30d' | '90d' | '12m' | 'all' | 'custom'
+export type TimeRange = 'today' | '7d' | '30d' | '90d' | '12m' | 'all' | 'custom'
 
 export const timeRanges: { value: TimeRange; label: string }[] = [
+  { value: 'today', label: 'Today' },
   { value: '7d', label: 'Last 7 days' },
   { value: '30d', label: 'Last 30 days' },
   { value: '90d', label: 'Last 90 days' },
@@ -85,7 +86,7 @@ export function previousFilter(filter: StatsFilter, now = new Date()): StatsFilt
  */
 export function previousLabel(range: TimeRange): string {
   const label = timeRanges.find((r) => r.value === range)?.label ?? ''
-  return range === 'custom' || range === 'all'
+  return range === 'custom' || range === 'all' || range === 'today'
     ? 'previous period'
     : label.replace('Last', 'previous')
 }
@@ -95,6 +96,9 @@ export function previousLabel(range: TimeRange): string {
  */
 function rangeStart(range: TimeRange, now: Date): Date | undefined {
   switch (range) {
+    // days are in UTC, like the buckets of the charts
+    case 'today':
+      return new Date(Math.floor(now.getTime() / day) * day)
     case '7d':
     case '30d':
     case '90d':
@@ -114,6 +118,7 @@ function rangeStart(range: TimeRange, now: Date): Date | undefined {
 export function rangeDescription(range: TimeRange, now = new Date()): string {
   if (range === 'all') return 'Every job'
   if (range === 'custom') return 'Pick a start and end date'
+  if (range === 'today') return 'Since 00:00 UTC'
   const format = new Intl.DateTimeFormat('en-GB', { dateStyle: 'medium', timeZone: 'UTC' })
   return `${format.format(rangeStart(range, now))} to today`
 }
@@ -170,6 +175,7 @@ export function chartInterval(
   dataStart?: string,
 ): Interval {
   switch (range) {
+    case 'today':
     case '7d':
     case '30d':
       return 'day'
