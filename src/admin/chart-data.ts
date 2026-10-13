@@ -54,6 +54,27 @@ export function bucketValues(
 }
 
 /**
+ * The counts of a chart as tab separated text: a row per period with a column
+ * per series and the total. Periods are named by their start in UTC, like
+ * 2026-10-05 for a day or a week and 2026-10 for a month.
+ */
+export function chartTsv(
+  chartPeriods: Date[],
+  interval: Interval,
+  series: { key: string; label: string }[],
+  values: Record<string, (number | null)[]>,
+): string {
+  const length = interval === 'year' ? 4 : interval === 'month' ? 7 : 10
+  const rows = chartPeriods.map((period, i) => {
+    const counts = series.map((s) => values[s.key]?.[i] ?? 0)
+    return [period.toISOString().slice(0, length), ...counts, counts.reduce((a, b) => a + b, 0)]
+  })
+  return [[interval, ...series.map((s) => s.label), 'Total'], ...rows]
+    .map((row) => row.join('\t') + '\n')
+    .join('')
+}
+
+/**
  * The indexes that get a point in a line chart. With few periods every value
  * gets one, with many only the values without a neighbour, which the line
  * cannot show.

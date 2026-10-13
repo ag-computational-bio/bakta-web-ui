@@ -16,6 +16,7 @@ afterEach(() => Object.assign(filters, { range: '30d', customFrom: '', customTo:
 
 describe('chartInterval', () => {
   it('maps the fixed ranges', () => {
+    expect(chartInterval('today', {}, now)).toBe('day')
     expect(chartInterval('7d', {}, now)).toBe('day')
     expect(chartInterval('30d', {}, now)).toBe('day')
     expect(chartInterval('90d', {}, now)).toBe('week')
@@ -52,6 +53,8 @@ describe('time range', () => {
     expect(statsFilter(now).from).toBe('2026-10-04T12:00:00.000Z')
     filters.range = '90d'
     expect(statsFilter(now).from).toBe('2026-07-13T12:00:00.000Z')
+    filters.range = 'today'
+    expect(statsFilter(now).from).toBe('2026-10-11T00:00:00.000Z')
   })
 
   it('keeps only the range and the custom dates in the URL', () => {
@@ -86,6 +89,7 @@ describe('time range', () => {
 
 describe('rangeDescription', () => {
   it('shows the dates of the preset ranges', () => {
+    expect(rangeDescription('today', now)).toBe('Since 00:00 UTC')
     expect(rangeDescription('7d', now)).toBe('4 Oct 2026 to today')
     expect(rangeDescription('12m', now)).toBe('11 Oct 2025 to today')
     expect(rangeDescription('all', now)).toBe('Every job')
@@ -115,5 +119,6 @@ describe('previousFilter', () => {
     )
     expect(previousLabel('30d')).toBe('previous 30 days')
     expect(previousLabel('custom')).toBe('previous period')
+    expect(previousLabel('today')).toBe('previous period')
   })
 })
