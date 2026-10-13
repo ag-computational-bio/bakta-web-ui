@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { Bucket } from './admin-api'
-import { bucketValues, chartPeriods, pointIndexes } from './chart-data'
+import { bucketValues, chartPeriods, chartTsv, pointIndexes } from './chart-data'
 
 function bucket(start: string, group: string | null, total: number, p50?: number): Bucket {
   return {
@@ -79,5 +79,21 @@ describe('chartPeriods with an end', () => {
       '2026-01-01T00:00:00.000Z',
     ])
     expect(chartPeriods([], filter, 'day', now)).toHaveLength(31)
+  })
+})
+
+describe('chartTsv', () => {
+  it('has a row per period with a column per series and the total', () => {
+    const list = [new Date('2026-02-01T00:00:00Z'), new Date('2026-03-01T00:00:00Z')]
+    const series = [
+      { key: 'bakta', label: 'Bakta' },
+      { key: 'baktfold', label: 'Baktfold' },
+    ]
+    expect(chartTsv(list, 'month', series, { bakta: [3, 0], baktfold: [1, 2] })).toBe(
+      'month\tBakta\tBaktfold\tTotal\n2026-02\t3\t1\t4\n2026-03\t0\t2\t2\n',
+    )
+    expect(chartTsv(list.slice(0, 1), 'day', series, { bakta: [3] })).toBe(
+      'day\tBakta\tBaktfold\tTotal\n2026-02-01\t3\t0\t3\n',
+    )
   })
 })

@@ -22,7 +22,17 @@
         <h3 class="section-title mb-0">Jobs over time</h3>
         <span class="small text-secondary">{{ intervalNote(interval) }}</span>
       </div>
-      <ChipGroup v-model="groupBy" :options="groupOptions" label="Group by" segmented />
+      <div class="d-flex flex-wrap align-items-center gap-2">
+        <ChipGroup v-model="groupBy" :options="groupOptions" label="Group by" segmented />
+        <button
+          type="button"
+          class="btn btn-outline-secondary btn-sm"
+          :disabled="!periods.length"
+          @click="downloadTsv"
+        >
+          <i class="bi bi-download" aria-hidden="true"></i> TSV
+        </button>
+      </div>
     </div>
     <SeriesChart
       v-if="periods.length"
@@ -146,7 +156,7 @@ import {
 import { loadCachedFirst } from '../admin-cache'
 import { handleAdminError, useAdminApi } from '../admin-session'
 import { groupSeries } from '../chart-colors'
-import { bucketValues, chartPeriods } from '../chart-data'
+import { bucketValues, chartPeriods, chartTsv } from '../chart-data'
 import AdminFilterBar from '../components/AdminFilterBar.vue'
 import ChipGroup from '../components/ChipGroup.vue'
 import ListPagination from '../components/ListPagination.vue'
@@ -281,6 +291,17 @@ const jobValues = computed(() =>
   grouped.value ? bucketValues(grouped.value.buckets, periods.value, 'jobs_total') : {},
 )
 const jobSeries = computed(() => groupSeries(groupBy.value, Object.keys(jobValues.value)))
+
+// the jobs of the chart as a file, with the interval and the groups it shows
+function downloadTsv() {
+  const tsv = chartTsv(periods.value, interval.value, jobSeries.value, jobValues.value)
+  const url = URL.createObjectURL(new Blob([tsv], { type: 'text/tab-separated-values' }))
+  const link = document.createElement('a')
+  link.href = url
+  link.download = `bakta-jobs-per-${interval.value}.tsv`
+  link.click()
+  URL.revokeObjectURL(url)
+}
 let request = 0
 async function load() {
   const current = ++request
