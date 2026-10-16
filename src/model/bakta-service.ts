@@ -149,7 +149,13 @@ export interface BaktaService {
 }
 
 function generateRepliconTable(replicons: Replicon[]): string {
-  return replicons.map((x) => [x.id, x.new, x.type, x.topology, x.name].join('\t')).join('\n')
+  return replicons
+    .map((x) =>
+      [x.id, x.new, x.type, x.topology, x.name]
+        .map((value) => (/[",\t\r\n]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value))
+        .join('\t'),
+    )
+    .join('\n')
 }
 
 class BaktaServiceImpl implements BaktaService {

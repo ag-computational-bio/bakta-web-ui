@@ -59,7 +59,11 @@ const fixtures = {
 
 describe('bakta service', () => {
   const uploadHeaders = [undefined, {}]
-  it.each(uploadHeaders)('preserves upload bytes without Content-Type', async (headers) => {
+  it.each([
+    ...uploadHeaders.map((headers) => ({ headers, id: 'sequence', field: 'sequence' })),
+    { headers: {}, id: 'contig,1', field: '"contig,1"' },
+    { headers: {}, id: '"contig1', field: '"""contig1"' },
+  ])('preserves upload bytes and quotes replicon ID $id', async ({ headers, id, field }) => {
     const storage = new SimpleJobStorage()
     const api: BaktaApi = createBaktaApi('')
     const query = '?X-Amz-SignedHeaders=host'
@@ -100,13 +104,13 @@ describe('bakta service', () => {
     const service = createBaktaService(api, storage)
     await service.submitJob(
       createBaktaJobRequest({
-        sequence: '>sequence\nACGT',
+        sequence: `>${id}\nACGT`,
         prodigalTrainingFile: new File(['training'], 'prodigal.tf', {
           type: 'application/octet-stream',
         }),
         replicons: [
           {
-            id: 'sequence',
+            id,
             length: 4,
             new: 'new',
             name: 'name',
@@ -124,10 +128,10 @@ describe('bakta service', () => {
     expect(uploads[1].headers.get('Content-Type')).toBe(null)
     expect(uploads[2].headers.get('Content-Type')).toBe(null)
     expect(new Uint8Array(await uploads[0].arrayBuffer())).toEqual(
-      new TextEncoder().encode('>sequence\nACGT'),
+      new TextEncoder().encode(`>${id}\nACGT`),
     )
     expect(new Uint8Array(await uploads[1].arrayBuffer())).toEqual(
-      new TextEncoder().encode('sequence\tnew\tchromosome\tcircular\tname'),
+      new TextEncoder().encode(`${field}\tnew\tchromosome\tcircular\tname`),
     )
     expect(new Uint8Array(await uploads[2].arrayBuffer())).toEqual(
       new TextEncoder().encode('training'),
