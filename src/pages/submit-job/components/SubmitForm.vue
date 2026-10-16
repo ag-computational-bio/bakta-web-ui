@@ -157,8 +157,8 @@
       <div class="table-responsive">
         <EditRepliconTable v-model="replicons" :completeGenome="completeGenome" />
       </div>
-      <div v-if="!valid && !idsAreINSDCCompliant" class="alert alert-danger mb-0 mt-3">
-        The contig ids are not INSDC compliant.
+      <div v-if="sequenceIdError" class="alert alert-danger mb-0 mt-3">
+        {{ sequenceIdError }}
       </div>
     </div>
 
@@ -539,21 +539,38 @@ const replicons = computed({
   set: (v) => updateRequest({ replicons: v }),
 })
 
-const idsAreINSDCCompliant = computed(() => {
+const sequenceIdError = computed(() => {
   const insdecRe = /^[A-Za-z\d_.:*#-]{1,25}$/
+  const ids = new Set<string>()
+  const minLength = compliant.value ? 200 : minContigLength.value
+  let sequenceCounter = 0
   for (const replicon of replicons.value) {
-    const id = replicon.new.length > 0 ? replicon.new : replicon.id
-    if (!insdecRe.exec(id)) return false
+    if (replicon.length < minLength) continue
+    sequenceCounter++
+    const replacement = replicon.new.trim().split(' ')[0]
+    const useReplacement = !(replicons.value.length === 1 && config.value.plasmid)
+    const id = keepContigHeaders.value
+      ? replicon.id
+      : useReplacement && replacement && replacement !== '-'
+        ? replacement
+        : `${locus.value || 'contig'}_${sequenceCounter}`
+    if (id.length === 0 || /[\s;\p{Cc}]/u.test(id)) {
+      return 'Contig IDs must not be empty or contain whitespace, semicolons or control characters.'
+    }
+    if (ids.has(id)) return `Duplicate contig ID: ${id}`
+    ids.add(id)
+    if (compliant.value && !insdecRe.test(id)) return 'The contig ids are not INSDC compliant.'
   }
-  return true
+  return replicons.value.length > 0 && sequenceCounter === 0
+    ? 'No sequences meet the minimum contig length.'
+    : ''
 })
 
 const valid = computed(() => {
   if (props.modelValue.sequence.length === 0) return false
   if (validationError.value.length > 0) return false
   if (locusError(locus.value) || locusTagError(locusTag.value, compliant.value)) return false
-  if (keepContigHeaders.value || compliant.value) return idsAreINSDCCompliant.value
-  return true
+  return sequenceIdError.value.length === 0
 })
 
 watch(
