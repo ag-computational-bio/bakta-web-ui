@@ -73,5 +73,10 @@
     "extends": [
       "plugin:storybook/recommended"
     ]
+  },
+  "overrides": {
+    "@vitest/browser-playwright": {
+      "@vitest/browser": "4.1.6"
+    }
   }
 }
